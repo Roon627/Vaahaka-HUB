@@ -1,49 +1,54 @@
-# Raalhu (ރާޅު, "Wave")
+# Ihusaas — ihusaas.online
 
-Anonymous confession / dumping-ground platform for Maldivians.
-Next.js 14 (App Router) · Tailwind · Framer Motion · react-simple-maps · Supabase.
+*Ihusaas* (feeling) is an anonymous, gentle place for Maldivians to set down what they're carrying.
+Write a letter, seal it in a bottle, let strangers listen. Readers reply with 🫂 🫀 🕯️ and kind anonymous notes. No accounts.
 
-```
-supabase/schema.sql          tables, indexes, RLS, column grants, RPCs (run once)
-public/data/*.geojson        atoll boundaries (placeholder shipped — see below)
-scripts/build-placeholder-geo.mjs
-src/
-├─ app/
-│  ├─ layout.tsx             shell + Nav
-│  ├─ template.tsx           per-route enter transition (Framer Motion)
-│  ├─ page.tsx               feed
-│  └─ map/page.tsx           heatmap
-├─ components/
-│  ├─ DumpingGround.tsx      masonry feed, infinite scroll, composer modal
-│  ├─ DropStory.tsx          anonymous composer
-│  ├─ PostCard.tsx           card, trigger-warning gate, report
-│  ├─ ReactionBar.tsx        🫂 Felt · 🫀 Heart · 🕯️ Listening
-│  ├─ CategoryFilter.tsx     mood chips (shared by feed + map)
-│  ├─ AtollMap.tsx           GeoJSON heatmap + tooltips + category toggle
-│  └─ Nav.tsx
-├─ hooks/  usePosts.ts (keyset pagination) · useAtollCounts.ts
-└─ lib/    constants.ts · types.ts · supabase.ts · device.ts · geo.ts
+**Stack:** Next.js 14 (App Router) · Tailwind · Framer Motion · react-simple-maps · Supabase · installable PWA.
+
+## Run it
+
+```bash
+cp .env.example .env.local          # fill in the Supabase URL + anon key
+npm install
+npm run dev                         # http://localhost:3000
 ```
 
-## Setup
-1. Create a Supabase project, run `supabase/schema.sql` in the SQL editor.
-2. `cp .env.example .env.local` and fill in URL + anon key.
-3. `npm install && npm run dev`
+Database (Supabase SQL editor, in this order):
 
-## Real map data
-A schematic placeholder is committed so the app runs immediately. To use real
-boundaries (e.g. `jawish/maldives-geo`), drop the GeoJSON at
-`public/data/maldives-atolls.geojson` (or set `NEXT_PUBLIC_ATOLL_GEOJSON_URL`).
-Features are matched to atolls by `src/lib/geo.ts` (code or name in common
-property keys) — add your dataset's key to `KEYS` if needed. Island-level
-datasets work: all islands of an atoll share one count.
-If polygons render as a filled rectangle, the ring winding is inverted for
-d3-geo; rewind them with `@turf/rewind` (`reverse: true`).
+1. `supabase/schema.sql` — tables, indexes, RLS, column grants, reaction/report RPCs
+2. `supabase/migrations/002_comments_moderation.sql` — anonymous notes, the English + Dhivehi word filter, richer reports, audit log
+3. *(optional)* `supabase/seed_showcase.sql` — 24 sample letters + notes for demos. Remove with `delete from posts where device_token like 'seed-%';`
 
-## Privacy model
-No accounts. A random device token (localStorage) is used only for reaction
-dedupe and a 5-posts/hour limit; it lives in columns anon cannot SELECT.
-Reactions and reports are only writable through SECURITY DEFINER RPCs.
-Three distinct reports auto-hide a post pending review.
-Before launch consider: CAPTCHA (Turnstile) on insert, an admin moderation view
-using the service role, and crisis-helpline copy reviewed by locals.
+## Deploy to ihusaas.online
+
+1. Push to GitHub and import the repo into Vercel (or any Node host).
+2. Environment variables: everything in `.env.example`. At minimum `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL=https://ihusaas.online`.
+3. Add the domain `ihusaas.online` in the host's dashboard and point DNS at it (the host shows the exact records).
+4. HTTPS is required for the PWA install prompt and service worker, and every host above provides it automatically.
+
+## What's inside
+
+```
+supabase/                 schema, migrations, seeds
+public/data/              real atoll boundaries (jawish/maldives-geo) + 1,063 islands (naxeem/maldives-atoll-islands), both MIT
+public/brand/             logo pack (see public/brand/README.md)
+public/sw.js              service worker (same-origin only; never caches Supabase)
+scripts/                  build-geo-data · build-brand · fodibey-smoke.sh
+docs/fodibey-api.md       the Fodibey integration
+src/lib/helplines.ts      verified Maldives helplines (add only numbers you've verified)
+src/lib/fodibey/          the Fodibey API (server-only)
+src/components/           feed, bottles, reader, composer, map, nav, sheets
+```
+
+Handy scripts: `npm run geo:build` refreshes the map/island data · `npm run brand:build` regenerates the whole logo pack.
+
+## Safety by design
+
+* **Anonymous:** a random device token (localStorage) is used only to dedupe reactions/reports and rate-limit posting; it lives in columns the public API can't read.
+* **Kindness is enforced in the database:** rude/harsh wording (English + Dhivehi, Thaana and Latin spellings), links, emails and phone numbers are rejected for notes; slurs are rejected everywhere. Rate limits stop floods. See `docs/fodibey-api.md` §4 for managing the list.
+* **Reports** on letters and notes (with reasons). Three distinct reports auto-hide; "someone may be in danger" never hides but flags for follow-up and shows helplines.
+* **Helplines** (911 · 1677 · 1412 · 1421 · FPA · 1484) are one tap away from the menu, every letter, the composer (a gentle nudge on crisis wording), and the offline page. They work with no data.
+* **Please review before launch:** the Dhivehi blocked-word list is a *starter set*: have native speakers extend it. Re-verify the helpline numbers periodically (`src/lib/helplines.ts` records when they were last checked).
+
+## Data credits
+Atoll boundaries: [jawish/maldives-geo](https://github.com/jawish/maldives-geo) (MIT). Islands: [naxeem/maldives-atoll-islands](https://github.com/naxeem/maldives-atoll-islands) (MIT). Fonts: Fraunces, Nunito, Caveat (SIL OFL).

@@ -6,7 +6,7 @@ import type { Post } from "@/lib/types";
 
 // Only the columns the anon role may read (see column grants in schema.sql).
 export const POST_COLUMNS =
-  "id,created_at,body,category,trigger_warning,atoll_code,island,felt_count,heart_count,listening_count";
+  "id,created_at,body,category,trigger_warning,atoll_code,island,felt_count,heart_count,listening_count,comment_count";
 
 interface Filters {
   category: CategoryId | null;
@@ -80,5 +80,26 @@ export function usePosts({ category, atoll }: Filters) {
     [category, atoll]
   );
 
-  return { posts, loading, done, error, loadMore, prepend };
+  /** Merge fields into one loaded post (keeps list teasers in sync with the reader). */
+  const patch = useCallback((id: string, fields: Partial<Post>) => {
+    setPosts((prev) => {
+      const i = prev.findIndex((x) => x.id === id);
+      if (i < 0) return prev;
+      const cur = prev[i];
+      if (!(Object.keys(fields) as (keyof Post)[]).some((k) => cur[k] !== fields[k])) return prev;
+      const next = [...prev];
+      next[i] = { ...cur, ...fields };
+      return next;
+    });
+  }, []);
+
+  /** Fetch the first page again (e.g. after "new bottles arrived"). */
+  const reload = useCallback(() => {
+    generation.current += 1;
+    inFlight.current = false;
+    setDone(false);
+    fetchPage(null, generation.current);
+  }, [fetchPage]);
+
+  return { posts, loading, done, error, loadMore, prepend, patch, reload };
 }

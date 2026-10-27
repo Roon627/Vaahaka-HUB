@@ -5,7 +5,7 @@ const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!url || !key) {
   // Fail loudly in dev; otherwise the UI just shows empty states.
-  console.warn("Raalhu: NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY are not set.");
+  console.warn("Ihusaas: NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY are not set.");
 }
 
 // Anonymous client: no sessions, no cookies, no stored identity.

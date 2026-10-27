@@ -1,5 +1,5 @@
 -- =============================================================================
--- Raalhu (Wave) — Supabase schema
+-- Ihusaas (ihusaas.online) — Supabase schema
 -- Run in the Supabase SQL editor. Idempotent enough for a fresh project.
 --
 -- Anonymity model
@@ -81,8 +81,9 @@ create index if not exists posts_device_recent_idx
   on public.posts (device_token, created_at desc);
 
 -- Rate limit: max 5 stories per device per hour (cheap abuse brake).
+-- SECURITY DEFINER: the anon role can't read device_token (by design), so the count must run as the owner.
 create or replace function public.posts_rate_limit() returns trigger
-language plpgsql as $$
+language plpgsql security definer set search_path = public as $$
 begin
   if new.device_token is null then
     raise exception 'device token required' using errcode = 'P0001';

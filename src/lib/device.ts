@@ -37,3 +37,16 @@ export function setMyReaction(postId: string, kind: ReactionKind, on: boolean) {
   all[postId] = [...set];
   safeSet(MINE_KEY, JSON.stringify(all));
 }
+
+// ---- bottles this browser has already opened (they show as "opened" in the sea) ----
+const OPENED_KEY = "raalhu.opened";
+
+export function getOpened(): string[] {
+  try { return JSON.parse(safeGet(OPENED_KEY) ?? "[]"); } catch { return []; }
+}
+
+export function markOpened(postId: string) {
+  const ids = getOpened().filter((x) => x !== postId);
+  ids.push(postId);
+  safeSet(OPENED_KEY, JSON.stringify(ids.slice(-500))); // cap so it never grows unbounded
+}

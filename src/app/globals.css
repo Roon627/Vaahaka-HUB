@@ -4,23 +4,66 @@
 
 :root { color-scheme: dark; }
 
-html, body { background: #04090f; }
+html { background: #0a1c26; }
 
 body {
-  color: #e6f1f7;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  /* Faint bioluminescent haze behind everything */
-  background-image:
-    radial-gradient(60rem 30rem at 15% -10%, rgba(46, 230, 197, 0.07), transparent 60%),
-    radial-gradient(50rem 30rem at 100% 10%, rgba(255, 107, 107, 0.05), transparent 60%);
-  background-attachment: fixed;
+  color: #f5efe4;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  /* The fixed <Ocean/> scene paints the background; keep body transparent so it shows. */
+  background: transparent;
 }
 
-::selection { background: rgba(46, 230, 197, 0.3); }
+::selection { background: rgba(159, 227, 208, 0.28); }
 
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
+/* Soft, thin scrollbars for the composer / lists */
+* { scrollbar-width: thin; scrollbar-color: #2a5560 transparent; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
 }
+
+/* ---- Parchment ------------------------------------------------------------ */
+.paper {
+  position: relative;
+  color: #3a2d1f;
+  background:
+    radial-gradient(120% 90% at 15% 0%, #faefd4 0%, #f0dfb8 55%, #e6cf9f 100%);
+  border-radius: 14px 20px 12px 22px / 20px 12px 22px 14px;
+  box-shadow: 0 40px 90px -24px rgba(0, 0, 0, 0.7), inset 0 0 70px rgba(150, 110, 50, 0.28);
+}
+/* paper grain */
+.paper::before {
+  content: "";
+  position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  opacity: 0.55; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .36  0 0 0 0 .27  0 0 0 0 .14  0 0 0 .24 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.paper > :where(:not(.absolute)) { position: relative; }
+
+/* ruled writing lines — line-height MUST stay 32px to sit on the rules */
+.ruled {
+  line-height: 32px;
+  background-image: repeating-linear-gradient(transparent, transparent 31px, rgba(90, 70, 40, 0.2) 32px);
+  background-attachment: local;
+}
+
+/* ---- Mobile / touch ------------------------------------------------------- */
+html { -webkit-text-size-adjust: 100%; }
+body { -webkit-tap-highlight-color: transparent; overscroll-behavior-y: contain; }
+/* no 300ms tap delay / double-tap zoom on controls */
+button, a, [role="button"], select, summary { touch-action: manipulation; }
+
+@media (max-width: 639px) {
+  /* iOS zooms the page when a focused field is under 16px */
+  input, textarea, select { font-size: 16px !important; }
+  /* modals become bottom sheets */
+  .paper.sheet { border-radius: 24px 24px 0 0; }
+}
+.sheet-pad { padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); }
+
+/* Map: while "locked" a swipe over it scrolls the page; unlocked, it pans/zooms the map.
+   d3-zoom sets touch-action:none inline, hence !important. */
+.map-locked svg { touch-action: pan-y !important; }

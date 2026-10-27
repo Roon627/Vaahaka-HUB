@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="280" viewBox="-20 -14 240 280"><defs>
+    <clipPath id="sc"><path d="M82 38 L82 76 C82 96 34 104 34 156 C34 204 62 226 100 226 C138 226 166 204 166 156 C166 104 118 96 118 76 L118 38 Z"/></clipPath>
+    <linearGradient id="sg" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".55" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#fff" stop-opacity=".22"/></linearGradient>
+    <radialGradient id="sl" cx=".5" cy=".62" r=".6"><stop offset="0" stop-color="#f1d58a" stop-opacity=".9"/><stop offset="1" stop-color="#f1d58a" stop-opacity=".14"/></radialGradient>
+    <filter id="sb" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>
+    <filter id="die" x="-20%" y="-20%" width="140%" height="140%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="6" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="o0"/><feComposite in="o0" in2="SourceAlpha" operator="out" result="o"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="sh"/><feOffset in="sh" dy="4" result="sh2"/>
+      <feFlood flood-color="#06141c" flood-opacity=".35"/><feComposite in2="sh2" operator="in" result="shadow"/>
+      <feMerge><feMergeNode in="shadow"/><feMergeNode in="o"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter></defs><g filter="url(#die)">
+    
+    
+    <ellipse cx="100" cy="230" rx="70" ry="9" fill="#2a7a86" opacity=".45"/>
+    <path d="M82 38 L82 76 C82 96 34 104 34 156 C34 204 62 226 100 226 C138 226 166 204 166 156 C166 104 118 96 118 76 L118 38 Z" fill="#f9ecca"/>
+    <g clip-path="url(#sc)"><rect x="20" y="36" width="160" height="210" fill="url(#sl)"/></g>
+    <g transform="rotate(-7 100 80)"><rect x="90" y="56" width="20" height="46" rx="5" fill="#f6e9cc"/><path transform="translate(100 82) scale(0.62)" d="M0 9 C-16 -3 -10 -17 0 -9 C10 -17 16 -3 0 9Z" fill="#f1d58a"/></g>
+    <g><rect x="84" y="4" width="32" height="30" rx="8" fill="#d9a96a"/><rect x="84" y="4" width="32" height="11" rx="5.5" fill="#ecc78f"/><circle cx="94" cy="25" r="2" fill="#b98748"/><circle cx="107" cy="20" r="1.8" fill="#b98748"/></g>
+    <path d="M82 38 L82 76 C82 96 34 104 34 156 C34 204 62 226 100 226 C138 226 166 204 166 156 C166 104 118 96 118 76 L118 38 Z" fill="url(#sg)" stroke="#fff" stroke-opacity=".8" stroke-width="4" stroke-linejoin="round"/>
+    <rect x="75" y="28" width="50" height="16" rx="8" fill="#fff" fill-opacity=".3" stroke="#fff" stroke-opacity=".8" stroke-width="3.5"/>
+    <path d="M52 138 C49 160 54 184 67 200" stroke="#fff" stroke-opacity=".75" stroke-width="6" stroke-linecap="round" fill="none"/><circle cx="56" cy="124" r="3.5" fill="#fff" fill-opacity=".75"/>
+    <path d="M71 161 Q80 150 89 161" fill="none" stroke="#24323d" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M111 161 Q120 150 129 161" fill="none" stroke="#24323d" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="64" cy="177" rx="10" ry="6" fill="#ff9fb0" opacity="0.6"/><ellipse cx="136" cy="177" rx="10" ry="6" fill="#ff9fb0" opacity="0.6"/><path d="M91 175 Q100 185 109 175" fill="none" stroke="#24323d" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M150 103 Q150 110 157 110 Q150 110 150 117 Q150 110 143 110 Q150 110 150 103Z" fill="#f7d58e" opacity="1"/><path d="M44 123 Q44 128 49 128 Q44 128 44 133 Q44 128 39 128 Q44 128 44 123Z" fill="#f7d58e" opacity="0.9"/>
+    </g></svg>

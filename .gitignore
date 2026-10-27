@@ -4,3 +4,9 @@ node_modules
 .env
 next-env.d.ts
 tsconfig.tsbuildinfo
+vaahaka.txt
+.pgurl
+.next-prod
+marketing/.tmp
+.shot/
+marketing/screenshots-4k/

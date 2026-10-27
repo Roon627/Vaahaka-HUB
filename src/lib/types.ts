@@ -12,6 +12,15 @@ export interface Post {
   felt_count: number;
   heart_count: number;
   listening_count: number;
+  comment_count: number;
+}
+
+/** An anonymous note left under a letter. */
+export interface Comment {
+  id: string;
+  post_id: string;
+  created_at: string;
+  body: string;
 }
 
 export type ReactionCounts = Record<ReactionKind, number>;
