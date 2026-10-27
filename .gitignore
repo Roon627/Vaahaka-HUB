@@ -10,3 +10,6 @@ vaahaka.txt
 marketing/.tmp
 .shot/
 marketing/screenshots-4k/
+.env*.bak-*
+.next-deploy
+deploy/

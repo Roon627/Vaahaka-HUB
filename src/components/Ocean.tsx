@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
-import { moonPhase } from "@/lib/moon";
+import { DAY_SKY, NIGHT_SKY, skyAt, type SkyState } from "@/lib/sky";
 import { useWeather } from "@/lib/weather";
 import Moon from "./Moon";
 
@@ -34,8 +34,15 @@ export default function Ocean() {
   const [ripples, setRipples] = useState<Ripple[]>([]);
   const lamp = useRef<HTMLDivElement>(null);
   const weather = useWeather();
-  const [moon, setMoon] = useState(() => moonPhase(new Date(0))); // real phase set after mount (avoids SSR mismatch)
-  useEffect(() => setMoon(moonPhase()), []);
+  // The REAL sky over Malé, recomputed every minute (set after mount so server and client markup agree).
+  const [sky, setSky] = useState<SkyState | null>(null);
+  useEffect(() => {
+    const tick = () => setSky(skyAt(new Date()));
+    tick();
+    const t = setInterval(tick, 60_000);
+    return () => clearInterval(t);
+  }, []);
+  const day = sky?.daylight ?? 0;
 
   useEffect(() => {
     // Phones (and reduced-motion users) get a lighter scene: fewer elements, same mood.
@@ -71,8 +78,11 @@ export default function Ocean() {
 
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      {/* Moonlit surface water */}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,#17475a 0%,#0f3140 38%,#0a2331 100%)" }} />
+      {/* Sky: night, crossfading to day with the real sun; twilight haze and a glow on the horizon at sunrise/sunset */}
+      <div className="absolute inset-0" style={{ background: `linear-gradient(180deg,${NIGHT_SKY[0]} 0%,${NIGHT_SKY[1]} 38%,${NIGHT_SKY[2]} 100%)` }} />
+      <div className="absolute inset-0 transition-opacity duration-[4000ms]" style={{ opacity: day, background: `linear-gradient(180deg,${DAY_SKY[0]} 0%,${DAY_SKY[1]} 45%,${DAY_SKY[2]} 100%)` }} />
+      <div className="absolute inset-0 transition-opacity duration-[4000ms]" style={{ opacity: (sky?.twilight ?? 0) * 0.55, background: "linear-gradient(180deg,#3b2f6e 0%,#5b4486 40%,transparent 80%)" }} />
+      <div className="absolute inset-0 transition-opacity duration-[4000ms]" style={{ opacity: sky?.glow ?? 0, background: `radial-gradient(130% 42% at ${sky?.morning ? "22%" : "78%"} 82%, ${sky?.glowColor ?? "#ffb07a"}99 0%, ${sky?.glowColor ?? "#ffb07a"}33 40%, transparent 72%)` }} />
       {/* ...crossfading to the lightless deep */}
       <motion.div className="absolute inset-0" style={{ opacity: depth, background: "linear-gradient(180deg,#08202d 0%,#051520 45%,#030a12 100%)" }} />
       <motion.div className="absolute inset-0" initial={false} animate={{ opacity: calm ? 0.9 : 0 }} transition={{ duration: 0.9 }} style={{ background: "linear-gradient(180deg,#08202d 0%,#051520 45%,#030a12 100%)" }} />
@@ -88,7 +98,7 @@ export default function Ocean() {
 
       <motion.div className="absolute inset-0" initial={false} animate={{ opacity: calm ? 0 : 1 }} transition={{ duration: 0.9 }}>
       {/* Stars + a rare shooting star */}
-      <motion.div className="absolute inset-0" style={{ opacity: starsO }}>
+      <motion.div className="absolute inset-0 transition-opacity duration-[4000ms]" style={{ opacity: starsO, filter: `opacity(${sky?.stars ?? 1})` }}>
         {stars.map((s) => (
           <span
             key={s.id}
@@ -101,13 +111,28 @@ export default function Ocean() {
         </div>
       </motion.div>
 
-      {/* The moon, in tonight's real phase; its glow scales with how much of it is lit */}
-      <motion.div className="absolute right-[7%] top-[3.75rem] sm:right-[9%] sm:top-24" style={{ y: moonY, opacity: moonO }}>
-        <div className="relative h-[4.5rem] w-[4.5rem] animate-breathe rounded-full sm:h-44 sm:w-44"
-          style={{ boxShadow: `0 0 80px 18px rgba(247,213,142,${0.06 + 0.24 * moon.illumination}), 0 0 220px 60px rgba(247,213,142,${0.03 + 0.1 * moon.illumination})` }}>
-          <div className="h-full w-full"><Moon phase={moon.phase} size={176} /></div>
-        </div>
-      </motion.div>
+      {/* The sun and moon, where they REALLY are over Malé right now. Both sit behind all text, below the header.
+          x = progress between rise and set, y = real altitude. */}
+      {sky && (
+        <>
+          <motion.div className="absolute" style={{ right: "7%", top: `${sky.sun.y}%`, y: moonY, opacity: moonO, translateX: "50%", translateY: "-50%" }}>
+            <div className="transition-opacity duration-[4000ms]" style={{ opacity: sky.sun.visible }}>
+              <div className="h-12 w-12 rounded-full sm:h-28 sm:w-28"
+                style={{ background: `radial-gradient(circle at 40% 38%, #fffdf2 0%, ${sky.sun.color} 62%)`, boxShadow: `0 0 ${50 * sky.sun.glow + 20}px ${14 * sky.sun.glow}px ${sky.sun.color}88, 0 0 160px 50px ${sky.sun.color}33` }} />
+            </div>
+          </motion.div>
+
+          <motion.div className="absolute" style={{ right: sky.sun.visible > 0.3 && sky.moon.visible > 0.3 ? "calc(7% + 68px)" : "7%", top: `${sky.moon.y}%`, y: moonY, opacity: moonO, translateX: "50%", translateY: "-50%" }} transition={{ duration: 1 }}>
+            <div className="transition-opacity duration-[4000ms]" style={{ opacity: sky.moon.visible }}>
+              <div className="h-10 w-10 rounded-full sm:h-24 sm:w-24"
+                style={{ transform: `rotate(${sky.moon.tilt}deg)`, filter: `sepia(${0.75 * sky.moon.warm}) saturate(${1 + sky.moon.warm * 0.6})`,
+                  boxShadow: `0 0 70px 14px rgba(247,213,142,${(0.05 + 0.22 * sky.moon.fraction) * (1 - day)}), 0 0 200px 50px rgba(247,213,142,${(0.02 + 0.08 * sky.moon.fraction) * (1 - day)})` }}>
+                <Moon phase={sky.moon.phase} size={96} />
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
 
       {/* When it's raining in Malé, it rains here too */}
       {weather?.rainy && (
@@ -120,7 +145,7 @@ export default function Ocean() {
       )}
 
       {/* Light rays slanting down through the water */}
-      <motion.div className="absolute inset-x-0 top-0 h-[75vh] overflow-hidden" style={{ opacity: raysO }}>
+      <motion.div className="absolute inset-x-0 top-0 h-[75vh] overflow-hidden" style={{ opacity: raysO, filter: `opacity(${0.4 + day * 0.9})` }}>
         {[8, 26, 47, 66, 86].map((l, i) => (
           <span
             key={l}

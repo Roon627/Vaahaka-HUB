@@ -4,7 +4,7 @@
 set -u
 BASE="${1:-http://localhost:3000}/api/fodibey/v1"
 KEY="${FODIBEY_API_KEY:?set FODIBEY_API_KEY}"
-H=(-H "Authorization: Bearer $KEY" -H "Content-Type: application/json" -H "X-Fodibey-Actor: smoke-test")
+H=(-H "Authorization: Bearer $KEY" -H "X-Fodibey-Key: $KEY" -H "Content-Type: application/json" -H "X-Fodibey-Actor: smoke-test")
 pass=0; fail=0
 t() { # name expected_status curl-args...
   local name=$1 want=$2; shift 2

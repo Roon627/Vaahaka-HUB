@@ -17,9 +17,12 @@ export type AuthResult = { ok: true; actor: string } | { ok: false; status: 401 
 export function authenticate(req: Request): AuthResult {
   const keys = configuredKeys();
   if (keys.length === 0) return { ok: false, status: 503, code: "api_disabled", message: "The Fodibey API is not configured on this server (FODIBEY_API_KEY is unset)." };
+  // Standard `Authorization: Bearer <key>`, or `X-Fodibey-Key: <key>`. Some shared hosts (LiteSpeed/Apache) strip
+  // the Authorization header before it reaches the app, so the custom header is the dependable fallback.
   const m = /^Bearer\s+(.+)$/i.exec(req.headers.get("authorization") ?? "");
-  const given = m ? sha(m[1].trim()) : null;
-  if (!given || !keys.some((k) => timingSafeEqual(k, given))) return { ok: false, status: 401, code: "unauthorized", message: "Missing or invalid bearer token." };
+  const presented = m?.[1].trim() ?? req.headers.get("x-fodibey-key")?.trim();
+  const given = presented ? sha(presented) : null;
+  if (!given || !keys.some((k) => timingSafeEqual(k, given))) return { ok: false, status: 401, code: "unauthorized", message: "Missing or invalid API key (send `Authorization: Bearer <key>` or `X-Fodibey-Key: <key>`)." };
   // Who clicked, for the audit log. Fodibey passes its own moderator id; never trusted for access decisions.
   const actor = (req.headers.get("x-fodibey-actor") ?? "fodibey").replace(/[^\w@.\- ]/g, "").slice(0, 80) || "fodibey";
   return { ok: true, actor };

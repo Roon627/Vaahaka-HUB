@@ -67,3 +67,15 @@ button, a, [role="button"], select, summary { touch-action: manipulation; }
 /* Map: while "locked" a swipe over it scrolls the page; unlocked, it pans/zooms the map.
    d3-zoom sets touch-action:none inline, hence !important. */
 .map-locked svg { touch-action: pan-y !important; }
+
+/* ---- Map (Leaflet) -------------------------------------------------------- */
+.leaflet-container { font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif; outline: none; }
+.leaflet-tooltip.atoll-tip { background: rgba(8, 26, 38, 0.92); color: #f5efe4; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 6px 10px; font-size: 12px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6); }
+.leaflet-tooltip.atoll-tip::before { display: none; }
+.leaflet-tooltip.atoll-label { background: transparent; border: 0; box-shadow: none; color: #f5efe4; font-size: 11px; font-weight: 600; padding: 0; text-shadow: 0 0 3px #04121b, 0 0 3px #04121b, 0 0 6px #04121b; }
+.leaflet-tooltip.atoll-label::before { display: none; }
+.leaflet-control-attribution { background: rgba(8, 26, 38, 0.7) !important; color: #9db9b8 !important; font-size: 9px; }
+.leaflet-control-attribution a { color: #bfe6e0 !important; }
+.leaflet-tooltip.atoll-label-light { color: #0a1c26; text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 6px #fff, 0 0 8px #fff; }
+.map-light .leaflet-control-attribution { background: rgba(255, 255, 255, 0.8) !important; color: #3b4a52 !important; }
+.map-light .leaflet-control-attribution a { color: #1c6f86 !important; }

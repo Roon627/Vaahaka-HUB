@@ -29,9 +29,21 @@ async function audit(actor: string, action: string, targetType: string, targetId
 const table = (t: string) => (t === "post" ? "posts" : "comments");
 
 // ----------------------------------------------------------------------------- handlers
+/**
+ * 200 = the API is reachable and your key is valid. `database` says whether data endpoints will work:
+ *   "ok" | "not_configured" (SUPABASE_SERVICE_ROLE_KEY missing on the server) | "error" (database unreachable, 503).
+ * A dashboard can therefore tell "Ihusaas is down" apart from "Ihusaas needs its database key".
+ */
 const health: Handler = async () => {
-  const { error } = await admin().from("posts").select("id", { head: true, count: "exact" }).limit(1);
-  return json({ ok: !error, service: "ihusaas", api: "fodibey/v1", time: new Date().toISOString(), database: error ? "error" : "ok" }, error ? 503 : 200);
+  const base = { service: "ihusaas", api: "fodibey/v1", time: new Date().toISOString() };
+  let db: "ok" | "not_configured" | "error" = "ok";
+  try {
+    const { error } = await admin().from("posts").select("id", { head: true, count: "exact" }).limit(1);
+    if (error) db = "error";
+  } catch (e) {
+    if (e instanceof ConfigError) db = "not_configured"; else db = "error";
+  }
+  return json({ ok: db !== "error", ...base, database: db, ...(db === "not_configured" ? { hint: "Set SUPABASE_SERVICE_ROLE_KEY on the server (scripts/set-server-secret.sh)." } : {}) }, db === "error" ? 503 : 200);
 };
 
 const stats: Handler = async () => {
@@ -270,7 +282,7 @@ function cors(req: Request, res: Response): Response {
   const allowed = (process.env.FODIBEY_ALLOWED_ORIGINS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
   if (origin && allowed.includes(origin)) {
     res.headers.set("Access-Control-Allow-Origin", origin);
-    res.headers.set("Access-Control-Allow-Headers", "authorization, content-type, x-fodibey-actor");
+    res.headers.set("Access-Control-Allow-Headers", "authorization, content-type, x-fodibey-actor, x-fodibey-key");
     res.headers.set("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS");
     res.headers.append("Vary", "Origin");
   }

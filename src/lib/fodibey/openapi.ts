@@ -13,11 +13,11 @@ export function openapi() {
 
   return {
     openapi: "3.0.3",
-    info: { title: "Ihusaas × Fodibey API", version: "1.0.0", description: "Moderation + analytics API for the Fodibey dashboard. Authenticate with `Authorization: Bearer <FODIBEY_API_KEY>`. Optionally send `X-Fodibey-Actor: <moderator id>` so actions are attributed in the audit log. No endpoint ever returns device tokens." },
+    info: { title: "Ihusaas × Fodibey API", version: "1.0.0", description: "Moderation + analytics API for the Fodibey dashboard. Authenticate with `Authorization: Bearer <FODIBEY_API_KEY>` or, if a proxy strips that header (the cPanel host does), `X-Fodibey-Key: <FODIBEY_API_KEY>`. Optionally send `X-Fodibey-Actor: <moderator id>` so actions are attributed in the audit log. No endpoint ever returns device tokens." },
     servers: [{ url: "/api/fodibey/v1" }],
-    security: [{ bearer: [] }],
+    security: [{ bearer: [] }, { fodibeyKey: [] }],
     components: {
-      securitySchemes: { bearer: { type: "http", scheme: "bearer" } },
+      securitySchemes: { bearer: { type: "http", scheme: "bearer" }, fodibeyKey: { type: "apiKey", in: "header", name: "X-Fodibey-Key", description: "Same key as the bearer token. Use this if your host strips the Authorization header." } },
       schemas: {
         Error: { type: "object", properties: { error: { type: "object", properties: { code: { type: "string" }, message: { type: "string" } } } } },
         Report: { type: "object", properties: { id: { type: "string", format: "uuid" }, created_at: { type: "string", format: "date-time" }, reason: { type: "string", enum: ["rude", "hate", "self_harm", "spam", "privacy", "other"] }, status: { type: "string", enum: ["open", "actioned", "dismissed"] }, resolved_at: { type: "string", format: "date-time", nullable: true }, target: { type: "object", properties: { type: { type: "string", enum: ["post", "comment"] }, id: { type: "string", format: "uuid" }, content: { type: "object", nullable: true } } } } },

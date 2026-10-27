@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { moonPhase, type MoonPhase } from "@/lib/moon";
+import { maleTime, skyAt, type SkyState } from "@/lib/sky";
 import { useWeather } from "@/lib/weather";
 import { useSea } from "./SeaProvider";
 
@@ -9,10 +10,12 @@ export default function SkyLine() {
   const { online } = useSea();
   const w = useWeather();
   const [moon, setMoon] = useState<MoonPhase | null>(null);
-  useEffect(() => setMoon(moonPhase()), []);
+  const [sky, setSky] = useState<SkyState | null>(null);
+  useEffect(() => { setMoon(moonPhase()); setSky(skyAt(new Date())); }, []);
   const bits = [
     online > 0 && <span key="o" className="inline-flex items-center gap-1.5"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-glow opacity-60" /><span className="relative inline-flex h-2 w-2 rounded-full bg-glow" /></span>{online} here now</span>,
     w && <span key="w" title={`${w.label}, wind ${w.wind} km/h`}>Malé {w.temp}° {w.emoji}</span>,
+    sky && <span key="s" title="Malé local time">{sky.next.kind === "sunrise" ? "🌅 sunrise" : "🌇 sunset"} {maleTime(sky.next.at)}</span>,
     moon && <span key="m" title={`${Math.round(moon.illumination * 100)}% lit`}>{moon.emoji} {moon.name}</span>,
   ].filter(Boolean);
   if (!bits.length) return null;

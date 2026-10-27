@@ -20,6 +20,9 @@ Run `FODIBEY_API_KEY=… ./scripts/fodibey-smoke.sh https://ihusaas.online` to c
 
 ## 2. Calling it
 
+> **Important on the cPanel host:** its web server strips the `Authorization` header, so a bearer token never arrives.
+> Send the key as **`X-Fodibey-Key: <key>`** instead (same value). Both headers are accepted; use the custom one in production.
+
 ```bash
 curl https://ihusaas.online/api/fodibey/v1/stats \
   -H "Authorization: Bearer $FODIBEY_API_KEY" \
@@ -33,7 +36,7 @@ No endpoint ever returns a device token. Paging: `limit` (≤200) and `cursor` (
 
 | Method & path | Purpose |
 |---|---|
-| `GET /health` | Liveness + database check |
+| `GET /health` | **200** = API reachable and key valid. The `database` field is `ok`, `not_configured` (server lacks `SUPABASE_SERVICE_ROLE_KEY`) or `error` (503). Use it to tell "down" from "needs its database key" |
 | `GET /stats` | Posts / comments / open reports, last 24h & 7d, by mood, by atoll, reaction totals |
 | `GET /reports?status=open&target=post\|comment&reason=` | The moderation queue, with the reported content attached |
 | `POST /reports/{id}/resolve` `{action, note?}` | `hide` · `dismiss` (restores auto-hidden content) · `delete` · `acknowledge` (handled, content untouched, e.g. a self-harm follow-up) |

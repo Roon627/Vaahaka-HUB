@@ -42,11 +42,17 @@ IHUSAAS_WEBHOOK_SECRET=<same value as FODIBEY_WEBHOOK_SECRET>
 Every request from Fodibey:
 
 ```
-Authorization: Bearer $IHUSAAS_API_KEY
+X-Fodibey-Key: $IHUSAAS_API_KEY            # NOT "Authorization: Bearer": the cPanel host strips that header
 X-Fodibey-Actor: <moderator id or email>      # shows up in the audit log
 ```
 
 **Call the API from Fodibey's server, never from the browser.** The key must not reach a user's device.
+
+## 2b. Gotchas found while testing the live server
+* Always call **`https://`**. Plain `http://` returns an HTML "301 Moved Permanently" page, which a JSON client reports as "unreadable response".
+* `GET /health` returns **200** with `database: "ok" | "not_configured" | "error"`. If it says `not_configured`, the server still needs `SUPABASE_SERVICE_ROLE_KEY`
+  (`./scripts/set-server-secret.sh SUPABASE_SERVICE_ROLE_KEY`), and data endpoints (`/stats`, `/reports`…) answer 503 JSON until then. `/helplines` and `/openapi.json` work without it.
+* Until the HTTPS certificate is valid, a strict HTTPS client fails the TLS handshake. See `docs/HOSTING_CPANEL.md` §4.
 
 ## 3. Dashboard to build: screens and the calls behind them
 
