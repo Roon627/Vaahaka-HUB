@@ -168,3 +168,7 @@ button:disabled { cursor: wait; }
 .map-illustrated .leaflet-control-scale { margin-bottom: 3px; }
 .map-illustrated .leaflet-control-scale-line { background: #edf5dbdd; border-color: #315763; color: #315763; font-size: 9px; }
 .map-illustrated .pin { filter: drop-shadow(1px 3px 2px #164e6333); }
+
+.leaflet-container.map-can-drag { cursor: grab; }
+.leaflet-container.map-can-drag:active { cursor: grabbing; }
+.leaflet-container.map-touch-scroll, .map-touch-scroll .leaflet-pane { touch-action: pan-y; }

@@ -1,8 +1,8 @@
 "use client";
 import "leaflet/dist/leaflet.css";
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from "react";
+import { useCallback, useEffect, useImperativeHandle, useMemo, useState } from "react";
 import L from "leaflet";
-import { MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, Marker, TileLayer, Tooltip, useMapEvents } from "react-leaflet";
 import IllustratedCoast from "./IllustratedCoast";
 import { ATOLLS, CATEGORY_BY_ID, type CategoryId } from "@/lib/constants";
 import { resolveAtollCode, type AtollCollection } from "@/lib/geo";
@@ -10,6 +10,8 @@ import { resolveAtollCode, type AtollCollection } from "@/lib/geo";
 export interface MapHandle { zoomIn: () => void; zoomOut: () => void; reset: () => void }
 
 interface Props {
+  /** Explicit prop crosses the Next dynamic boundary; React refs do not. */
+  mapHandle: React.Ref<MapHandle>;
   fc: AtollCollection | null;
   /** stories per region for the current mood filter */
   counts: Record<string, number>;
@@ -44,13 +46,15 @@ const ATTRIBUTION = '© <a href="https://www.openstreetmap.org/copyright">OpenSt
 function Controller({ handle, interactive, bounds, onZoom }: { handle: React.Ref<MapHandle>; interactive: boolean; bounds: L.LatLngBounds | null; onZoom: (zoom: number) => void }) {
   const map = useMapEvents({ zoomend: (e) => onZoom(e.target.getZoom()) });
   useImperativeHandle(handle, () => ({
-    zoomIn: () => map.zoomIn(0.75),
-    zoomOut: () => map.zoomOut(0.75),
-    reset: () => map.fitBounds(HOME, { padding: [10, 10], animate: true }),
+    zoomIn: () => { map.stop(); map.zoomIn(0.75); },
+    zoomOut: () => { map.stop(); map.zoomOut(0.75); },
+    reset: () => { map.stop(); map.fitBounds(HOME, { padding: [10, 10], animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches }); },
   }), [map]);
   useEffect(() => {
     const m = map as L.Map;
-    for (const h of [m.dragging, m.touchZoom, m.doubleClickZoom, m.boxZoom, m.keyboard]) interactive ? h.enable() : h.disable();
+    m.getContainer().classList.toggle("map-can-drag", interactive);
+    m.getContainer().classList.toggle("map-touch-scroll", !interactive);
+    for (const h of [m.dragging, m.touchZoom, m.doubleClickZoom, m.boxZoom, m.keyboard, m.scrollWheelZoom]) interactive ? h.enable() : h.disable();
   }, [map, interactive]);
   useEffect(() => { if (bounds) map.flyToBounds(bounds, { maxZoom: 9, padding: [60, 60], duration: 0.8, animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches }); }, [map, bounds]);
   useEffect(() => { map.fitBounds(HOME, { padding: [10, 10], animate: false }); }, [map]);
@@ -86,7 +90,7 @@ const bottleDrop = (color: string) =>
   });
 
 /** Georeferenced illustrated islands, with optional OpenStreetMap detail. */
-const LeafletMap = forwardRef<MapHandle, Props>(function LeafletMap(p, ref) {
+function LeafletMap(p: Props) {
   const [zoom, setZoom] = useState(6);
   const [illustrated, setIllustrated] = useState(true);
   const coastFailed = useCallback(() => setIllustrated(false), []);
@@ -118,11 +122,11 @@ const LeafletMap = forwardRef<MapHandle, Props>(function LeafletMap(p, ref) {
       <MapContainer
         bounds={HOME} boundsOptions={{ padding: [10, 10] }} zoomSnap={0.25} zoomDelta={0.75} minZoom={5} maxZoom={illustrated ? 15 : 19}
         maxBounds={[[-5, 69], [11, 78]]} maxBoundsViscosity={0.9}
-        scrollWheelZoom={false} zoomControl={false} attributionControl className="h-full w-full"
+        scrollWheelZoom={p.interactive} zoomControl={false} attributionControl className="h-full w-full"
         style={{ background: illustrated ? "#3199ac" : night ? "#0a1c26" : "#d4dadc" }}
       >
         {illustrated ? <IllustratedCoast onFailure={coastFailed} /> : <TileLayer url={TILE_URL} attribution={ATTRIBUTION} maxZoom={19} detectRetina />}
-        <Controller handle={ref} interactive={p.interactive} bounds={selBounds} onZoom={setZoom} />
+        <Controller handle={p.mapHandle} interactive={p.interactive} bounds={selBounds} onZoom={setZoom} />
 
         {/* ripples: letters that landed here in the last 24h */}
         {ATOLLS.filter((a) => (p.recent[a.code] ?? 0) > 0 && p.where[a.code]).map((a) => (
@@ -161,6 +165,6 @@ const LeafletMap = forwardRef<MapHandle, Props>(function LeafletMap(p, ref) {
       {illustrated && <div aria-hidden className="pointer-events-none absolute bottom-24 left-4 z-[500] text-center text-[#e1f6e6] opacity-75"><span className="text-[9px] font-bold tracking-[.2em]">N</span><div className="text-3xl">✧</div></div>}
     </div>
   );
-});
+}
 
 export default LeafletMap;

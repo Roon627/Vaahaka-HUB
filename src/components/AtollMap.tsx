@@ -60,7 +60,14 @@ export default function AtollMap() {
   useEffect(() => { const tick = () => setDaylight(skyAt(new Date()).daylight); tick(); const t = setInterval(tick, 60_000); return () => clearInterval(t); }, []);
   const [interactive, setInteractive] = useState(true);
   const [coarse, setCoarse] = useState(false);
-  useEffect(() => { const c = !window.matchMedia("(pointer: fine)").matches; setCoarse(c); setInteractive(!c); }, []);
+  useEffect(() => {
+    // Hybrid laptops can have a touch screen AND a mouse/trackpad.
+    const mouse = window.matchMedia("(any-pointer: fine)");
+    const update = () => { setCoarse(!mouse.matches); setInteractive(mouse.matches); };
+    update();
+    mouse.addEventListener("change", update);
+    return () => mouse.removeEventListener("change", update);
+  }, []);
 
   // Boundaries: fetched here (not by <Geographies url>) so we can derive centroids for markers/labels.
   const [fc, setFc] = useState<AtollCollection | null>(null);
@@ -141,7 +148,7 @@ export default function AtollMap() {
             <p className="absolute inset-0 flex items-center justify-center px-8 text-center text-sm text-mist">Couldn't load the atoll boundaries. You can still explore regions in the list below.</p>
           ) : (
             <LeafletMap
-              ref={mapRef} fc={fc} counts={counts} max={max} category={category} breakdown={breakdown} recent={recent} arrival={lastArrival} daylight={daylight} where={where}
+              mapHandle={mapRef} fc={fc} counts={counts} max={max} category={category} breakdown={breakdown} recent={recent} arrival={lastArrival} daylight={daylight} where={where}
               selected={selected} hovered={hovered}
               onSelect={(c) => setSelected((s) => (s === c ? null : c))} onHover={setHovered}
               interactive={interactive}

@@ -47,3 +47,8 @@ Vaahaka-HUB is the **Ihusaas** web app (Next.js, deployed on **Vercel**, product
 - Default map uses georeferenced island polygons from geoBoundaries / Sentinel-2 (2021) with decorative surf, green land, and bottle markers. Source metadata and CC BY 4.0 attribution are in public/data/COASTLINES.md.
 - Street toggle retains OpenStreetMap for newer reclamation and local details; illustrated data failure falls back to street tiles.
 - Full-country view uses smaller markers, with labels and larger bottles on zoom. Administrative atoll polygons are used for navigation bounds, not rendered as land.
+
+## Map control fix
+- Pass the Leaflet imperative handle as an explicit `mapHandle` prop across Next's dynamic component boundary; a React `ref` there targets the loader rather than the map.
+- Enable dragging, wheel zoom, double-click, and keyboard navigation together; detect any fine pointer for hybrid touch/mouse devices.
+- Update map cursor/touch-action classes through the Leaflet container because MapContainer's initial props are not reactive. Phone scroll mode remains available.
