@@ -7,7 +7,7 @@
  *  - Hashed build assets, brand images and map/island data: cache first, refreshed in the background.
  * Bump VERSION to invalidate caches after a change to this file's strategy.
  */
-const VERSION = "v4";
+const VERSION = "v5";
 const SHELL = `rf-shell-${VERSION}`;
 const RUNTIME = `rf-rt-${VERSION}`;
 const PRECACHE = ["/offline.html", "/brand/stickers/sad.svg", "/help", "/brand/mark.svg", "/brand/png/icon-192.png", "/manifest.webmanifest", "/data/maldives-atolls.geojson", "/data/maldives-islands.json"];
@@ -33,7 +33,13 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return; // never touch Supabase / other origins
 
   if (req.mode === "navigate") {
-    event.respondWith(fetch(req).catch(() => caches.match(req).then((hit) => hit || caches.match("/offline.html"))));
+    event.respondWith(
+      fetch(req)
+        // Safari refuses a navigation answered with a redirected response (a 308 on a trailing slash, say):
+        // hand it a clean copy so the installed app never ends up on a blank screen.
+        .then(async (res) => (res.redirected ? new Response(await res.blob(), { status: res.status, statusText: res.statusText, headers: res.headers }) : res))
+        .catch(() => caches.match(req).then((hit) => hit || caches.match("/offline.html")))
+    );
     return;
   }
 
