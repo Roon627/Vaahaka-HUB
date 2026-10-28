@@ -8,7 +8,7 @@ import type { Post } from "@/lib/types";
 import { useSea } from "./SeaProvider";
 import { looksLikeCrisis } from "./CrisisNudge";
 
-/** A real sticky note gets replaced now and then: this one every 10 minutes, for everybody at the same time. */
+/** A notepad page gets torn off now and then: this one every 10 minutes, for everybody at the same time. */
 const SLOT_MS = 10 * 60 * 1000;
 const MAX_CHARS = 170;
 
@@ -66,7 +66,7 @@ function pick(slot: number, notes: Note[]): Note {
 }
 
 export default function StickyNote() {
-  const { openPost, openWriter } = useSea();
+  const { openPost } = useSea();
   const calm = useReducedMotion();
   const [letters, setLetters] = useState<Note[]>([]);
   const [slot, setSlot] = useState<number | null>(null);
@@ -97,7 +97,7 @@ export default function StickyNote() {
   // each new note sits at a slightly different angle, like it was pressed on by hand
   const tilt = slot === null ? -3 : [-4, -2.5, -1.5, 2, 3, -3.5][slot % 6];
   const long = note.lines.join(" ").length;
-  const size = long < 70 ? "text-[1.7rem] md:text-3xl" : long < 130 ? "text-2xl md:text-[1.7rem]" : "text-xl md:text-2xl";
+  const size = long < 70 ? "text-2xl md:text-[1.7rem]" : "text-xl md:text-2xl";
 
   return (
     <div className="relative mx-auto w-[min(88vw,22rem)] pt-3 md:absolute md:left-[2%] md:top-[50px] md:mx-0 md:w-[21.5rem]">
@@ -108,22 +108,19 @@ export default function StickyNote() {
           animate={{ opacity: 1, y: 0, rotate: tilt, scale: 1 }}
           exit={calm ? { opacity: 0 } : { opacity: 0, y: 70, rotate: tilt + 14, transition: { duration: 0.45, ease: "easeIn" } }}
           transition={{ type: "spring", stiffness: 160, damping: 15 }}
-          className="sticky-note"
+          className="notepad"
         >
-          <span className="sticky-tape" aria-hidden />
-          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#8a7a3a]">{note.eyebrow}</p>
-          {note.greeting && <p className="mt-3 font-hand text-4xl leading-none">{note.greeting}</p>}
-          <div dir="auto" className={`mt-3 font-hand leading-snug ${size} ${note.post ? "line-clamp-6 md:line-clamp-7" : ""}`}>
+          <p className="text-[10px] font-bold leading-8 uppercase tracking-[0.24em] text-inksoft">{note.eyebrow}</p>
+          {note.greeting && <p className="font-hand text-3xl leading-8">{note.greeting}</p>}
+          <div dir="auto" className={`font-hand leading-8 ${size} ${note.post ? "line-clamp-6 md:line-clamp-7" : ""}`}>
             {note.lines.map((l, i) => <p key={i}>{l}</p>)}
           </div>
-          <p className="mt-4 font-hand text-xl text-[#7a6a35]">{note.sign}</p>
-          <div className="mt-4 flex items-center justify-between gap-3">
-            {note.post ? (
-              <button onClick={() => openPost(note.post!)} className="sticky-btn">Read the whole letter →</button>
-            ) : (
-              <button onClick={() => openWriter()} className="sticky-btn">Write yours ↗</button>
-            )}
-          </div>
+          <p className="mt-2 font-hand text-xl leading-8 text-inksoft">{note.sign}</p>
+          {note.post && (
+            <div className="mt-3">
+              <button onClick={() => openPost(note.post!)} className="notepad-btn">Read the whole letter →</button>
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
       <p className="mt-3 text-center text-[11px] tracking-wide text-mist md:text-left md:pl-3">

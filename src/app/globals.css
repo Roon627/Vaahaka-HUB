@@ -123,13 +123,18 @@ button, a, [role="button"], select, summary { touch-action: manipulation; }
 .shore-orbit-one { inset: 35px -5px; }
 .shore-orbit-two { inset: 5px 30px; transform: rotate(25deg); }
 .shore-letter { position: absolute; top: 90px; left: 6%; width: 260px; padding: 28px; color: #3a2d1f; background: linear-gradient(135deg, #f7edda, #e5d3ad); border-radius: 3px 10px 8px 3px; box-shadow: 0 25px 70px #0005; transform: rotate(-9deg); }
-.sticky-note { position: relative; padding: 30px 26px 22px; color: #3a2d1f; background: linear-gradient(165deg, #fff3a6 0%, #fbe580 100%); border-radius: 2px 2px 6px 2px; box-shadow: 0 2px 3px #0003, 0 26px 50px -12px #0007; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 26px), calc(100% - 26px) 100%, 0 100%); transform-origin: 50% 0; }
-.sticky-note::after { content: ''; position: absolute; right: 0; bottom: 0; width: 26px; height: 26px; background: linear-gradient(135deg, #d9bf56 50%, transparent 50%); }
-.sticky-tape { position: absolute; left: 50%; top: -12px; width: 86px; height: 26px; transform: translateX(-50%) rotate(-3deg); background: #ffffff55; box-shadow: 0 1px 2px #0002; backdrop-filter: blur(1px); }
-.sticky-btn { min-height: 44px; border-radius: 999px; padding: 8px 16px; font-size: 13px; font-weight: 700; color: #3a2d1f; background: #3a2d1f14; transition: background .2s, transform .2s; }
-.sticky-btn:hover { background: #3a2d1f26; }
-.sticky-btn:active { transform: scale(.96); }
-.sticky-btn:focus-visible { outline: 2px solid #3a2d1f; outline-offset: 2px; }
+.notepad { position: relative; padding: 46px 22px 20px 44px; color: #3a2d1f; border-radius: 4px 4px 8px 8px; transform-origin: 50% 0;
+  background:
+    linear-gradient(90deg, transparent 34px, #c9604f55 34px, #c9604f55 36px, transparent 36px),
+    repeating-linear-gradient(180deg, transparent 0, transparent calc(2rem - 1px), #8a9bb855 calc(2rem - 1px), #8a9bb855 2rem) 0 38px / 100% 100% no-repeat,
+    linear-gradient(135deg, #f7edda, #e5d3ad);
+  box-shadow: 0 2px 3px #0003, 0 26px 60px -14px #0008; }
+.notepad::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 30px; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, #2c3a46, #1d2933); box-shadow: 0 2px 4px #0005; }
+.notepad::after { content: ''; position: absolute; left: 14px; right: 14px; top: 9px; height: 12px; background: radial-gradient(circle at 6px 6px, #0b141b 0 4px, transparent 4.5px) 0 0 / 22px 12px repeat-x; }
+.notepad-btn { min-height: 44px; border-radius: 999px; padding: 8px 16px; font-size: 13px; font-weight: 700; color: #3a2d1f; background: #3a2d1f14; transition: background .2s, transform .2s; }
+.notepad-btn:hover { background: #3a2d1f26; }
+.notepad-btn:active { transform: scale(.96); }
+.notepad-btn:focus-visible { outline: 2px solid #3a2d1f; outline-offset: 2px; }
 .shore-hero-bottle { position: absolute; right: -1%; top: 190px; transform: rotate(19deg); filter: drop-shadow(0 16px 25px #0005); }
 .shore-sky p { margin-top: 0; justify-content: flex-start; }
 .shore-chip { display: inline-flex; min-height: 40px; align-items: center; gap: 7px; border-radius: 999px; border: 1px solid transparent; padding: 8px 14px; color: #9db9b8; font-size: 12px; transition: background .2s, color .2s; }
