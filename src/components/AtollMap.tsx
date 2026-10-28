@@ -3,22 +3,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { interpolateRgb } from "d3-interpolate";
 import { useAtollStats } from "@/hooks/useAtollStats";
 import { centroidOf, resolveAtollCode, type AtollCollection } from "@/lib/geo";
 import {
   ATOLLS, ATOLL_BY_CODE, ATOLL_GEOJSON_URL, CATEGORIES, CATEGORY_BY_ID, DEFAULT_HEAT_COLOR, type CategoryId,
 } from "@/lib/constants";
 import { useSea } from "./SeaProvider";
-import type { BaseLayer, MapHandle } from "./LeafletMap";
+import type { MapHandle } from "./LeafletMap";
+import { skyAt } from "@/lib/sky";
 import MoodButton from "./MoodButton";
 import MoodSheet from "./MoodSheet";
 
 // Leaflet touches `window`, so it only loads in the browser.
 const LeafletMap = dynamic(() => import("./LeafletMap"), { ssr: false, loading: () => <div className="h-full w-full animate-pulse bg-[#0a1c26]" /> });
-const BINS = 5;
-const QUIET = "#0f2a35"; // atolls with no stories
-const EDGE = "rgba(190,230,225,0.28)";
 
 
 /** Horizontal bar split by mood: how an atoll's stories break down. `scale` = share of the full width it fills. */
@@ -36,7 +33,7 @@ function MoodBar({ parts, scale = 1 }: { parts: { id: CategoryId; n: number }[];
 /**
  * Heatmap of where stories come from.
  *  - Real atoll boundaries (jawish/maldives-geo) with drag-to-pan and +/- zoom.
- *  - Choropleth in 5 steps (easier to read than a smooth ramp) tinted by the chosen mood.
+ *  - One donut per region: ring = mood mix, centre = count, size = volume; ripples where letters landed in the last 24h.
  *  - Proportional markers + labels; click an atoll to inspect it in the side panel,
  *    where its mood breakdown and shortcuts to read / write live.
  *  - One RPC per mood is fetched up front, so mood switching is instant.
@@ -44,14 +41,17 @@ function MoodBar({ parts, scale = 1 }: { parts: { id: CategoryId; n: number }[];
 export default function AtollMap() {
   const router = useRouter();
   const { openWriter } = useSea();
-  const { stats, loading } = useAtollStats();
+  const { stats, recent, loading } = useAtollStats();
+  const { lastArrival } = useSea();
 
   const [category, setCategory] = useState<CategoryId | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const [moodOpen, setMoodOpen] = useState(false);
   const mapRef = useRef<MapHandle>(null);
-  const [base, setBase] = useState<BaseLayer>("map");
+  // The map's look follows the real sun over Malé (set after mount so server and client markup agree).
+  const [daylight, setDaylight] = useState(0);
+  useEffect(() => { const tick = () => setDaylight(skyAt(new Date()).daylight); tick(); const t = setInterval(tick, 60_000); return () => clearInterval(t); }, []);
   const [interactive, setInteractive] = useState(true);
   const [coarse, setCoarse] = useState(false);
   useEffect(() => { const c = !window.matchMedia("(pointer: fine)").matches; setCoarse(c); setInteractive(!c); }, []);
@@ -74,14 +74,6 @@ export default function AtollMap() {
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
   const active = Object.values(counts).filter((n) => n > 0).length;
 
-  // Up to 5 steps on a sqrt scale (so one huge atoll doesn't wash out the rest). Upper bounds are
-  // de-duplicated: with few stories (say max 6) several steps would otherwise collapse onto one number.
-  const steps = useMemo(() => Array.from(new Set(Array.from({ length: BINS }, (_, i) => Math.ceil(max * ((i + 1) / BINS) ** 2)))), [max]);
-  const bin = (n: number) => (n === 0 ? 0 : steps.findIndex((t) => n <= t) + 1); // 0 = quiet, 1..steps.length
-  const ramp = useMemo(() => interpolateRgb("#1f5967", heat), [heat]);
-  const fillFor = (code: string | null) => { const b = bin(code ? counts[code] ?? 0 : 0); return b === 0 ? QUIET : ramp(0.2 + 0.8 * (b / steps.length)); };
-  const legend = steps.map((hi, i) => ({ color: ramp(0.2 + 0.8 * ((i + 1) / steps.length)), hi }));
-
   // Totals per mood for the sheet (all + one per mood)
   const moodTotals = useMemo(() => Object.fromEntries(["all", ...CATEGORIES.map((c) => c.id)].map((k) => [k, Object.values(stats[k] ?? {}).reduce((a, b) => a + b, 0)])), [stats]);
 
@@ -98,9 +90,6 @@ export default function AtollMap() {
     router.push(`/?${q.toString()}`);
   };
 
-  // Names on the map: the focused atoll plus the busiest few.
-  const topFew = new Set(ranked.slice(0, 4).filter((a) => a.n > 0).map((a) => a.code));
-  const labelled = (code: string) => code === selected || code === hovered || topFew.has(code);
 
   return (
     <section className="mx-auto w-full max-w-6xl px-4 pb-16">
@@ -129,10 +118,10 @@ export default function AtollMap() {
             <p className="absolute inset-0 flex items-center justify-center px-8 text-center text-sm text-mist">Couldn't load the atoll boundaries. Check public/data/maldives-atolls.geojson.</p>
           ) : (
             <LeafletMap
-              ref={mapRef} fc={fc} counts={counts} max={max} heat={heat} fillFor={fillFor} where={where}
+              ref={mapRef} fc={fc} counts={counts} max={max} category={category} breakdown={breakdown} recent={recent} arrival={lastArrival} daylight={daylight} where={where}
               selected={selected} hovered={hovered}
               onSelect={(c) => setSelected((s) => (s === c ? null : c))} onHover={setHovered}
-              interactive={interactive} base={base} labelled={labelled}
+              interactive={interactive}
               names={Object.fromEntries(ATOLLS.map((a) => [a.code, a.code === "MLE" ? "Malé" : a.name]))}
               tip={(c) => `${ATOLL_BY_CODE[c]?.name}: ${(counts[c] ?? 0).toLocaleString()} ${category ? CATEGORY_BY_ID[category].label.toLowerCase() + " " : ""}${(counts[c] ?? 0) === 1 ? "story" : "stories"}`}
             />
@@ -140,7 +129,7 @@ export default function AtollMap() {
 
           {/* zoom controls */}
           <div className="absolute right-3 top-3 z-[1000] flex flex-col overflow-hidden rounded-xl border border-white/10 bg-abyss/70 text-foam backdrop-blur-md">
-            {[["+", "Zoom in", () => mapRef.current?.zoomIn()], ["−", "Zoom out", () => mapRef.current?.zoomOut()], ["⌂", "Reset view", () => mapRef.current?.reset()], [base === "map" ? "🌙" : "🗺", base === "map" ? "Switch to the dark map" : "Switch to the standard map", () => setBase((b) => (b === "map" ? "dark" : "map"))]].map(([g, l, f]) => (
+            {[["+", "Zoom in", () => mapRef.current?.zoomIn()], ["−", "Zoom out", () => mapRef.current?.zoomOut()], ["⌂", "Reset view", () => mapRef.current?.reset()]].map(([g, l, f]) => (
               <button key={l as string} aria-label={l as string} title={l as string} onClick={f as () => void} className="h-11 w-11 text-lg transition hover:bg-white/10 active:bg-white/15 sm:h-10 sm:w-10">{g as string}</button>
             ))}
             {coarse && (
@@ -160,12 +149,12 @@ export default function AtollMap() {
             </div>
           )}
 
-          {/* legend: 5 steps, labelled with their upper bound */}
-          <div className="absolute inset-x-3 bottom-3 z-[1000] rounded-xl border border-white/10 bg-abyss/70 px-3 py-2 backdrop-blur-md">
-            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] text-mist">
-              <span className="mr-1">stories</span>
-              <span className="h-2.5 w-4 rounded-sm" style={{ background: QUIET, boxShadow: "inset 0 0 0 1px rgba(255,255,255,.12)" }} /><span>0</span>
-              {legend.map((l, i) => (<span key={i} className="flex items-center gap-1"><span className="ml-1 h-2.5 w-4 rounded-sm" style={{ background: l.color }} /><span className="tabular-nums">{i === legend.length - 1 ? `≤${l.hi}` : l.hi}</span></span>))}
+          {/* how to read the markers */}
+          <div className="absolute inset-x-3 bottom-3 z-[1000] rounded-xl border border-white/10 bg-abyss/75 px-3 py-2 backdrop-blur-md">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-mist">
+              <span>{category ? `${CATEGORY_BY_ID[category].label}: ring size = stories` : "size = stories · ring = mood mix"}</span>
+              {!category && <span className="flex items-center gap-1">{CATEGORIES.map((c) => <span key={c.id} title={c.label} className="h-2 w-2 rounded-full" style={{ background: c.color }} />)}</span>}
+              <span className="flex items-center gap-1"><span className="relative flex h-2.5 w-2.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-glow opacity-60" /><span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-glow" /></span>new in 24h</span>
             </div>
           </div>
 

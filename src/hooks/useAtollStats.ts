@@ -12,6 +12,7 @@ export type AtollStats = Record<string, Record<string, number>>;
  */
 export function useAtollStats() {
   const [stats, setStats] = useState<AtollStats>({});
+  const [recent, setRecent] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,8 +31,16 @@ export function useAtollStats() {
       setStats(Object.fromEntries(entries));
       setLoading(false);
     });
+    // Letters sent in the last 24h per region: drives the ripples on the map.
+    supabase.from("posts").select("atoll_code").gte("created_at", new Date(Date.now() - 24 * 3600_000).toISOString()).limit(2000)
+      .then(({ data }) => {
+        if (cancelled) return;
+        const m: Record<string, number> = {};
+        for (const r of (data ?? []) as { atoll_code: string }[]) m[r.atoll_code] = (m[r.atoll_code] ?? 0) + 1;
+        setRecent(m);
+      });
     return () => { cancelled = true; };
   }, []);
 
-  return { stats, loading };
+  return { stats, recent, loading };
 }

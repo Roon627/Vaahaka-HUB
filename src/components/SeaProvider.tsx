@@ -30,6 +30,8 @@ interface Sea {
   /** Bottles other people sent since this tab opened (the feed offers to show them). */
   arrivals: number;
   clearArrivals: () => void;
+  /** The most recent bottle someone else sent (null once its animation is over). */
+  lastArrival: { id: number; category: CategoryId; atoll: string } | null;
 }
 
 interface Arrival { id: number; category: CategoryId; atoll: string }
@@ -115,9 +117,9 @@ export function SeaProvider({ children }: { children: React.ReactNode }) {
       openWriter: (o) => setWriter(o ?? {}),
       openPost, openRandom, finding, opened,
       onPosted: (cb) => { postedCb.current = cb; },
-      online, arrivals, clearArrivals: () => setArrivals(0),
+      online, arrivals, clearArrivals: () => setArrivals(0), lastArrival: sailing,
     }),
-    [openPost, openRandom, finding, opened, online, arrivals]
+    [openPost, openRandom, finding, opened, online, arrivals, sailing]
   );
 
   return (

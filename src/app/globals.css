@@ -72,10 +72,28 @@ button, a, [role="button"], select, summary { touch-action: manipulation; }
 .leaflet-container { font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif; outline: none; }
 .leaflet-tooltip.atoll-tip { background: rgba(8, 26, 38, 0.92); color: #f5efe4; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 6px 10px; font-size: 12px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6); }
 .leaflet-tooltip.atoll-tip::before { display: none; }
-.leaflet-tooltip.atoll-label { background: transparent; border: 0; box-shadow: none; color: #f5efe4; font-size: 11px; font-weight: 600; padding: 0; text-shadow: 0 0 3px #04121b, 0 0 3px #04121b, 0 0 6px #04121b; }
+.leaflet-tooltip.atoll-label { background: transparent; border: 0; box-shadow: none; font-size: 11px; font-weight: 700; padding: 0; }
 .leaflet-tooltip.atoll-label::before { display: none; }
 .leaflet-control-attribution { background: rgba(8, 26, 38, 0.7) !important; color: #9db9b8 !important; font-size: 9px; }
 .leaflet-control-attribution a { color: #bfe6e0 !important; }
-.leaflet-tooltip.atoll-label-light { color: #0a1c26; text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 6px #fff, 0 0 8px #fff; }
-.map-light .leaflet-control-attribution { background: rgba(255, 255, 255, 0.8) !important; color: #3b4a52 !important; }
-.map-light .leaflet-control-attribution a { color: #1c6f86 !important; }
+/* The map follows the real sun over Malé: a dark teal "night chart" made from the same free OpenStreetMap tiles (no key, no second provider). */
+.map-night .leaflet-tile-pane { filter: invert(1) hue-rotate(184deg) brightness(0.74) saturate(1.15) contrast(0.92); }
+.map-night .leaflet-tooltip.atoll-label { color: #f5efe4; text-shadow: 0 0 3px #04121b, 0 0 3px #04121b, 0 0 6px #04121b; }
+.map-night .leaflet-control-attribution { background: rgba(8, 26, 38, 0.7) !important; color: #9db9b8 !important; }
+.map-night .leaflet-control-attribution a { color: #bfe6e0 !important; }
+.map-day .leaflet-tile-pane { filter: saturate(0.85); }
+.map-day .leaflet-tooltip.atoll-label { color: #0a1c26; text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 6px #fff, 0 0 8px #fff; }
+.map-day .leaflet-control-attribution { background: rgba(255, 255, 255, 0.8) !important; color: #3b4a52 !important; }
+.map-day .leaflet-control-attribution a { color: #1c6f86 !important; }
+.leaflet-tile-pane { transition: filter 1.5s ease; }
+
+/* region markers */
+.pin { transition: transform 0.2s ease; cursor: pointer; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45)); }
+.pin-on { transform: scale(1.12); }
+.ripple-wrap { pointer-events: none; }
+.ripple { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--c); opacity: 0; animation: ripple 3.2s ease-out infinite; }
+.ripple.r2 { animation-delay: 1.1s; }
+.ripple.r3 { animation-delay: 0.5s; }
+@keyframes ripple { 0% { transform: scale(0.7); opacity: 0.75; } 100% { transform: scale(2.6); opacity: 0; } }
+.bottle-drop { animation: bottle-drop 1.1s cubic-bezier(0.3, 1.5, 0.6, 1) both; }
+@keyframes bottle-drop { 0% { transform: translateY(-120px) rotate(-30deg); opacity: 0; } 60% { opacity: 1; } 100% { transform: translateY(0) rotate(0); opacity: 1; } }
