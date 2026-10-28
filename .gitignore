@@ -10,6 +10,8 @@ vaahaka.txt
 marketing/.tmp
 .shot/
 marketing/screenshots-4k/
+marketing/tiktok/
+.gitignore.bak-*
 .env*.bak-*
 .next-deploy
 deploy/

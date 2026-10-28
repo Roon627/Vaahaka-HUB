@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSea } from "./SeaProvider";
 import MoodDock from "./MoodDock";
-import { isIos, isStandalone, promptInstall, useCanInstall } from "@/lib/pwa";
+import { startInstall, useInstall } from "@/lib/pwa";
 
 /* ------------------------------------------------------------------ icons */
 const I = (d: React.ReactNode) => function Icon({ className = "h-[18px] w-[18px]" }: { className?: string }) {
@@ -20,7 +20,7 @@ const Info = I(<><circle cx="12" cy="12" r="9" /><path d="M12 11v5" /><circle cx
 function Logo() {
   return (
     <span className="flex items-center gap-2 font-display text-xl text-foam">
-      <img src="/brand/mark.svg" alt="" width={26} height={31} className="animate-drift" />
+      <img src="/brand/mark.svg" alt="" width={20} height={33} className="h-[33px] w-auto animate-drift" />
       <span>Ihusaas</span>
     </span>
   );
@@ -80,17 +80,27 @@ function AboutMenu({ onClose }: { onClose: () => void }) {
   );
 }
 
-/** "Install app": a real button where the browser supports it, instructions on iOS, nothing once installed. */
+/** "Install app": a real button where the browser allows it, otherwise it opens the how-to for this browser. Hidden once installed. */
 function InstallRow() {
-  const can = useCanInstall();
-  const [ios, setIos] = useState(false);
-  useEffect(() => { setIos(isIos() && !isStandalone()); }, []);
-  if (!can && !ios) return null;
+  const { show, can, mode } = useInstall();
+  if (!show) return null;
   return (
     <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5 text-[13px] text-mist">
-      <span>{can ? "Add Ihusaas to your home screen." : "To install: tap Share, then “Add to Home Screen”."}</span>
-      {can && <button onClick={() => promptInstall()} className="min-h-10 shrink-0 rounded-full bg-gradient-to-r from-glow to-sand px-4 text-xs font-semibold text-abyss">Install</button>}
+      <span>{mode === "inapp" ? "Open in your browser to add Ihusaas to your home screen." : "Add Ihusaas to your home screen."}</span>
+      <button onClick={() => startInstall()} className="min-h-10 shrink-0 rounded-full bg-gradient-to-r from-glow to-sand px-4 text-xs font-semibold text-abyss">{can ? "Install" : "How"}</button>
     </div>
+  );
+}
+
+/** Small always-there "Install" pill in the phone top bar. */
+function InstallPill() {
+  const { show } = useInstall();
+  if (!show) return null;
+  return (
+    <button onClick={() => startInstall()} aria-label="Install the Ihusaas app" className="ml-auto flex items-center gap-1.5 rounded-full border border-glow/30 bg-glow/10 px-3 py-1.5 text-xs font-semibold text-glow transition active:scale-95">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden><path d="M12 3v12M7 11l5 5 5-5" /><path d="M5 20h14" /></svg>
+      Install
+    </button>
   );
 }
 
@@ -148,6 +158,7 @@ export default function Nav() {
       {/* ---- mobile top logo ---- */}
       <header className="fixed inset-x-0 top-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-end border-b border-white/[0.06] bg-[rgba(8,26,38,0.92)] px-5 pb-2 backdrop-blur-xl md:hidden">
         <Link href="/" aria-label="Ihusaas home"><Logo /></Link>
+        <InstallPill />
       </header>
 
       {/* ---- mobile dock ---- */}

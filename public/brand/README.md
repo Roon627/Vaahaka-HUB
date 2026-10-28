@@ -21,4 +21,4 @@ Mood colours: horror #e88b8b · sad #8fb6e8 · vent #f0a870 · secrets #b9a2e8 �
 Fraunces (headings, wordmark) and Nunito (UI), both SIL OFL via Google Fonts. Handwriting touches use Caveat.
 
 ## Usage
-Keep clear space around the logo equal to the cork's width. Don't recolour the glass, stretch, or add effects. Don't put the dark wordmark on dark backgrounds or the light one on light ones.
+The logo is the Tide Bottle; the faced mascot is for stickers and playful moments only. Keep clear space around the logo equal to the cork's width. Don't recolour the glass, stretch, or add effects. Don't put the dark wordmark on dark backgrounds or the light one on light ones.

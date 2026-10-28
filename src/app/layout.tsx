@@ -16,11 +16,12 @@ const title = "Ihusaas — say it to the sea";
 const description = "A quiet, anonymous place for Maldivians to set down what they're carrying. Seal it in a bottle. Let the sea listen.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://ihusaas.online"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.ihusaas.online"),
   title: { default: title, template: "%s · Ihusaas" },
   description,
   applicationName: "Ihusaas",
   appleWebApp: { capable: true, title: "Ihusaas", statusBarStyle: "black-translucent" },
+  other: { "mobile-web-app-capable": "yes" },
   formatDetection: { telephone: false }, // we link helpline numbers explicitly; don't auto-link random digits
   openGraph: { type: "website", siteName: "Ihusaas", title, description, images: [{ url: "/brand/og.png", width: 1200, height: 630, alt: "Ihusaas" }] },
   twitter: { card: "summary_large_image", title, description, images: ["/brand/og.png"] },

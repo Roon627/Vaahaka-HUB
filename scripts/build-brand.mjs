@@ -84,8 +84,26 @@ function mascot(id, color, face = "happy", { waves = false, puddle = false, glow
 
 const svgDoc = (w, h, vb, inner) => `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="${vb}">${inner}</svg>`;
 
-/** Mascot alone, transparent background. */
-const markSVG = (face = "happy", color = MOODS.happy, opts = { puddle: true }) => {
+// ---- the Tide Bottle: the app's logo glyph. A clean message-in-a-bottle: cork, glass, a wave of sea inside, a heart. ----
+const TIDE_BODY = "M24 20 H36 V34 C36 44 52 50 52 68 V104 C52 113 46 118 38 118 H22 C14 118 8 113 8 104 V68 C8 50 24 44 24 34 Z";
+/** { defs, art } in a 60x124 box (cork top y=5, base y=118). `id` keeps gradient ids unique when several share one SVG. */
+function tide(id) {
+  const defs = `<clipPath id="${id}c"><path d="${TIDE_BODY}"/></clipPath>
+    <linearGradient id="${id}l" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c4f5e6"/><stop offset="1" stop-color="#46b09b"/></linearGradient>
+    <linearGradient id="${id}k" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7d58e"/><stop offset="1" stop-color="#c79b62"/></linearGradient>`;
+  const art = `<g clip-path="url(#${id}c)"><path d="M0 74 C8 67 14 67 20 72.5 S34 79 40 72.5 S54 67 60 74 V124 H0 Z" fill="url(#${id}l)"/></g>
+    <path d="${TIDE_BODY}" fill="#f5efe4" fill-opacity=".07" stroke="#f5efe4" stroke-width="3.6" stroke-linejoin="round"/>
+    <rect x="23" y="5" width="14" height="17" rx="3.4" fill="url(#${id}k)"/>
+    <path d="M30 106 C20 98 20 88 26 87 C28.5 86.6 30 89 30 89 C30 89 31.5 86.6 34 87 C40 88 40 98 30 106 Z" fill="#f5efe4"/>`;
+  return { defs, art };
+}
+/** Place the Tide Bottle so its centre line is at (cx) and its top at (top), scaled by s. */
+const tideAt = (id, cx, top, s) => { const t = tide(id); return { defs: t.defs, art: `<g transform="translate(${(cx - 30 * s).toFixed(2)} ${(top - 5 * s).toFixed(2)}) scale(${s})">${t.art}</g>` }; };
+
+/** The logo mark alone, transparent background (nav, favicon-ish uses, ads). */
+const markSVG = () => { const t = tide("m"); return svgDoc(76, 126, "-8 -1 76 126", `<defs>${t.defs}</defs>${t.art}`); };
+/** The cute faced mascot alone: kept for stickers, moods and playful moments. */
+const mascotSVG = (face = "happy", color = MOODS.happy, opts = { puddle: true }) => {
   const m = mascot("m", color, face, opts);
   return svgDoc(200, 240, "0 0 200 240", `<defs>${m.defs}</defs>${m.art}`);
 };
@@ -103,25 +121,22 @@ const stickerSVG = (face) => {
     </filter></defs><g filter="url(#die)">${m.art}</g>`);
 };
 
-// ---- app icon: night-sea tile with moon, stars, waves and the mascot ---------------
+// ---- app icon: night-sea tile with the Tide Bottle, a crescent moon and a few stars -------
 function iconSVG({ maskable = false } = {}) {
-  const m = mascot("i", MOODS.happy, "happy", { glowBlob: true });
-  const s = maskable ? 2.15 : 2.7; // maskable keeps everything inside the central safe zone
-  const w = 200 * s, h = 240 * s;
-  const stars = [[150, 170, 6], [880, 330, 5], [250, 520, 4], [800, 560, 6], [120, 360, 3], [930, 150, 4]]
-    .map(([x, y, r]) => sparkle(x, y, r * 2.4, C.foam, 0.8)).join("");
-  const rx = maskable ? 0 : 230;
-  return svgDoc(1024, 1024, "0 0 1024 1024", `<defs>${m.defs}
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f5a6c"/><stop offset=".55" stop-color="#0f3140"/><stop offset="1" stop-color="#08202d"/></linearGradient>
-    <radialGradient id="moon" cx=".35" cy=".32" r=".8"><stop offset="0" stop-color="#fffaf0"/><stop offset=".6" stop-color="#f8e9bd"/><stop offset="1" stop-color="#ead08f"/></radialGradient>
-    <filter id="mb" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="40"/></filter></defs>
+  const s = maskable ? 5.4 : 6.4; // maskable keeps everything inside the central safe zone (80%)
+  const t = tideAt("i", 512, 520 - 56.5 * s, s);
+  const rx = maskable ? 0 : 232;
+  const stars = (maskable ? [[262, 330, 4.5], [806, 430, 5.5], [190, 570, 4]] : [[196, 214, 7], [262, 330, 4.5], [806, 420, 5.5], [170, 560, 4]])
+    .map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${C.foam}" opacity=".7"/>`).join("");
+  const moon = `<path d="M812 176a74 74 0 1 0 54 130a60 60 0 0 1-54-130z" fill="${C.lantern}"/>`;
+  return svgDoc(1024, 1024, "0 0 1024 1024", `<defs>${t.defs}
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#15506a"/><stop offset="1" stop-color="#051722"/></linearGradient>
+    <radialGradient id="halo" cx=".5" cy=".55" r=".5"><stop offset="0" stop-color="#9fe3d0" stop-opacity=".42"/><stop offset="1" stop-color="#9fe3d0" stop-opacity="0"/></radialGradient></defs>
     <rect width="1024" height="1024" rx="${rx}" fill="url(#bg)"/>
-    <circle cx="790" cy="250" r="150" fill="#f7d58e" opacity=".35" filter="url(#mb)"/>
-    <circle cx="790" cy="250" r="${maskable ? 84 : 100}" fill="url(#moon)"/>
+    <circle cx="512" cy="560" r="${maskable ? 330 : 400}" fill="url(#halo)"/>
     ${stars}
-    <g transform="translate(${512 - w / 2} ${(maskable ? 500 : 480) - h / 2}) scale(${s})">${m.art}</g>
-    <clipPath id="tile"><rect width="1024" height="1024" rx="${rx}"/></clipPath><g clip-path="url(#tile)"><path d="M0 872 Q128 818 256 872 T512 872 T768 872 T1024 872 V1024 H0Z" fill="#7fd0d2" opacity=".35"/>
-    <path d="M0 920 Q128 872 256 920 T512 920 T768 920 T1024 920 V1024 H0Z" fill="#2a7a86"/></g>`);
+    ${maskable ? `<g transform="translate(722 292) scale(.8) translate(-840 -240)">${moon}</g>` : moon}
+    ${t.art}`);
 }
 
 // ---- wordmarks as true outlines ----------------------------------------------------
@@ -155,39 +170,41 @@ function wordmarkSVG(kind) {
   const dark = kind !== "light";
   const raalhu = dark ? C.foam : "#17323f", feels = dark ? C.glow : "#1f8a7d"; // main word / italic accent
   if (kind === "stacked") {
-    const m = mascot("w", MOODS.happy, "happy", { puddle: true });
     const W = 800, size = 150, a = width(reg, "Ihusaas", size), b = width(ita, "online", size);
-    return svgDoc(W, 760, `0 0 ${W} 760`, `<defs>${m.defs}</defs>
-      <g transform="translate(${W / 2 - 150} 20) scale(1.5)">${m.art}</g>
+    const t = tideAt("w", W / 2, 16, 3.0);
+    return svgDoc(W, 760, `0 0 ${W} 760`, `<defs>${t.defs}</defs>${t.art}
       ${textPath(reg, "Ihusaas", (W - a) / 2, 600, size, raalhu)}
       ${textPath(ita, "online", (W - b) / 2, 740, size, feels)}`);
   }
   const size = 120, gap = 28, tile = 180;
+  const lead = dark ? 96 : tile + 36;
   const a = width(reg, "Ihusaas", size), b = width(ita, "online", size);
-  const total = tile + 36 + a + gap + b;
+  const total = lead + a + gap + b;
   const mark = dark
-    ? (() => { const m = mascot("w", MOODS.happy, "happy", { puddle: false }); return `<defs>${m.defs}</defs><g transform="translate(10 -2) scale(.72)">${m.art}</g>`; })()
+    ? (() => { const t = tideAt("w", 44, 18, 1.28); return `<defs>${t.defs}</defs>${t.art}`; })()
     : (() => { const i = iconSVG().replace(/<svg[^>]*>/, "").replace("</svg>", ""); return `<g transform="scale(${tile / 1024})">${i}</g>`; })();
   return svgDoc(Math.ceil(total), tile, `0 0 ${Math.ceil(total)} ${tile}`, `${mark}
-    ${textPath(reg, "Ihusaas", tile + 36, 128, size, raalhu)}${textPath(ita, "online", tile + 36 + a + gap, 128, size, feels)}`);
+    ${textPath(reg, "Ihusaas", lead, 128, size, raalhu)}${textPath(ita, "online", lead + a + gap, 128, size, feels)}`);
 }
 
 // ---- social share image (1200x630) -------------------------------------------------
 function ogSVG() {
-  const m = mascot("o", MOODS.happy, "happy", { puddle: true });
+  const t = tideAt("o", 330, 62, 4.4);
   const stars = Array.from({ length: 46 }, (_, i) => {
     const x = (i * 197) % 1200, y = (i * 83) % 330;
     return `<circle cx="${x}" cy="${y}" r="${(i % 3) + 1}" fill="#f5efe4" opacity="${0.35 + (i % 4) * 0.15}"/>`;
   }).join("");
-    return svgDoc(1200, 630, "0 0 1200 630", `<defs>${m.defs}
+  return svgDoc(1200, 630, "0 0 1200 630", `<defs>${t.defs}
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b5163"/><stop offset=".6" stop-color="#0f3140"/><stop offset="1" stop-color="#07182a"/></linearGradient>
     <radialGradient id="moon" cx=".35" cy=".32" r=".8"><stop offset="0" stop-color="#fffaf0"/><stop offset=".6" stop-color="#f8e9bd"/><stop offset="1" stop-color="#ead08f"/></radialGradient>
+    <radialGradient id="halo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#9fe3d0" stop-opacity=".4"/><stop offset="1" stop-color="#9fe3d0" stop-opacity="0"/></radialGradient>
     <filter id="mb" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="40"/></filter></defs>
     <rect width="1200" height="630" fill="url(#bg)"/>${stars}
     <circle cx="1040" cy="130" r="120" fill="#f7d58e" opacity=".3" filter="url(#mb)"/><circle cx="1040" cy="130" r="64" fill="url(#moon)"/>
+    <circle cx="330" cy="320" r="300" fill="url(#halo)"/>
     <path d="M0 540 Q150 500 300 540 T600 540 T900 540 T1200 540 V630 H0Z" fill="#7fd0d2" opacity=".25"/>
     <path d="M0 580 Q150 545 300 580 T600 580 T900 580 T1200 580 V630 H0Z" fill="#2a7a86" opacity=".95"/>
-    <g transform="translate(110 70) scale(2.2)">${m.art}</g>
+    ${t.art}
     ${textPath(reg, "Ihusaas", 540, 290, 140, C.foam)}${textPath(ita, "online", 548, 420, 110, C.glow)}
     ${textPath(ita, "Say it to the sea.", 548, 500, 44, C.sand)}${textPath(reg, "ihusaas.online", 1200 - width(reg, "ihusaas.online", 30) - 56, 600, 30, C.foam)}`);
 }
@@ -205,7 +222,8 @@ write("wordmark-light.svg", wordmarkSVG("light"));
 write("wordmark-stacked.svg", wordmarkSVG("stacked"));
 write("og.svg", ogSVG());
 for (const face of Object.keys(FACES)) write(`stickers/${face}.svg`, stickerSVG(face));
-write("mark-noface.svg", markSVG("happy"));
+write("mascot.svg", mascotSVG());
+write("mark-noface.svg", markSVG());
 
 // PNGs
 const jobs = [];
@@ -235,6 +253,7 @@ await Promise.all(jobs);
 // App-router conventions: favicon + apple touch icon
 writeFileSync(new URL("icon.svg", APP), icon);
 await sharp(Buffer.from(iconM), { density: 300 }).resize(180).png().toFile(new URL("apple-icon.png", APP).pathname);
+await sharp(Buffer.from(icon), { density: 300 }).resize(96).png().toFile(new URL("icon.png", APP).pathname);
 
 write("README.md", `# Ihusaas — logo pack
 
@@ -259,6 +278,6 @@ Mood colours: horror #e88b8b · sad #8fb6e8 · vent #f0a870 · secrets #b9a2e8 �
 Fraunces (headings, wordmark) and Nunito (UI), both SIL OFL via Google Fonts. Handwriting touches use Caveat.
 
 ## Usage
-Keep clear space around the logo equal to the cork's width. Don't recolour the glass, stretch, or add effects. Don't put the dark wordmark on dark backgrounds or the light one on light ones.
+The logo is the Tide Bottle; the faced mascot is for stickers and playful moments only. Keep clear space around the logo equal to the cork's width. Don't recolour the glass, stretch, or add effects. Don't put the dark wordmark on dark backgrounds or the light one on light ones.
 `);
 console.log("brand pack written: public/brand/ + src/app/icon.svg + src/app/apple-icon.png");
