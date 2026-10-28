@@ -158,11 +158,7 @@ export default function AtollMap() {
           </div>
 
           {coarse && <button onClick={() => setInteractive((v) => !v)} aria-pressed={interactive} className="absolute left-3 top-3 z-[1000] min-h-11 rounded-full border border-white/15 bg-abyss/90 px-4 text-xs text-foam shadow-soft">{interactive ? "Done exploring ✓" : "Move map ↔"}</button>}
-          {!sel && <div className="pointer-events-none absolute inset-x-6 bottom-20 z-[1000] rounded-2xl border border-glow/20 bg-abyss/90 p-4 text-center shadow-soft backdrop-blur-md">
-            <span className="block text-2xl text-sand" aria-hidden>✧</span>
-            <p className="mt-1 font-display text-xl text-foam">Where will you drift?</p>
-            <p className="mt-1 text-xs text-mist">Tap a circle or let the tide choose above.</p>
-          </div>}
+          {!sel && <div className="pointer-events-none absolute inset-x-10 bottom-20 z-[1000] rounded-full bg-abyss/80 px-3 py-2 text-center text-xs text-foam backdrop-blur-md">✧ Tap a bottle. Discover a shore.</div>}
           {sel && (
             <div className="absolute inset-x-3 bottom-[4.25rem] z-[1000] flex items-center gap-3 rounded-2xl border border-white/15 bg-abyss/90 p-3 backdrop-blur-md">
               <div className="min-w-0 flex-1">
@@ -178,7 +174,7 @@ export default function AtollMap() {
           {/* how to read the markers */}
           <div className="absolute inset-x-3 bottom-3 z-[1000] rounded-xl border border-white/10 bg-abyss/75 px-3 py-2 backdrop-blur-md">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-mist">
-              <span>{category ? `${CATEGORY_BY_ID[category].label}: ring size = stories` : "size = stories · ring = mood mix"}</span>
+              <span>{category ? `${CATEGORY_BY_ID[category].label}: bottles carry stories` : "bottle = region · colour = top feeling"}</span>
               {!category && <span className="flex items-center gap-1">{CATEGORIES.map((c) => <span key={c.id} title={c.label} className="h-2 w-2 rounded-full" style={{ background: c.color }} />)}</span>}
               <span className="flex items-center gap-1"><span className="relative flex h-2.5 w-2.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-glow opacity-60" /><span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-glow" /></span>new in 24h</span>
             </div>

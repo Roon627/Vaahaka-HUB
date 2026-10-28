@@ -42,3 +42,8 @@ Vaahaka-HUB is the **Ihusaas** web app (Next.js, deployed on **Vercel**, product
 - Validation: TypeScript and production build pass; Chromium checks at 320/390/768/1440px cover layout and discovery/search interactions.
 - No standalone lint script exists; `next build` performs its configured lint/type checks.
 - Local account-page exports are excluded in `.gitignore`. Do not add credential exports to Git.
+
+## Illustrated map follow-up
+- Default map uses georeferenced island polygons from geoBoundaries / Sentinel-2 (2021) with decorative surf, green land, and bottle markers. Source metadata and CC BY 4.0 attribution are in public/data/COASTLINES.md.
+- Street toggle retains OpenStreetMap for newer reclamation and local details; illustrated data failure falls back to street tiles.
+- Full-country view uses smaller markers, with labels and larger bottles on zoom. Administrative atoll polygons are used for navigation bounds, not rendered as land.

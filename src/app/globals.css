@@ -159,3 +159,12 @@ button:disabled { cursor: wait; }
   .island-explorer button.px-4 { padding-left: 12px; padding-right: 12px; }
   .voyage-card { padding: 16px; }
 }
+
+/* Illustrated atlas: real coastlines with decorative surf and paper-like water. */
+.map-illustrated .leaflet-container { background-image: radial-gradient(ellipse at 30% 20%, #ffffff15, transparent 65%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='80'%3E%3Cpath d='M14 25q5 5 10 0m0 0q5 5 10 0M65 62q5 5 10 0m0 0q5 5 10 0' fill='none' stroke='%23e2f8ee' stroke-opacity='.16' stroke-width='1.2'/%3E%3C/svg%3E") !important; }
+.map-illustrated .leaflet-tooltip.atoll-label { color: #163f4c; background: #fff6dbed; padding: 3px 7px; border: 1px solid #e4d6af; border-radius: 5px; font-family: var(--font-display), serif; font-size: 11px; box-shadow: 0 2px 4px #164e6320; }
+.map-illustrated .leaflet-control-attribution { background: #e5f4e8e6 !important; color: #245562 !important; }
+.map-illustrated .leaflet-control-attribution a { color: #245562 !important; }
+.map-illustrated .leaflet-control-scale { margin-bottom: 3px; }
+.map-illustrated .leaflet-control-scale-line { background: #edf5dbdd; border-color: #315763; color: #315763; font-size: 9px; }
+.map-illustrated .pin { filter: drop-shadow(1px 3px 2px #164e6333); }
