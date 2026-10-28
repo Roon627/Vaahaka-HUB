@@ -17,7 +17,9 @@ const Waves = I(<><path d="M2 8c2.5-2.5 4.5 2.5 7 0s4.5-2.5 7 0 4.5 2.5 6 0" /><
 const MapPin = I(<><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></>);
 const Dice = I(<><rect x="4" y="4" width="16" height="16" rx="3.5" /><circle cx="9" cy="9" r="1" fill="currentColor" /><circle cx="15" cy="15" r="1" fill="currentColor" /><circle cx="15" cy="9" r="1" fill="currentColor" /><circle cx="9" cy="15" r="1" fill="currentColor" /></>);
 const Pen = I(<><path d="M4 20l1-4L16.5 4.5a2 2 0 0 1 3 3L8 19l-4 1z" /><path d="M14 7l3 3" /></>);
-const Info = I(<><circle cx="12" cy="12" r="9" /><path d="M12 11v5" /><circle cx="12" cy="7.8" r=".6" fill="currentColor" /></>);
+const Bars = I(<><path d="M4 7h16" /><path d="M4 12h16" /><path d="M4 17h16" /></>);
+const Close = I(<><path d="M6 6l12 12" /><path d="M18 6L6 18" /></>);
+const Chevron = I(<path d="M9 6l6 6-6 6" />);
 
 function Logo() {
   return (
@@ -29,6 +31,19 @@ function Logo() {
 }
 
 /* ------------------------------------------------------------- about menu */
+function MenuRow({ icon, title, hint, onClick, href, tone = "plain" }: { icon: string; title: string; hint: string; onClick?: () => void; href?: string; tone?: "plain" | "glow" | "coral" }) {
+  const cls = `flex min-h-14 w-full items-center gap-3 rounded-2xl border p-3 text-left transition active:scale-[0.98] ${
+    tone === "glow" ? "border-glow/30 bg-glow/[0.09] hover:bg-glow/15" : tone === "coral" ? "border-coral/30 bg-coral/[0.09] hover:bg-coral/15" : "border-white/10 bg-white/[0.04] hover:bg-white/10"}`;
+  const inner = (
+    <>
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.07] text-xl" aria-hidden>{icon}</span>
+      <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-foam">{title}</span><span className="block text-[12.5px] leading-snug text-mist">{hint}</span></span>
+      <Chevron className="h-4 w-4 shrink-0 text-mist" />
+    </>
+  );
+  return href ? <Link href={href} onClick={onClick} className={cls}>{inner}</Link> : <button onClick={onClick} className={cls}>{inner}</button>;
+}
+
 function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () => void }) {
   const { openRandom, finding } = useSea();
   useEffect(() => {
@@ -42,46 +57,51 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
     ["🍾", "Seal it in a bottle", "It drifts into the sea for strangers to find."],
     ["🕯️", "They only listen", "Readers offer supportive reactions and kind anonymous notes."],
   ];
+  const fold = "group mt-3 rounded-2xl border border-white/10 bg-white/[0.03] open:bg-white/[0.05]";
+  const sum = "flex min-h-12 cursor-pointer list-none items-center justify-between px-4 text-sm font-medium text-foam [&::-webkit-details-marker]:hidden";
   return (
     <>
-      <button aria-label="Close menu" className="fixed inset-0 z-40 cursor-default" onClick={onClose} />
+      <button aria-label="Close menu" className="fixed inset-0 z-40 cursor-default bg-black/30 md:bg-transparent" onClick={onClose} />
       <motion.div
-        role="dialog" aria-label="About Ihusaas"
-        initial={{ opacity: 0, y: -8, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8, scale: 0.97 }}
+        role="dialog" aria-label="Menu"
+        initial={{ opacity: 0, y: 12, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.97 }}
         transition={{ duration: 0.18 }}
-        className="fixed inset-x-3 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-50 max-h-[70dvh] overflow-y-auto rounded-3xl border border-white/10 bg-abyss/90 p-5 shadow-soft backdrop-blur-xl md:inset-x-auto md:bottom-auto md:right-4 md:top-20 md:w-[22rem]"
+        className="fixed inset-x-3 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-50 max-h-[78dvh] overflow-y-auto overscroll-contain rounded-3xl border border-white/10 bg-abyss/95 p-4 shadow-soft backdrop-blur-xl md:inset-x-auto md:bottom-auto md:right-4 md:top-20 md:max-h-[calc(100dvh-6.5rem)] md:w-[23rem]"
       >
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-display text-xl text-foam">How Ihusaas works</h2>
-          <button onClick={onSuggest} className="flex shrink-0 items-center gap-1.5 rounded-full border border-glow/30 bg-glow/10 px-3 py-1.5 text-xs font-semibold text-glow transition active:scale-95"><span aria-hidden>💌</span> Send a note</button>
+        <div className="flex items-center justify-between gap-3 px-1 pb-3">
+          <h2 className="font-display text-xl text-foam">Menu</h2>
+          <button onClick={onClose} aria-label="Close menu" className="flex h-10 w-10 items-center justify-center rounded-full text-mist transition hover:bg-white/10 hover:text-foam"><Close className="h-5 w-5" /></button>
         </div>
-        <ol className="mt-3 space-y-3">
-          {steps.map(([e, t, d]) => (
-            <li key={t} className="flex gap-3">
-              <span className="mt-0.5 text-lg">{e}</span>
-              <span><span className="block text-sm font-medium text-foam">{t}</span><span className="text-[13px] leading-snug text-mist">{d}</span></span>
-            </li>
-          ))}
-        </ol>
 
-        <h3 className="mt-5 text-xs font-medium uppercase tracking-widest text-sand/80">Our promise</h3>
-        <ul className="mt-2 space-y-1.5 text-[13px] leading-snug text-mist">
-          <li>· No name, email or account is attached to a letter.</li>
-          <li>· Kind anonymous notes and supportive reactions. No downvotes.</li>
-          <li>· Please keep names and identifying details out. Reports hide a letter for review.</li>
-        </ul>
-
-        <div className="mt-5 rounded-2xl border border-coral/25 bg-coral/[0.08] p-3.5 text-[13px] leading-snug text-foam/90">
-          <strong className="font-medium text-coral">Need someone right now?</strong> Free, confidential, 24 hours: the national mental health helpline on <a href="tel:1677" className="font-semibold underline">1677</a>. In an emergency call <a href="tel:911" className="font-semibold underline">911</a>.
-          <Link href="/help" onClick={onClose} className="mt-2 block font-medium text-foam underline underline-offset-2">See all Maldives helplines →</Link>
+        <div className="space-y-2.5">
+          <MenuRow tone="glow" icon="💌" title="Contact us" hint="Send an idea, report a bug or say thank you" onClick={onSuggest} />
+          <MenuRow tone="coral" icon="🛟" title="Need help right now?" hint="Free helplines in the Maldives, 24 hours" href="/help" onClick={onClose} />
+          <MenuRow icon="🎲" title="Surprise me" hint="Open a random bottle" onClick={() => { onClose(); if (!finding) openRandom(); }} />
         </div>
-        <button onClick={() => { onClose(); openRandom(); }} disabled={finding}
-          className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] text-sm text-foam transition hover:bg-white/10">
-          <Dice className="h-[18px] w-[18px]" /> Surprise me: open a random bottle
-        </button>
-        <button onClick={onSuggest} className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-glow/25 bg-glow/[0.07] text-sm text-foam transition hover:bg-glow/15">
-          <span aria-hidden>💌</span> Send us a note: ideas, bugs or a thank-you
-        </button>
+
+        <div className="mt-3 rounded-2xl border border-coral/25 bg-coral/[0.08] p-3.5 text-[13px] leading-snug text-foam/90">
+          <strong className="font-medium text-coral">In distress?</strong> Call the national mental health helpline <a href="tel:1677" className="font-semibold underline">1677</a>. In an emergency call <a href="tel:911" className="font-semibold underline">911</a>.
+        </div>
+
+        <details className={fold}>
+          <summary className={sum}>How Ihusaas works<Chevron className="h-4 w-4 text-mist transition group-open:rotate-90" /></summary>
+          <ol className="space-y-3 px-4 pb-4">
+            {steps.map(([e, t, d]) => (
+              <li key={t} className="flex gap-3">
+                <span className="mt-0.5 text-lg">{e}</span>
+                <span><span className="block text-sm font-medium text-foam">{t}</span><span className="text-[13px] leading-snug text-mist">{d}</span></span>
+              </li>
+            ))}
+          </ol>
+        </details>
+        <details className={fold}>
+          <summary className={sum}>Our promise<Chevron className="h-4 w-4 text-mist transition group-open:rotate-90" /></summary>
+          <ul className="space-y-1.5 px-4 pb-4 text-[13px] leading-snug text-mist">
+            <li>· No name, email or account is attached to a letter.</li>
+            <li>· Kind anonymous notes and supportive reactions. No downvotes.</li>
+            <li>· Please keep names and identifying details out. Reports hide a letter for review.</li>
+          </ul>
+        </details>
         <InstallRow />
       </motion.div>
     </>
@@ -120,7 +140,7 @@ const TABS = [
 
 /**
  * Desktop: a floating glass pill — logo · Drift / Map (sliding highlight) ·
- * Surprise me · About · Write.
+ * Surprise me · Menu · Write.
  * Mobile: slim top logo + a floating bottom dock with the same actions.
  */
 export default function Nav() {
@@ -158,7 +178,7 @@ export default function Nav() {
             {surprise}
           </div>
           <div className="flex items-center gap-1.5">
-            <button onClick={() => setAbout((v) => !v)} aria-label="About and safety" aria-expanded={about} className={`rounded-full p-2.5 transition hover:bg-white/10 hover:text-foam ${about ? "bg-white/10 text-foam" : "text-mist"}`}><Info /></button>
+            <button onClick={() => setAbout((v) => !v)} aria-label="Menu: contact, help and how it works" aria-expanded={about} aria-haspopup="dialog" className={`flex items-center gap-2 rounded-full px-3.5 py-2 text-sm transition hover:bg-white/10 hover:text-foam ${about ? "bg-white/10 text-foam" : "text-mist"}`}>{about ? <Close /> : <Bars />} Menu</button>
             <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={() => openWriter()} className="flex items-center gap-2 rounded-full bg-gradient-to-r from-glow to-sand px-5 py-2.5 text-sm font-semibold text-abyss shadow-glow">
               <Pen /> Write
             </motion.button>
@@ -179,7 +199,7 @@ export default function Nav() {
           <DockLink href="/map" label="Map" Icon={MapPin} on={path === "/map"} />
           <motion.button whileTap={{ scale: 0.92 }} onClick={() => openWriter()} aria-label="Write a letter" className="mx-1 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-glow to-sand text-abyss shadow-glow"><Pen className="h-5 w-5" /></motion.button>
           <MoodDock variant="dock" />
-          <button onClick={() => setAbout((v) => !v)} aria-label="About and safety" className={`flex min-h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-full px-2 text-[10px] ${about ? "text-foam" : "text-mist"}`}><Info className="h-5 w-5" />About</button>
+          <button onClick={() => setAbout((v) => !v)} aria-label="Menu: contact, help and how it works" aria-expanded={about} aria-haspopup="dialog" className={`flex min-h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-full px-2 text-[10px] ${about ? "bg-white/10 text-foam" : "text-mist"}`}>{about ? <Close className="h-5 w-5" /> : <Bars className="h-5 w-5" />}Menu</button>
         </div>
       </nav>
 

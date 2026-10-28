@@ -123,7 +123,14 @@ button, a, [role="button"], select, summary { touch-action: manipulation; }
 .shore-orbit-one { inset: 35px -5px; }
 .shore-orbit-two { inset: 5px 30px; transform: rotate(25deg); }
 .shore-letter { position: absolute; top: 90px; left: 6%; width: 260px; padding: 28px; color: #3a2d1f; background: linear-gradient(135deg, #f7edda, #e5d3ad); border-radius: 3px 10px 8px 3px; box-shadow: 0 25px 70px #0005; transform: rotate(-9deg); }
-.shore-hero-bottle { position: absolute; right: 8%; top: 155px; transform: rotate(19deg); filter: drop-shadow(0 16px 25px #0005); }
+.sticky-note { position: relative; padding: 30px 26px 22px; color: #3a2d1f; background: linear-gradient(165deg, #fff3a6 0%, #fbe580 100%); border-radius: 2px 2px 6px 2px; box-shadow: 0 2px 3px #0003, 0 26px 50px -12px #0007; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 26px), calc(100% - 26px) 100%, 0 100%); transform-origin: 50% 0; }
+.sticky-note::after { content: ''; position: absolute; right: 0; bottom: 0; width: 26px; height: 26px; background: linear-gradient(135deg, #d9bf56 50%, transparent 50%); }
+.sticky-tape { position: absolute; left: 50%; top: -12px; width: 86px; height: 26px; transform: translateX(-50%) rotate(-3deg); background: #ffffff55; box-shadow: 0 1px 2px #0002; backdrop-filter: blur(1px); }
+.sticky-btn { min-height: 44px; border-radius: 999px; padding: 8px 16px; font-size: 13px; font-weight: 700; color: #3a2d1f; background: #3a2d1f14; transition: background .2s, transform .2s; }
+.sticky-btn:hover { background: #3a2d1f26; }
+.sticky-btn:active { transform: scale(.96); }
+.sticky-btn:focus-visible { outline: 2px solid #3a2d1f; outline-offset: 2px; }
+.shore-hero-bottle { position: absolute; right: -1%; top: 190px; transform: rotate(19deg); filter: drop-shadow(0 16px 25px #0005); }
 .shore-sky p { margin-top: 0; justify-content: flex-start; }
 .shore-chip { display: inline-flex; min-height: 40px; align-items: center; gap: 7px; border-radius: 999px; border: 1px solid transparent; padding: 8px 14px; color: #9db9b8; font-size: 12px; transition: background .2s, color .2s; }
 .shore-chip:hover { background: #ffffff0a; color: #f5efe4; }
@@ -132,12 +139,7 @@ button, a, [role="button"], select, summary { touch-action: manipulation; }
 .shore-bottle-card:hover { background: linear-gradient(155deg, #9fe3d00e, #ffffff03); border-color: #9fe3d03d; }
 .shore-hero button:focus-visible, .shore-chip:focus-visible, .shore-hero a:focus-visible { outline: 2px solid #9fe3d0; outline-offset: 5px; }
 @media (max-width: 767px) {
-  .shore-art { height: 310px; max-width: 360px; width: 100%; margin: 0 auto; }
-  .shore-letter { top: 45px; left: 8%; width: 235px; padding: 22px; }
-  .shore-hero-bottle { top: 100px; right: 7%; }
-  .shore-hero-bottle svg { height: 185px; width: auto; }
-  .shore-art > span:first-of-type { top: 8px; }
-  .shore-art > span:nth-last-of-type(2) { bottom: 0; }
+  .shore-art { height: auto; width: 100%; padding-top: 6px; }
   .shore-chip { padding: 8px 10px; }
 }
 

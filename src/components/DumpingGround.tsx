@@ -7,6 +7,7 @@ import { ATOLL_BY_CODE, CATEGORIES, type CategoryId } from "@/lib/constants";
 import BottleCard from "./BottleCard";
 import Bottle from "./Bottle";
 import FeedBar from "./FeedBar";
+import StickyNote from "./StickyNote";
 import { useSea } from "./SeaProvider";
 
 const WAVE = "M0 60 Q150 20 300 60 T600 60 T900 60 T1200 60 T1500 60 T1800 60 T2100 60 T2400 60 V140 H0 Z";
@@ -111,19 +112,14 @@ export default function DumpingGround() {
             </div>
             <p className="mt-5 text-xs tracking-wide text-mist">No account. No name. Just you.</p>
           </div>
-          <div className="shore-art hidden md:block" aria-hidden="true">
-            <div className="shore-orbit shore-orbit-one" />
-            <div className="shore-orbit shore-orbit-two" />
-            <span className="absolute left-4 top-12 font-hand text-2xl text-sand/80">Let it all out.</span>
-            <div className="shore-letter">
-              <span className="text-[10px] uppercase tracking-[0.25em] text-inksoft">A place for your words</span>
-              <p className="mt-5 font-hand text-4xl">Dear sea,</p>
-              <p className="mt-3 font-display text-lg leading-relaxed">I don’t need all the answers.<br />Just somewhere to begin.</p>
-              <span className="mt-6 block font-hand text-xl text-inksoft">With love, someone.</span>
-            </div>
-            <div className="shore-hero-bottle"><Bottle color="#9fe3d0" height={230} glow /></div>
-            <span className="absolute bottom-8 right-3 font-hand text-2xl text-sand/80">The sea is listening.</span>
-            <span className="absolute right-8 top-20 text-xl text-sand">✧</span>
+          <div className="shore-art">
+            <div className="shore-orbit shore-orbit-one hidden md:block" aria-hidden="true" />
+            <div className="shore-orbit shore-orbit-two hidden md:block" aria-hidden="true" />
+            <span aria-hidden="true" className="absolute right-6 top-6 hidden font-hand text-2xl text-sand/80 md:block">Let it all out.</span>
+            <StickyNote />
+            <div className="shore-hero-bottle hidden md:block" aria-hidden="true"><Bottle color="#9fe3d0" height={230} glow /></div>
+            <span aria-hidden="true" className="absolute -bottom-2 right-10 hidden font-hand text-2xl text-sand/80 md:block">The sea is listening.</span>
+            <span aria-hidden="true" className="absolute right-8 top-20 hidden text-xl text-sand md:block">✧</span>
           </div>
         </div>
       </div>
