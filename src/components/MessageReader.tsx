@@ -92,7 +92,7 @@ export default function MessageReader({ post, onClose, onCounts, onStep, hasPrev
             </div>
           ) : (
             <motion.div key={`b-${post.id}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15, duration: 0.4 }}>
-              <p className={`mt-2 whitespace-pre-wrap break-words font-display text-ink ${textSize(post.body.length)}`}>{post.body}</p>
+              <p dir="auto" className={`mt-2 whitespace-pre-wrap break-words font-display text-ink ${textSize(post.body.length)}`}>{post.body}</p>
               <p className="mt-3 text-right font-hand text-2xl text-inksoft">— someone in {atoll?.name ?? post.atoll_code}</p>
             </motion.div>
           )}

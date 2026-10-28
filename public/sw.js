@@ -7,7 +7,7 @@
  *  - Hashed build assets, brand images and map/island data: cache first, refreshed in the background.
  * Bump VERSION to invalidate caches after a change to this file's strategy.
  */
-const VERSION = "v3";
+const VERSION = "v4";
 const SHELL = `rf-shell-${VERSION}`;
 const RUNTIME = `rf-rt-${VERSION}`;
 const PRECACHE = ["/offline.html", "/brand/stickers/sad.svg", "/help", "/brand/mark.svg", "/brand/png/icon-192.png", "/manifest.webmanifest", "/data/maldives-atolls.geojson", "/data/maldives-islands.json"];
@@ -24,7 +24,7 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-const STATIC = /^\/(_next\/static\/|brand\/|data\/)|\.(?:png|svg|jpg|jpeg|webp|woff2?|ico)$/;
+const STATIC = /^\/(_next\/static\/|brand\/|data\/)|\.(?:png|svg|jpg|jpeg|webp|woff2?|ttf|ico)$/;
 
 self.addEventListener("fetch", (event) => {
   const req = event.request;

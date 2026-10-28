@@ -165,6 +165,7 @@ export default function DropStory({ defaultAtoll, defaultCategory, onPosted, onC
       </div>
 
       <textarea
+        dir="auto"
         value={body}
         onChange={(e) => setBody(e.target.value)}
         rows={6}

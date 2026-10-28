@@ -2,13 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Dhivehi.mv's free Dhivehi font. unicode-range limits it to the Thaana block (+ the Arabic comma/semicolon/question mark Thaana uses),
+   so Latin text keeps its own fonts and Dhivehi letters get a proper Thaana face instead of whatever the phone falls back to. */
+@font-face {
+  font-family: "Dhivehi";
+  src: url("/fonts/Dhivehi.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0780-07BF, U+060C, U+061B, U+061F, U+FDF2;
+}
+
 :root { color-scheme: dark; }
 
-html { background: #0a1c26; }
+html { background: #0a1c26; font-synthesis-style: none; }
 
 body {
   color: #f5efe4;
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans), "Dhivehi", ui-sans-serif, system-ui, sans-serif;
   /* The fixed <Ocean/> scene paints the background; keep body transparent so it shows. */
   background: transparent;
 }

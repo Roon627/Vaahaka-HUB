@@ -23,9 +23,9 @@ const config: Config = {
       },
       fontFamily: {
         // CSS variables are injected by next/font in layout.tsx
-        display: ["var(--font-display)", "ui-serif", "Georgia", "serif"],
-        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
-        hand: ["var(--font-hand)", "cursive"],
+        display: ["var(--font-display)", "Dhivehi", "ui-serif", "Georgia", "serif"],
+        sans: ["var(--font-sans)", "Dhivehi", "ui-sans-serif", "system-ui", "sans-serif"],
+        hand: ["var(--font-hand)", "Dhivehi", "cursive"],
       },
       boxShadow: {
         soft: "0 14px 44px -14px rgba(3,14,20,0.65)",

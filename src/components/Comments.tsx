@@ -40,7 +40,7 @@ export default function Comments({ postId }: { postId: string }) {
           {comments.map((c) => (
             <motion.li key={c.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0 }}
               className="rounded-2xl border border-ink/10 bg-ink/[0.05] px-4 py-3">
-              <p className="whitespace-pre-wrap break-words font-display text-[15px] leading-relaxed text-ink">{c.body}</p>
+              <p dir="auto" className="whitespace-pre-wrap break-words font-display text-[15px] leading-relaxed text-ink">{c.body}</p>
               <div className="mt-1.5 flex items-center justify-between text-xs text-inksoft">
                 <span>someone · {timeAgo(c.created_at)}</span>
                 <button onClick={() => setReport({ type: "comment", id: c.id })} aria-label="Report this note" className="-mr-2 flex min-h-9 items-center gap-1 rounded-full px-2.5 transition hover:bg-ink/10 hover:text-wax">
@@ -63,6 +63,7 @@ export default function Comments({ postId }: { postId: string }) {
       <form onSubmit={(e) => { e.preventDefault(); send(text); }} className="mt-3">
         <label htmlFor={`note-${postId}`} className="sr-only">Leave an anonymous note</label>
         <textarea
+          dir="auto"
           id={`note-${postId}`} value={text} onChange={(e) => { setText(e.target.value); setError(null); }}
           rows={2} maxLength={MAX} placeholder="Leave a kind, anonymous note…"
           className="w-full resize-none rounded-2xl border border-ink/20 bg-ink/[0.04] px-4 py-3 font-display text-base leading-relaxed text-ink placeholder:text-inksoft/60 focus:border-ink/50 focus:outline-none"
