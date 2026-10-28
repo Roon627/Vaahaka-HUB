@@ -13,3 +13,7 @@ marketing/screenshots-4k/
 .env*.bak-*
 .next-deploy
 deploy/
+
+# Local account-page exports (may contain credentials)
+API keys · instabox.html
+API keys · instabox_files/

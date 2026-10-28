@@ -1,15 +1,13 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { usePosts } from "@/hooks/usePosts";
 import { ATOLL_BY_CODE, CATEGORIES, type CategoryId } from "@/lib/constants";
 import BottleCard from "./BottleCard";
 import Bottle from "./Bottle";
 import FeedBar from "./FeedBar";
 import { useSea } from "./SeaProvider";
-import SkyLine from "./SkyLine";
-import { supabase } from "@/lib/supabase";
 
 const WAVE = "M0 60 Q150 20 300 60 T600 60 T900 60 T1200 60 T1500 60 T1800 60 T2100 60 T2400 60 V140 H0 Z";
 /** Colour of the water body below the surface. The front wave uses the same value so there's no seam. */
@@ -40,23 +38,6 @@ function Surface() {
   );
 }
 
-/** A little depth gauge on the right edge: you really are diving. */
-function DepthGauge() {
-  const { scrollY } = useScroll();
-  const [m, setM] = useState(0);
-  useMotionValueEvent(scrollY, "change", (v) => setM(Math.round(v / 40)));
-  const pct = Math.min(m / 90, 1) * 100;
-  return (
-    <div aria-hidden className="pointer-events-none fixed right-3 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-2 text-[10px] text-mist/80 lg:flex">
-      <span>0 m</span>
-      <div className="relative h-44 w-px bg-white/15">
-        <motion.span className="absolute -left-[3px] h-[7px] w-[7px] rounded-full bg-glow shadow-glow" animate={{ top: `${pct}%` }} transition={{ type: "spring", stiffness: 120, damping: 20 }} />
-      </div>
-      <span className="tabular-nums text-glow">{m} m</span>
-    </div>
-  );
-}
-
 /** Placeholder bottle while the first page loads. */
 function BottleSkeleton() {
   return (
@@ -79,7 +60,7 @@ function BottleSkeleton() {
 export default function DumpingGround() {
   const router = useRouter();
   const params = useSearchParams();
-  const { openWriter, openPost, onPosted, arrivals, clearArrivals } = useSea();
+  const { openWriter, openRandom, finding, openPost, onPosted, arrivals, clearArrivals } = useSea();
 
   const catParam = params.get("cat");
   const category = CATEGORIES.some((c) => c.id === catParam) ? (catParam as CategoryId) : null;
@@ -90,20 +71,6 @@ export default function DumpingGround() {
 
   // New letters sent from anywhere (this page's button, the nav) land at the top of this feed.
   useEffect(() => { onPosted(prepend); return () => onPosted(null); }, [onPosted, prepend]);
-
-  // "N bottles washed ashore today": a live nudge that the sea is alive.
-  const [today, setToday] = useState(0);
-  useEffect(() => {
-    supabase.from("posts").select("id", { count: "exact", head: true }).gte("created_at", new Date(Date.now() - 24 * 3600_000).toISOString())
-      .then(({ count }) => setToday(count ?? 0));
-  }, []);
-
-  // A greeting that notices the hour. Set after mount so SSR and client agree.
-  const [hello, setHello] = useState("Welcome");
-  useEffect(() => {
-    const h = new Date().getHours();
-    setHello(h >= 23 || h < 4 ? "Can't sleep? You're not alone." : h < 12 ? "Good morning." : h < 18 ? "Good afternoon." : "Good evening.");
-  }, []);
 
   // Update one query param, keep the rest.
   function setParam(key: string, value: string | null) {
@@ -122,62 +89,63 @@ export default function DumpingGround() {
     return () => io.disconnect();
   }, [loadMore]);
 
-  const headline = ["Say", "it", "to", "the", "sea."];
   const open = (p: typeof posts[number]) =>
     openPost(p, (c) => patch(p.id, { felt_count: c.felt, heart_count: c.heart, listening_count: c.listening }), posts);
 
   return (
     <section className="w-full">
-      <DepthGauge />
 
       {/* ---------------------------------------------------------- surface */}
-      <div className="relative mx-auto max-w-3xl px-4 pb-24 pt-14 text-center sm:pt-8">
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 1 }} className="font-hand text-2xl text-sand sm:text-3xl">
-          {hello}
-        </motion.p>
-        <h1 className="mt-1 flex flex-wrap justify-center gap-x-3 font-display text-4xl font-light leading-tight text-foam sm:gap-x-4 sm:text-6xl">
-          {headline.map((w, i) => (
-            <motion.span
-              key={w + i}
-              initial={{ opacity: 0, y: 20, filter: "blur(8px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ delay: 0.3 + i * 0.1, duration: 0.8, ease: "easeOut" }}
-              className={i >= 3 ? "italic text-glow" : ""}
-            >
-              {w}
-            </motion.span>
-          ))}
-        </h1>
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9, duration: 0.8 }} className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-foam/70">
-          Write what you're carrying, seal it in a bottle, and let it go. Or uncork someone else's and just listen.
-        </motion.p>
-        <motion.button
-          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1, duration: 0.6 }}
-          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}
-          onClick={() => openWriter({ atoll, category })}
-          className="mt-6 inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-glow to-sand py-2.5 pl-4 pr-7 text-sm font-semibold text-abyss shadow-glow"
-        >
-          <span className="-rotate-[25deg]"><Bottle color="#b4563f" height={34} glow={false} /></span>
-          Write a message
-        </motion.button>
-        <SkyLine />
-        {today > 0 && (
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }} className="mt-4 text-xs text-mist">
-            🍾 {today.toLocaleString()} {today === 1 ? "bottle" : "bottles"} washed ashore today
-          </motion.p>
-        )}
+      <div className="shore-hero mx-auto max-w-6xl px-5 pb-16 pt-8 sm:px-10 md:pb-24 lg:pt-12">
+        <div className="grid items-center gap-6 md:grid-cols-[1.2fr_1fr] md:gap-12">
+          <div className="relative z-10">
+            <h1 className="font-display text-[clamp(2.75rem,7vw,5.5rem)] font-light leading-[1.04] tracking-[-0.055em] text-foam">
+              Say it<br /><em className="text-glow">to the sea.</em>
+            </h1>
+            <p className="mt-4 max-w-sm text-base leading-relaxed text-mist">
+              Leave a feeling. Find a little understanding.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <button onClick={() => openWriter({ atoll, category })} className="shore-primary">Write a letter <span aria-hidden>↗</span></button>
+              <button onClick={openRandom} disabled={finding} className="shore-secondary disabled:opacity-50">{finding ? "Finding a bottle…" : "Surprise me"} <span aria-hidden>↝</span></button>
+            </div>
+            <p className="mt-5 text-xs tracking-wide text-mist">No account. No name. Just you.</p>
+          </div>
+          <div className="shore-art hidden md:block" aria-hidden="true">
+            <div className="shore-orbit shore-orbit-one" />
+            <div className="shore-orbit shore-orbit-two" />
+            <span className="absolute left-4 top-12 font-hand text-2xl text-sand/80">Let it all out.</span>
+            <div className="shore-letter">
+              <span className="text-[10px] uppercase tracking-[0.25em] text-inksoft">A place for your words</span>
+              <p className="mt-5 font-hand text-4xl">Dear sea,</p>
+              <p className="mt-3 font-display text-lg leading-relaxed">I don’t need all the answers.<br />Just somewhere to begin.</p>
+              <span className="mt-6 block font-hand text-xl text-inksoft">With love, someone.</span>
+            </div>
+            <div className="shore-hero-bottle"><Bottle color="#9fe3d0" height={230} glow /></div>
+            <span className="absolute bottom-8 right-3 font-hand text-2xl text-sand/80">The sea is listening.</span>
+            <span className="absolute right-8 top-20 text-xl text-sand">✧</span>
+          </div>
+        </div>
       </div>
 
       {/* ------------------------------------------------------------ water */}
-      <div className="relative min-h-[60vh] pb-32" style={{ background: WATER }}>
+      <div id="bottles" className="relative min-h-[60vh] scroll-mt-24 pb-24" style={{ background: WATER }}>
         <Surface />
 
-                <FeedBar category={category} atoll={atoll} onCategory={(c) => setParam("cat", c)} onAtoll={(a) => setParam("atoll", a)} />
+        <div className="mx-auto max-w-6xl px-5 pt-3 sm:px-10">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="font-display text-2xl tracking-tight text-foam sm:text-3xl">Washed ashore</h2>
+              <p className="mt-2 text-sm text-mist">Tap a bottle to read.</p>
+            </div>
 
-        <p className="mt-4 text-center text-xs text-mist/80">Tap a bottle to uncork it</p>
+          </div>
+          <FeedBar category={category} atoll={atoll} onCategory={(c) => setParam("cat", c)} onAtoll={(a) => setParam("atoll", a)} />
+        </div>
         <AnimatePresence>
           {arrivals > 0 && (
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-3 flex justify-center">
-              <button onClick={() => { clearArrivals(); reload(); window.scrollTo({ top: 380, behavior: "smooth" }); }}
+              <button onClick={() => { clearArrivals(); reload(); document.getElementById("bottles")?.scrollIntoView({ behavior: "smooth" }); }}
                 className="min-h-11 rounded-full bg-gradient-to-r from-glow to-sand px-5 text-sm font-semibold text-abyss shadow-glow">
                 🍾 {arrivals} new {arrivals === 1 ? "bottle" : "bottles"}, tap to see
               </button>
@@ -186,7 +154,7 @@ export default function DumpingGround() {
         </AnimatePresence>
 
         {/* the shelf: bottles stand still; only touch moves them */}
-        <ul className="mx-auto mt-5 grid max-w-5xl grid-cols-2 gap-x-3 gap-y-9 px-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        <ul className="mx-auto mt-5 grid max-w-6xl grid-cols-2 gap-3 px-5 sm:grid-cols-3 sm:gap-4 sm:px-10 md:grid-cols-4">
           {posts.map((p, i) => <BottleCard key={p.id} post={p} index={i} onOpen={open} />)}
           {loading && posts.length === 0 && Array.from({ length: 6 }, (_, i) => <BottleSkeleton key={i} />)}
         </ul>

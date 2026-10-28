@@ -38,7 +38,7 @@ function AboutMenu({ onClose }: { onClose: () => void }) {
   const steps = [
     ["✍️", "Write a letter", "No account, no email. Choose an ink for how it feels."],
     ["🍾", "Seal it in a bottle", "It drifts into the sea for strangers to find."],
-    ["🕯️", "They only listen", "Readers answer with 🫂 🫀 🕯️ — never words, never judgement."],
+    ["🕯️", "They only listen", "Readers offer supportive reactions and kind anonymous notes."],
   ];
   return (
     <>
@@ -62,7 +62,7 @@ function AboutMenu({ onClose }: { onClose: () => void }) {
         <h3 className="mt-5 text-xs font-medium uppercase tracking-widest text-sand/80">Our promise</h3>
         <ul className="mt-2 space-y-1.5 text-[13px] leading-snug text-mist">
           <li>· No name, email or account is attached to a letter.</li>
-          <li>· No comments and no downvotes. Only support.</li>
+          <li>· Kind anonymous notes and supportive reactions. No downvotes.</li>
           <li>· Please keep names and identifying details out. Reports hide a letter for review.</li>
         </ul>
 

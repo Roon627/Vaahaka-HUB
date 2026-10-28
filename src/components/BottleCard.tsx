@@ -10,7 +10,7 @@ import WaxSeal from "./WaxSeal";
 interface Props { post: Post; index: number; onOpen: (post: Post) => void }
 
 /** The glass plank every bottle stands on. Adjacent cells overlap by the grid gap, so a row reads as one shelf. */
-const SHELF = "-mx-[7px] h-2.5 self-stretch rounded-sm bg-gradient-to-b from-[#7cc4c0]/45 to-[#2a6f78]/45 shadow-[0_10px_18px_-8px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.28)]";
+const SHELF = "h-px w-3/4 bg-gradient-to-r from-transparent via-glow/25 to-transparent";
 
 /**
  * One sealed bottle, standing still on its shelf: no bobbing, no random offsets. It only moves when you
@@ -34,7 +34,7 @@ export default function BottleCard({ post, index, onOpen }: Props) {
       <button
         onClick={() => { navigator.vibrate?.(8); onOpen(post); }}
         aria-label={`${isOpened ? "Reopen" : "Open"} a ${cat.label.toLowerCase()} message from ${place}${post.trigger_warning ? " (sealed with a content note)" : ""}`}
-        className="group flex w-full flex-col items-center rounded-2xl pb-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-glow/60"
+        className="shore-bottle-card group flex w-full flex-col items-center rounded-2xl px-3 pb-5 pt-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-glow/60"
       >
         <span className="relative flex h-[8.75rem] w-full items-end justify-center">
           {/* a pool of the mood's light under the bottle, shown on hover / press */}

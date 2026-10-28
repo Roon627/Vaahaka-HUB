@@ -51,7 +51,7 @@ function Controller({ handle, interactive, bounds }: { handle: React.Ref<MapHand
     const m = map as L.Map;
     for (const h of [m.dragging, m.touchZoom, m.doubleClickZoom, m.boxZoom, m.keyboard]) interactive ? h.enable() : h.disable();
   }, [map, interactive]);
-  useEffect(() => { if (bounds) map.flyToBounds(bounds, { maxZoom: 9, padding: [60, 60], duration: 0.8 }); }, [map, bounds]);
+  useEffect(() => { if (bounds) map.flyToBounds(bounds, { maxZoom: 9, padding: [60, 60], duration: 0.8, animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches }); }, [map, bounds]);
   useEffect(() => { map.fitBounds(HOME, { padding: [10, 10], animate: false }); }, [map]);
   return null;
 }
@@ -108,7 +108,8 @@ const LeafletMap = forwardRef<MapHandle, Props>(function LeafletMap(p, ref) {
     code: resolveAtollCode(f.properties) ?? f.properties.code,
     bounds: L.latLngBounds(f.geometry.coordinates.flat(2).map(([lng, lat]) => [lat, lng] as L.LatLngTuple)),
   })), [p.fc]);
-  useEffect(() => { setSelBounds(geo.find((x) => x.code === p.selected)?.bounds ?? null); }, [p.selected, geo]);
+  useEffect(() => { const point = p.selected ? p.where[p.selected] : null;
+    setSelBounds(geo.find((x) => x.code === p.selected)?.bounds ?? (point ? L.latLngBounds([point[1] - .06, point[0] - .06], [point[1] + .06, point[0] + .06]) : null)); }, [p.selected, geo, p.where]);
 
   // A new arrival: drop a bottle + splash into its region for a few seconds
   useEffect(() => {
@@ -145,7 +146,7 @@ const LeafletMap = forwardRef<MapHandle, Props>(function LeafletMap(p, ref) {
           const n = p.counts[a.code] ?? 0, on = a.code === p.selected || a.code === p.hovered, size = sizeFor(n);
           const icon = L.divIcon({ className: `pin ${on ? "pin-on" : ""}`, iconSize: [size, size], iconAnchor: [size / 2, size / 2], html: pinHtml(size, n, p.breakdown(a.code), p.category, on) });
           return (
-            <Marker key={a.code} position={at(a.code)} icon={icon} zIndexOffset={on ? 1000 : n}
+            <Marker key={a.code} title={p.tip(a.code)} alt={p.tip(a.code)} position={at(a.code)} icon={icon} zIndexOffset={on ? 1000 : n}
               eventHandlers={{ click: () => p.onSelect(a.code), mouseover: () => p.onHover(a.code), mouseout: () => p.onHover(null) }}>
               <Tooltip direction="top" offset={[0, -size / 2]} className="atoll-tip">{p.tip(a.code)}</Tooltip>
               {n > 0 && (on || n >= p.max * 0.5) && <Tooltip permanent direction="bottom" offset={[0, size / 2]} className="atoll-label">{p.names[a.code]}</Tooltip>}
