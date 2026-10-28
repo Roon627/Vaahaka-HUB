@@ -15,7 +15,7 @@ Everything Ihusaas needs is already built and deployed with the app. Fodibey onl
 | Smoke test | `FODIBEY_API_KEY=… ./scripts/fodibey-smoke.sh https://ihusaas.online` |
 | Database tables the API manages | `posts`, `comments`, `reports`, `blocked_terms`, `moderation_log` (Supabase) |
 
-Status: auth, validation, routing, relay and OpenAPI were tested against a production build.
+Status: auth, validation, routing, relay and OpenAPI were tested against a production build. The suggestions inbox (§3.6a) was tested end to end against the live database.
 The data endpoints need `SUPABASE_SERVICE_ROLE_KEY` set and **have not been run against live data yet**. Run the smoke test once keys are in place.
 
 ## 2. Connect it (one-time setup)
@@ -84,6 +84,12 @@ Explain in the UI: `scope: comments` = notes only; `scope: all` = also letters (
 ### 3.5 Audit log
 `GET /moderation-log?limit=100`: who did what, when. Read-only.
 
+### 3.6a Suggestions inbox (new)
+`GET /suggestions` (default = `new`) → a simple inbox: kind chip (💡 idea · 🐛 bug · 💌 thanks · 🛟 safety · 🌊 other), the message, `page` they were on, time, and the reply `contact` **only if present** (most are anonymous).
+Actions: `PATCH /suggestions/{id}` `{status: read|planned|done|archived, note}` and `DELETE`. Show a **badge** from `GET /stats` → `suggestions.new`.
+Put `safety` kind first and highlight it; those notes are not read in real time. Live push: handle the `suggestion.created` webhook event (same signature check as §4).
+Don't try to identify writers; if they left a `contact`, a short, kind reply is enough.
+
 ### 3.6 Helplines (read-only for now)
 `GET /helplines`: show with "last checked" date. (Editing would need a new endpoint and a DB table; not built yet.)
 
@@ -94,6 +100,7 @@ Explain in the UI: `scope: comments` = notes only; `scope: all` = also letters (
 - On Fodibey, verify every event: `X-Fodibey-Signature == "sha256=" + HMAC_SHA256(secret, X-Fodibey-Timestamp + "." + rawBody)`
   and reject timestamps older than 5 minutes. Use events to show a live badge on the Safety queue, or alert on self-harm reports.
 - No push set up? Just poll `GET /reports?status=open` every minute.
+- New suggestions arrive as a `suggestion.created` event the moment someone sends a note (no Supabase webhook needed). Or poll `GET /suggestions`.
 
 ## 5. Rules for the dashboard (these are sensitive people)
 - Device tokens are never returned. Don't try to identify writers. Don't export letters.

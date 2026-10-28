@@ -37,16 +37,33 @@ No endpoint ever returns a device token. Paging: `limit` (≤200) and `cursor` (
 | Method & path | Purpose |
 |---|---|
 | `GET /health` | **200** = API reachable and key valid. The `database` field is `ok`, `not_configured` (server lacks `SUPABASE_SERVICE_ROLE_KEY`) or `error` (503). Use it to tell "down" from "needs its database key" |
-| `GET /stats` | Posts / comments / open reports, last 24h & 7d, by mood, by atoll, reaction totals |
+| `GET /stats` | Posts / comments / open reports, **new suggestions**, last 24h & 7d, by mood, by atoll, reaction totals |
 | `GET /reports?status=open&target=post\|comment&reason=` | The moderation queue, with the reported content attached |
 | `POST /reports/{id}/resolve` `{action, note?}` | `hide` · `dismiss` (restores auto-hidden content) · `delete` · `acknowledge` (handled, content untouched, e.g. a self-harm follow-up) |
 | `GET /posts` · `PATCH /posts/{id}` `{is_hidden}` · `DELETE /posts/{id}` | Browse (incl. hidden), hide/unhide, delete |
 | `GET /comments` · `PATCH /comments/{id}` · `DELETE /comments/{id}` | Same for notes |
 | `GET /blocked-terms` · `POST /blocked-terms` · `DELETE /blocked-terms/{id}` | The word filter. POST takes one term or `{terms:[…]}` (≤500) |
 | `POST /moderation/check` `{text, scope?}` | "Would this be blocked?" using the app's exact filter |
+| `GET /suggestions?status=new\|read\|planned\|done\|archived\|all&kind=&q=` | The **suggestions inbox** ("Send us a note" in the app). Default `status=new`. Paged like posts (`next_cursor`). Never includes device tokens or IP hashes. |
+| `PATCH /suggestions/{id}` `{status?, note?}` | Triage: set `status` and/or an internal `note` (never public). Logged in the audit trail. |
+| `DELETE /suggestions/{id}` | Permanently delete a suggestion |
 | `GET /moderation-log` | Audit trail of every action taken through this API |
 | `GET /helplines` | The verified helplines the app shows (read-only for now) |
 | `GET /openapi.json` | The contract (public) |
+
+### Suggestions ("Send us a note")
+People tap **About → Send us a note** (or the 💌 pill) and choose a kind: `idea` · `bug` · `thanks` · `safety` · `other`. Notes are **anonymous**; `contact` (an email or number) is only present if the person chose to leave one so the team can reply.
+`page` is the app path they were on (e.g. `/map`). A `safety` note, or one that sounds like distress, shows the helplines in the app, but notes are **not read in real time**: treat `safety` as high priority anyway.
+
+```jsonc
+// GET /suggestions → 200
+{ "items": [ { "id": "…", "created_at": "…", "kind": "idea", "message": "Could the moon follow the tide?",
+               "contact": null, "page": "/map", "status": "new", "staff_note": null, "handled_by": null, "handled_at": null } ],
+  "next_cursor": null }
+// PATCH /suggestions/{id}  { "status": "planned", "note": "for map v2" }
+```
+New notes are also **pushed** to `FODIBEY_WEBHOOK_URL` as a signed `suggestion.created` event (see §5): `data` = `{ id, created_at, kind, message, contact, page }`.
+The public submit route is `POST /api/suggestions` (same-origin only, not part of this authenticated API): rate-limited per device and per network, with a honeypot field against bots.
 
 ### Report reasons
 `rude` · `hate` · `self_harm` · `spam` · `privacy` · `other`.
@@ -77,7 +94,7 @@ Ihusaas can push signed events:
 
 ```
 POST $FODIBEY_WEBHOOK_URL
-X-Fodibey-Event: moderation.action          (also db.posts.insert, db.comments.insert, db.reports.insert, …)
+X-Fodibey-Event: moderation.action          (also suggestion.created, db.posts.insert, db.comments.insert, db.reports.insert, …)
 X-Fodibey-Timestamp: 1767225600
 X-Fodibey-Signature: sha256=<hex HMAC-SHA256 of "<timestamp>.<raw body>" using FODIBEY_WEBHOOK_SECRET>
 ```

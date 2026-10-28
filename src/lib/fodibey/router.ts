@@ -53,7 +53,7 @@ const stats: Handler = async () => {
   const since = (h: number) => new Date(Date.now() - h * 3600_000).toISOString();
   const cats = ["horror", "sad", "vent", "secrets", "nostalgia", "work", "relationships"];
 
-  const [posts, hiddenPosts, comments, hiddenComments, openReports, openSelfHarm, p24, p7, c24, byCat, atolls, react] = await Promise.all([
+  const [posts, hiddenPosts, comments, hiddenComments, openReports, openSelfHarm, p24, p7, c24, byCat, atolls, react, newSuggestions, totalSuggestions] = await Promise.all([
     count(head("posts").eq("is_hidden", false)), count(head("posts").eq("is_hidden", true)),
     count(head("comments").eq("is_hidden", false)), count(head("comments").eq("is_hidden", true)),
     count(head("reports").eq("status", "open")), count(head("reports").eq("status", "open").eq("reason", "self_harm")),
@@ -63,12 +63,14 @@ const stats: Handler = async () => {
     db.rpc("atoll_counts", { p_category: null }),
     // Fine to sum client-side at launch scale; move to a SQL function once there are ~100k posts.
     db.from("posts").select("felt_count,heart_count,listening_count").eq("is_hidden", false).limit(5000),
+    count(head("suggestions").eq("status", "new")), count(head("suggestions")),
   ]);
   const r = (react.data ?? []) as { felt_count: number; heart_count: number; listening_count: number }[];
   return json({
     posts: { visible: posts, hidden: hiddenPosts, last_24h: p24, last_7d: p7 },
     comments: { visible: comments, hidden: hiddenComments, last_24h: c24 },
     reports: { open: openReports, open_self_harm: openSelfHarm },
+    suggestions: { new: newSuggestions, total: totalSuggestions },
     reactions: { felt: r.reduce((a, x) => a + x.felt_count, 0), heart: r.reduce((a, x) => a + x.heart_count, 0), listening: r.reduce((a, x) => a + x.listening_count, 0), sampled_posts: r.length },
     by_category: Object.fromEntries(byCat),
     by_atoll: Object.fromEntries(((atolls.data ?? []) as { atoll_code: string; total: number | string }[]).map((a) => [a.atoll_code, Number(a.total)])),
@@ -218,6 +220,53 @@ const check: Handler = async ({ body }) => {
   return error ? fail(500, "db_error", error.message) : json({ blocked: !!data });
 };
 
+const SUGGESTION_STATUS = ["new", "read", "planned", "done", "archived"];
+const SUGGESTION_COLS = "id,created_at,kind,message,contact,page,status,staff_note,handled_by,handled_at";
+
+/** The suggestions inbox ("Send us a note" in the app). Default view = status "new"; status=all shows everything. */
+const listSuggestions: Handler = async ({ url }) => {
+  const limit = int(url.searchParams.get("limit"), 50, 1, 200);
+  let q = admin().from("suggestions").select(SUGGESTION_COLS).order("created_at", { ascending: false }).limit(limit + 1);
+  const status = url.searchParams.get("status") ?? "new"; if (status !== "all") q = q.eq("status", status);
+  const kind = url.searchParams.get("kind"); if (kind) q = q.eq("kind", kind);
+  const cursor = url.searchParams.get("cursor"); if (cursor) q = q.lt("created_at", cursor);
+  const text = url.searchParams.get("q"); if (text) q = q.ilike("message", `%${text.replace(/[%_]/g, "")}%`);
+  const { data, error } = await q;
+  if (error) return fail(500, "db_error", error.message);
+  const rows = (data ?? []) as unknown as Record<string, any>[];
+  return json({ items: rows.slice(0, limit), next_cursor: rows.length > limit ? rows[limit - 1].created_at : null });
+};
+
+/** Triage a suggestion: { "status": "read|planned|done|archived|new", "note": "internal note" } (either or both). */
+const patchSuggestion: Handler = async ({ params, actor, body }) => {
+  if (!UUID.test(params.id)) return fail(400, "bad_id", "Id must be a UUID.");
+  const b = (await body()) ?? {};
+  const patch: Record<string, unknown> = {};
+  if (b.status !== undefined) {
+    if (!SUGGESTION_STATUS.includes(b.status)) return fail(400, "bad_status", `status must be one of: ${SUGGESTION_STATUS.join(", ")}.`);
+    patch.status = b.status;
+  }
+  if (b.note !== undefined) {
+    if (typeof b.note !== "string") return fail(400, "bad_note", "note must be a string.");
+    patch.staff_note = b.note.trim().slice(0, 1000) || null;
+  }
+  if (Object.keys(patch).length === 0) return fail(400, "bad_body", "Send { \"status\": ... } and/or { \"note\": ... }.");
+  patch.handled_by = actor; patch.handled_at = new Date().toISOString();
+  const { data, error } = await admin().from("suggestions").update(patch).eq("id", params.id).select(SUGGESTION_COLS).maybeSingle();
+  if (error) return fail(500, "db_error", error.message);
+  if (!data) return fail(404, "not_found", "No such suggestion.");
+  await audit(actor, "suggestion.update", "suggestion", params.id, { status: patch.status, noted: patch.staff_note !== undefined });
+  return json(data);
+};
+
+const deleteSuggestion: Handler = async ({ params, actor }) => {
+  if (!UUID.test(params.id)) return fail(400, "bad_id", "Id must be a UUID.");
+  const { error } = await admin().from("suggestions").delete().eq("id", params.id);
+  if (error) return fail(500, "db_error", error.message);
+  await audit(actor, "suggestion.delete", "suggestion", params.id);
+  return json({ ok: true });
+};
+
 const log: Handler = async ({ url }) => {
   const limit = int(url.searchParams.get("limit"), 100, 1, 500);
   const { data, error } = await admin().from("moderation_log").select("*").order("at", { ascending: false }).limit(limit);
@@ -260,6 +309,9 @@ const ROUTES: Route[] = [
   { method: "DELETE", path: "blocked-terms/:id", handler: deleteTerm },
   { method: "POST", path: "moderation/check", handler: check },
   { method: "GET", path: "moderation-log", handler: log },
+  { method: "GET", path: "suggestions", handler: listSuggestions },
+  { method: "PATCH", path: "suggestions/:id", handler: patchSuggestion },
+  { method: "DELETE", path: "suggestions/:id", handler: deleteSuggestion },
   { method: "GET", path: "helplines", handler: async () => json({ items: HELPLINES }) },
 ];
 

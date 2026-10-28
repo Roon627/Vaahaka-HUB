@@ -33,7 +33,7 @@ export async function emit(type: string, data: unknown): Promise<void> {
 }
 
 /** Strip anything private from a database row before it leaves this server. */
-export function scrub<T extends Record<string, unknown>>(row: T): Omit<T, "device_token"> {
-  const { device_token: _drop, ...rest } = row;
+export function scrub<T extends Record<string, unknown>>(row: T): Omit<T, "device_token" | "ip_hash"> {
+  const { device_token: _drop, ip_hash: _drop2, ...rest } = row;
   return rest;
 }

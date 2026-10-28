@@ -6,6 +6,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useSea } from "./SeaProvider";
 import MoodDock from "./MoodDock";
 import { startInstall, useInstall } from "@/lib/pwa";
+import { SUGGEST_EVENT } from "@/lib/suggest";
+import SuggestionSheet from "./SuggestionSheet";
 
 /* ------------------------------------------------------------------ icons */
 const I = (d: React.ReactNode) => function Icon({ className = "h-[18px] w-[18px]" }: { className?: string }) {
@@ -27,7 +29,7 @@ function Logo() {
 }
 
 /* ------------------------------------------------------------- about menu */
-function AboutMenu({ onClose }: { onClose: () => void }) {
+function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () => void }) {
   const { openRandom, finding } = useSea();
   useEffect(() => {
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -49,7 +51,10 @@ function AboutMenu({ onClose }: { onClose: () => void }) {
         transition={{ duration: 0.18 }}
         className="fixed inset-x-3 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-50 max-h-[70dvh] overflow-y-auto rounded-3xl border border-white/10 bg-abyss/90 p-5 shadow-soft backdrop-blur-xl md:inset-x-auto md:bottom-auto md:right-4 md:top-20 md:w-[22rem]"
       >
-        <h2 className="font-display text-xl text-foam">How Ihusaas works</h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-display text-xl text-foam">How Ihusaas works</h2>
+          <button onClick={onSuggest} className="flex shrink-0 items-center gap-1.5 rounded-full border border-glow/30 bg-glow/10 px-3 py-1.5 text-xs font-semibold text-glow transition active:scale-95"><span aria-hidden>💌</span> Send a note</button>
+        </div>
         <ol className="mt-3 space-y-3">
           {steps.map(([e, t, d]) => (
             <li key={t} className="flex gap-3">
@@ -73,6 +78,9 @@ function AboutMenu({ onClose }: { onClose: () => void }) {
         <button onClick={() => { onClose(); openRandom(); }} disabled={finding}
           className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] text-sm text-foam transition hover:bg-white/10">
           <Dice className="h-[18px] w-[18px]" /> Surprise me: open a random bottle
+        </button>
+        <button onClick={onSuggest} className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-glow/25 bg-glow/[0.07] text-sm text-foam transition hover:bg-glow/15">
+          <span aria-hidden>💌</span> Send us a note: ideas, bugs or a thank-you
         </button>
         <InstallRow />
       </motion.div>
@@ -120,6 +128,9 @@ export default function Nav() {
   const { openWriter, openRandom, finding } = useSea();
   const [about, setAbout] = useState(false);
   useEffect(() => setAbout(false), [path]);
+  // "Send us a note" can be opened from the About menu or from other pages (see lib/suggest.ts)
+  const [suggest, setSuggest] = useState(false);
+  useEffect(() => { const open = () => { setAbout(false); setSuggest(true); }; window.addEventListener(SUGGEST_EVENT, open); return () => window.removeEventListener(SUGGEST_EVENT, open); }, []);
 
   const surprise = (
     <button onClick={openRandom} disabled={finding} className="flex items-center gap-2 rounded-full px-3.5 py-2 text-sm text-mist transition hover:bg-white/10 hover:text-foam disabled:opacity-60">
@@ -172,7 +183,8 @@ export default function Nav() {
         </div>
       </nav>
 
-      <AnimatePresence>{about && <AboutMenu onClose={() => setAbout(false)} />}</AnimatePresence>
+      <AnimatePresence>{about && <AboutMenu onClose={() => setAbout(false)} onSuggest={() => { setAbout(false); setSuggest(true); }} />}</AnimatePresence>
+      <AnimatePresence>{suggest && <SuggestionSheet onClose={() => setSuggest(false)} />}</AnimatePresence>
     </>
   );
 }

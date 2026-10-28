@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import HelplineCard from "@/components/HelplineCard";
+import SuggestLink from "@/components/SuggestLink";
 import { HELPLINES, HELPLINES_CHECKED } from "@/lib/helplines";
 
 export const metadata: Metadata = { title: "Get help now", description: "Free and confidential helplines in the Maldives, including the 24-hour national mental health line (1677)." };
@@ -28,6 +29,8 @@ export default function Help() {
         <p><strong className="font-medium text-foam">If you're worried about someone you've read here:</strong> use the flag on their letter and choose “Someone may be in danger”. It won't hide their words; it lets a moderator know support may be needed.</p>
         <p className="mt-3">Numbers last checked on {HELPLINES_CHECKED} against official Maldivian government pages (linked on each card). If one doesn't connect, try 911 or the Ministry of Health. Ihusaas is a community space, not a crisis service.</p>
       </aside>
+
+      <p className="mt-8 text-center text-[13px] text-mist">Found a mistake in a number, or have an idea? <br /><SuggestLink className="mt-3" /></p>
     </section>
   );
 }
