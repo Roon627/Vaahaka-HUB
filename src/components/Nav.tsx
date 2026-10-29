@@ -66,7 +66,7 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
         role="dialog" aria-label="Menu"
         initial={{ opacity: 0, y: 12, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.97 }}
         transition={{ duration: 0.18 }}
-        className="fixed inset-x-3 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-50 max-h-[78dvh] overflow-y-auto overscroll-contain rounded-3xl border border-white/10 bg-abyss/95 p-4 shadow-soft backdrop-blur-xl md:inset-x-auto md:bottom-auto md:right-4 md:top-20 md:max-h-[calc(100dvh-6.5rem)] md:w-[23rem]"
+        className="fixed inset-x-3 bottom-[calc(4.9rem+env(safe-area-inset-bottom))] z-50 max-h-[78dvh] overflow-y-auto overscroll-contain rounded-3xl border border-white/10 bg-abyss/95 p-4 shadow-soft backdrop-blur-xl md:inset-x-auto md:bottom-auto md:right-4 md:top-20 md:max-h-[calc(100dvh-6.5rem)] md:w-[23rem]"
       >
         <div className="flex items-center justify-between gap-3 px-1 pb-3">
           <h2 className="font-display text-xl text-foam">Menu</h2>
@@ -193,13 +193,13 @@ export default function Nav() {
       </header>
 
       {/* ---- mobile dock ---- */}
-      <nav aria-label="Main" className="pointer-events-none fixed inset-x-0 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-3 md:hidden">
-        <div className="pointer-events-auto flex items-center gap-1 rounded-full border border-white/10 bg-abyss/70 p-1.5 shadow-soft backdrop-blur-xl">
+      <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[rgba(8,26,38,0.95)] pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden">
+        <div className="mx-auto flex max-w-md items-center justify-around px-2 py-1.5">
           {TABS.slice(0, 1).map(({ href, label, Icon }) => <DockLink key={href} href={href} label={label} Icon={Icon} on={path === href} />)}
           <DockLink href="/map" label="Map" Icon={MapPin} on={path === "/map"} />
-          <motion.button whileTap={{ scale: 0.92 }} onClick={() => openWriter()} aria-label="Write a letter" className="mx-1 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-glow to-sand text-abyss shadow-glow"><Pen className="h-5 w-5" /></motion.button>
+          <motion.button whileTap={{ scale: 0.92 }} onClick={() => openWriter()} aria-label="Write a letter" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-glow to-sand text-abyss shadow-glow"><Pen className="h-5 w-5" /></motion.button>
           <MoodDock variant="dock" />
-          <button onClick={() => setAbout((v) => !v)} aria-label="Menu: contact, help and how it works" aria-expanded={about} aria-haspopup="dialog" className={`flex min-h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-full px-2 text-[10px] ${about ? "bg-white/10 text-foam" : "text-mist"}`}>{about ? <Close className="h-5 w-5" /> : <Bars className="h-5 w-5" />}Menu</button>
+          <button onClick={() => setAbout((v) => !v)} aria-label="Menu: contact, help and how it works" aria-expanded={about} aria-haspopup="dialog" className={`flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-2 text-[10px] ${about ? "bg-white/10 text-foam" : "text-mist"}`}>{about ? <Close className="h-5 w-5" /> : <Bars className="h-5 w-5" />}Menu</button>
         </div>
       </nav>
 
@@ -211,7 +211,7 @@ export default function Nav() {
 
 function DockLink({ href, label, Icon, on }: { href: string; label: string; Icon: ReturnType<typeof I>; on: boolean }) {
   return (
-    <Link href={href} aria-current={on ? "page" : undefined} className={`flex min-h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-full px-2 text-[10px] transition-colors ${on ? "bg-white/10 text-foam" : "text-mist"}`}>
+    <Link href={href} aria-current={on ? "page" : undefined} className={`flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-2 text-[10px] transition-colors ${on ? "bg-white/10 text-foam" : "text-mist"}`}>
       <Icon className="h-5 w-5" />{label}
     </Link>
   );

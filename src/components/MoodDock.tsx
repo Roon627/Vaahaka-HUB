@@ -35,7 +35,7 @@ function Inner({ variant }: { variant: "dock" | "pill" }) {
     <>
       {variant === "dock" ? (
         <button onClick={() => setOpen(true)} aria-haspopup="dialog" aria-label={`Mood: ${value ? CATEGORY_BY_ID[value].label : "every mood"}. Change`}
-          className="flex min-h-12 w-14 min-w-0 flex-col items-center justify-center gap-0.5 rounded-full px-2 text-[10px]"
+          className="flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-2 text-[10px]"
           style={{ color: value ? color : "#9db9b8", background: value ? `${color}1f` : undefined }}>
           {face}<span className="max-w-full truncate">{value ? CATEGORY_BY_ID[value].label : "Mood"}</span>
         </button>

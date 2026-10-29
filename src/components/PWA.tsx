@@ -46,7 +46,7 @@ export default function PWA() {
         <motion.aside
           role="dialog" aria-label="Install Ihusaas"
           initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 24 }}
-          className="fixed inset-x-3 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-40 flex items-center gap-3 rounded-3xl border border-white/15 bg-abyss/90 p-3 pr-4 shadow-soft backdrop-blur-xl md:inset-x-auto md:bottom-6 md:right-6 md:w-[24rem]"
+          className="fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 flex items-center gap-3 rounded-3xl border border-white/15 bg-abyss/90 p-3 pr-4 shadow-soft backdrop-blur-xl md:inset-x-auto md:bottom-6 md:right-6 md:w-[24rem]"
         >
           <img src="/brand/png/icon-192.png" alt="" width={52} height={52} className="h-[52px] w-[52px] shrink-0 rounded-2xl" />
           <div className="min-w-0 flex-1">

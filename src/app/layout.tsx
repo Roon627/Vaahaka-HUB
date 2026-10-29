@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Nav />
           <PWA />
           {/* top padding clears the floating nav; bottom padding clears the mobile dock */}
-          <main className="pb-[calc(7rem+env(safe-area-inset-bottom))] pt-[calc(3.5rem+env(safe-area-inset-top))] md:pb-0 md:pt-24">{children}</main>
+          <main className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-[calc(3.5rem+env(safe-area-inset-top))] md:pb-0 md:pt-24">{children}</main>
         </SeaProvider>
       </body>
     </html>

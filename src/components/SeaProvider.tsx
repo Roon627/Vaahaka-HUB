@@ -185,7 +185,7 @@ export function SeaProvider({ children }: { children: React.ReactNode }) {
           <motion.div
             role="status"
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }}
-            className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] left-1/2 z-[60] -translate-x-1/2 rounded-full border border-white/15 bg-abyss/90 px-5 py-2.5 text-sm text-foam shadow-soft backdrop-blur-md md:bottom-8"
+            className="fixed bottom-[calc(5.75rem+env(safe-area-inset-bottom))] left-1/2 z-[60] -translate-x-1/2 rounded-full border border-white/15 bg-abyss/90 px-5 py-2.5 text-sm text-foam shadow-soft backdrop-blur-md md:bottom-8"
           >
             {toast}
           </motion.div>
