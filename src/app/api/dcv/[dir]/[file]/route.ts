@@ -14,7 +14,8 @@ export const dynamic = "force-dynamic";
 const DIRS = new Set(["pki-validation", "acme-challenge"]);
 const NAME = /^[A-Za-z0-9_-]{8,128}(\.txt)?$/;
 
-export async function GET(_req: Request, { params }: { params: { dir: string; file: string } }) {
+export async function GET(_req: Request, context: { params: Promise<{ dir: string; file: string }> }) {
+  const params = await context.params;
   if (!DIRS.has(params.dir) || !NAME.test(params.file)) return new Response("Not found", { status: 404 });
   try {
     const body = await readFile(path.join(process.cwd(), ".well-known", params.dir, params.file), "utf8");

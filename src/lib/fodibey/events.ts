@@ -18,6 +18,7 @@ export async function emit(type: string, data: unknown): Promise<void> {
   try {
     await fetch(url, {
       method: "POST",
+      redirect: "error",
       headers: {
         "content-type": "application/json",
         "x-fodibey-event": type,

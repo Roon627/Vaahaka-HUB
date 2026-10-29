@@ -38,7 +38,11 @@ export function getDeviceToken(): string {
 
 /** Which reactions this browser has already given: { [postId]: ["felt", ...] } */
 export function getMyReactions(): Record<string, ReactionKind[]> {
-  try { return JSON.parse(safeGet(MINE_KEY) ?? "{}"); } catch { return {}; }
+  try {
+    const value = JSON.parse(safeGet(MINE_KEY) ?? "{}");
+    if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+    return Object.fromEntries(Object.entries(value).filter((entry): entry is [string, ReactionKind[]] => Array.isArray(entry[1]) && entry[1].every((k) => ["felt", "heart", "listening"].includes(k))));
+  } catch { return {}; }
 }
 
 export function setMyReaction(postId: string, kind: ReactionKind, on: boolean) {
@@ -53,7 +57,7 @@ export function setMyReaction(postId: string, kind: ReactionKind, on: boolean) {
 const OPENED_KEY = "raalhu.opened";
 
 export function getOpened(): string[] {
-  try { return JSON.parse(safeGet(OPENED_KEY) ?? "[]"); } catch { return []; }
+  try { const value = JSON.parse(safeGet(OPENED_KEY) ?? "[]"); return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string").slice(-500) : []; } catch { return []; }
 }
 
 export function markOpened(postId: string) {

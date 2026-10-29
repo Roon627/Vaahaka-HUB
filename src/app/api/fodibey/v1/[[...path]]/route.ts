@@ -4,8 +4,8 @@ import { handle } from "@/lib/fodibey/router";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type Ctx = { params: { path?: string[] } };
-const h = (req: Request, { params }: Ctx) => handle(req, params.path);
+type Ctx = { params: Promise<{ path?: string[] }> };
+const h = async (req: Request, { params }: Ctx) => handle(req, (await params).path);
 
 export const GET = h;
 export const POST = h;

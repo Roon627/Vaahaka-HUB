@@ -1,3 +1,4 @@
+import { readBody, BodyTooLarge } from "@/lib/request-body";
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { admin, ConfigError } from "@/lib/fodibey/admin";
@@ -26,10 +27,12 @@ function sameOrigin(req: Request): boolean {
 
 export async function POST(req: Request) {
   if (!sameOrigin(req)) return err(403, "Not allowed.");
-  const raw = await req.text();
-  if (raw.length > 8000) return err(413, "That's too long.");
+  let raw: string;
+  try { raw = await readBody(req, 8000); } catch (e) { return err(e instanceof BodyTooLarge ? 413 : 400, "Invalid or oversized request."); }
   let b: Record<string, unknown>;
   try { b = JSON.parse(raw); } catch { return err(400, "Bad request."); }
+
+  if (!b || typeof b !== "object" || Array.isArray(b)) return err(400, "Bad request.");
 
   // Honeypot: real people never see or fill this field. Pretend it worked so bots learn nothing.
   if (typeof b.website === "string" && b.website.trim() !== "") return reply(200, { ok: true });
@@ -61,7 +64,7 @@ export async function POST(req: Request) {
     return reply(200, { ok: true });
   } catch (e) {
     if (e instanceof ConfigError) return err(503, "The suggestion box isn't switched on yet. Please try again later.");
-    console.error("suggestion error", e);
+    console.error("suggestion request failed");
     return err(500, "Sorry, something went wrong. Please try again.");
   }
 }

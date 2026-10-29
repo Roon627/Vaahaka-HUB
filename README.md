@@ -3,7 +3,7 @@
 *Ihusaas* (feeling) is an anonymous, gentle place for Maldivians to set down what they're carrying.
 Write a letter, seal it in a bottle, let strangers listen. Readers reply with 🫂 🫀 🕯️ and kind anonymous notes. No accounts.
 
-**Stack:** Next.js 14 (App Router) · Tailwind · Framer Motion · react-simple-maps · Supabase · installable PWA.
+**Stack:** Next.js 15 (App Router) · Tailwind · Framer Motion · Leaflet · Supabase · installable PWA.
 
 ## Run it
 
@@ -22,7 +22,7 @@ Database (Supabase SQL editor, in this order):
 ## Deploy to ihusaas.online
 
 1. Push to GitHub and import the repo into Vercel (or any Node host).
-2. Environment variables: everything in `.env.example`. At minimum `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL=https://ihusaas.online`.
+2. Environment variables: everything in `.env.example`. At minimum `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL=https://www.ihusaas.online`.
 3. Add the domain `ihusaas.online` in the host's dashboard and point DNS at it (the host shows the exact records).
 4. HTTPS is required for the PWA install prompt and service worker, and every host above provides it automatically.
 
@@ -52,3 +52,16 @@ Handy scripts: `npm run geo:build` refreshes the map/island data · `npm run bra
 
 ## Data credits
 Atoll boundaries: [jawish/maldives-geo](https://github.com/jawish/maldives-geo) (MIT). Islands: [naxeem/maldives-atoll-islands](https://github.com/naxeem/maldives-atoll-islands) (MIT). Fonts: Fraunces, Nunito, Caveat (SIL OFL).
+
+## PWA and security checks
+
+Run `node --test tests/pwa-security.test.mjs`, `npm run typecheck`, `npm audit`, and `npm run build`.
+When a local server is running, build separately: `NEXT_DIST_DIR=.next-sweep npm run build`.
+
+The install manifest uses a same-origin `/` launch URL. The correct production address is
+`https://www.ihusaas.online/` (a dot after `www`, not a slash). Icon URLs are versioned and
+opaque. After deploying an icon update, remove the old iPhone home-screen shortcut, open
+this address in Safari, let it load, and add it again. Device-side icon caching still requires
+real iPhone verification; desktop/browser tests cannot prove the iOS home-screen tile.
+
+See [the security review](docs/SECURITY-REVIEW-2026-10-29.md) for changes and remaining operational work.

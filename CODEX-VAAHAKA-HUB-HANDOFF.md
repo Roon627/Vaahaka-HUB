@@ -52,3 +52,10 @@ Vaahaka-HUB is the **Ihusaas** web app (Next.js, deployed on **Vercel**, product
 - Pass the Leaflet imperative handle as an explicit `mapHandle` prop across Next's dynamic component boundary; a React `ref` there targets the loader rather than the map.
 - Enable dragging, wheel zoom, double-click, and keyboard navigation together; detect any fine pointer for hybrid touch/mouse devices.
 - Update map cursor/touch-action classes through the Leaflet container because MapContainer's initial props are not reactive. Phone scroll mode remains available.
+
+## 2026-10-29 PWA/security sweep
+See docs/SECURITY-REVIEW-2026-10-29.md. Next 15.5.28, asynchronous route params,
+patched dependency lock, SW v8, icon URL v8, root PWA start URL, bounded request bodies,
+error/privacy hardening, and security headers. iPhone installation must still be verified
+on-device. Rotate previously exposed credentials in provider settings. Config backups use
+`.bak-2026-10-29-sweep`; public backups moved to ignored `.local-backups/`.

@@ -1,4 +1,5 @@
 import "server-only";
+import { readBody, BodyTooLarge } from "@/lib/request-body";
 import { NextResponse } from "next/server";
 import { admin, ConfigError } from "./admin";
 import { authenticate, safeEqual } from "./auth";
@@ -321,7 +322,7 @@ function match(method: string, seg: string[]): { route: Route; params: Record<st
     const parts = r.path.split("/");
     if (parts.length !== seg.length) continue;
     const params: Record<string, string> = {};
-    if (!parts.every((p, i) => (p.startsWith(":") ? ((params[p.slice(1)] = decodeURIComponent(seg[i])), true) : p === seg[i]))) continue;
+    if (!parts.every((p, i) => (p.startsWith(":") ? ((params[p.slice(1)] = seg[i]), true) : p === seg[i]))) continue;
     pathHit = true;
     if (r.method === method) return { route: r, params };
   }
@@ -355,11 +356,12 @@ export async function handle(req: Request, path: string[] | undefined): Promise<
     actor = a.actor;
   }
   try {
-    const body = async () => { try { return await req.json(); } catch { return null; } };
+    const body = async () => { try { return JSON.parse(await readBody(req, 65536)); } catch (e) { if (e instanceof BodyTooLarge) throw e; return null; } };
     return cors(req, await hit.route.handler({ req, url: new URL(req.url), params: hit.params, actor, body }));
   } catch (e) {
+    if (e instanceof BodyTooLarge) return cors(req, fail(413, "payload_too_large", "Request body is too large."));
     if (e instanceof ConfigError) return cors(req, fail(503, "not_configured", e.message));
-    console.error("fodibey api error", e);
+    console.error("fodibey request failed");
     return cors(req, fail(500, "internal_error", "Something went wrong."));
   }
 }

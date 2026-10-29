@@ -19,3 +19,9 @@ deploy/
 # Local account-page exports (may contain credentials)
 API keys · instabox.html
 API keys · instabox_files/
+
+# Local backups and generated marketing artifacts
+*.bak-*
+marketing/
+.next-sweep/
+.local-backups/

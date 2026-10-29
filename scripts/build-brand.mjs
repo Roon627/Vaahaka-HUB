@@ -250,6 +250,13 @@ const sheet = svgDoc(cellW * 4, cellH * 2, `0 0 ${cellW * 4} ${cellH * 2}`, `<re
 jobs.push(png(sheet, "stickers/_sheet.png", 2400));
 await Promise.all(jobs);
 
+// Keep every PWA manifest/touch icon reproducible, opaque and at its declared size.
+for (const size of [152, 167, 180, 192, 512]) {
+  const bytes = await sharp(Buffer.from(iconM), { density: 300 }).resize(size).flatten({ background: "#15506a" }).removeAlpha().png().toBuffer();
+  writeFileSync(new URL(`png/${size === 180 ? "icon-180-opaque" : `icon-opaque-${size}`}.png`, OUT), bytes);
+  if (size <= 180) writeFileSync(new URL(`../apple-touch-icon${size === 180 ? "" : `-${size}`}.png`, OUT), bytes);
+}
+
 // App-router conventions: favicon + apple touch icon
 writeFileSync(new URL("icon.svg", APP), icon);
 await sharp(Buffer.from(iconM), { density: 300 }).resize(180).flatten({ background: "#15506a" }).removeAlpha().png().toFile(new URL("apple-icon.png", APP).pathname); // iOS paints transparency black
