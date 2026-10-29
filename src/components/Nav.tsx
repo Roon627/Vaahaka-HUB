@@ -7,6 +7,7 @@ import { useSea } from "./SeaProvider";
 import MoodDock from "./MoodDock";
 import { startInstall, useInstall } from "@/lib/pwa";
 import { SUGGEST_EVENT } from "@/lib/suggest";
+import { SOUND_EVENT, setSound, soundOn } from "@/lib/sound";
 import SuggestionSheet from "./SuggestionSheet";
 
 /* ------------------------------------------------------------------ icons */
@@ -18,6 +19,8 @@ const MapPin = I(<><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 
 const Dice = I(<><rect x="4" y="4" width="16" height="16" rx="3.5" /><circle cx="9" cy="9" r="1" fill="currentColor" /><circle cx="15" cy="15" r="1" fill="currentColor" /><circle cx="15" cy="9" r="1" fill="currentColor" /><circle cx="9" cy="15" r="1" fill="currentColor" /></>);
 const Pen = I(<><path d="M4 20l1-4L16.5 4.5a2 2 0 0 1 3 3L8 19l-4 1z" /><path d="M14 7l3 3" /></>);
 const Bars = I(<><path d="M4 7h16" /><path d="M4 12h16" /><path d="M4 17h16" /></>);
+const Speaker = I(<><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" /><path d="M15.5 9a4 4 0 0 1 0 6" /><path d="M18 6.5a7.5 7.5 0 0 1 0 11" /></>);
+const SpeakerOff = I(<><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" /><path d="M16 9.5l5 5" /><path d="M21 9.5l-5 5" /></>);
 const Close = I(<><path d="M6 6l12 12" /><path d="M18 6L6 18" /></>);
 const Chevron = I(<path d="M9 6l6 6-6 6" />);
 
@@ -44,6 +47,20 @@ function MenuRow({ icon, title, hint, onClick, href, tone = "plain" }: { icon: s
   return href ? <Link href={href} onClick={onClick} className={cls}>{inner}</Link> : <button onClick={onClick} className={cls}>{inner}</button>;
 }
 
+/** Sounds on/off (splash, page tear). A real switch, so it reads the same on the phone sheet and the desktop dropdown. */
+function SoundRow() {
+  const [on, setOn] = useState(true);
+  useEffect(() => { const sync = () => setOn(soundOn()); sync(); window.addEventListener(SOUND_EVENT, sync); return () => window.removeEventListener(SOUND_EVENT, sync); }, []);
+  return (
+    <button onClick={() => setSound(!on)} role="switch" aria-checked={on}
+      className="flex min-h-14 w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-left transition hover:bg-white/10 active:scale-[0.98]">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.07] text-mist">{on ? <Speaker className="h-5 w-5" /> : <SpeakerOff className="h-5 w-5" />}</span>
+      <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-foam">Sounds</span><span className="block text-[12.5px] leading-snug text-mist">{on ? "Splashes and paper tears are on" : "Everything is quiet"}</span></span>
+      <span aria-hidden className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${on ? "bg-glow" : "bg-white/15"}`}><span className={`absolute top-0.5 h-5 w-5 rounded-full bg-abyss transition-all ${on ? "left-[22px]" : "left-0.5"}`} /></span>
+    </button>
+  );
+}
+
 function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () => void }) {
   const { openRandom, finding } = useSea();
   useEffect(() => {
@@ -66,7 +83,7 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
         role="dialog" aria-label="Menu"
         initial={{ opacity: 0, y: 12, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.97 }}
         transition={{ duration: 0.18 }}
-        className="fixed inset-x-3 bottom-[calc(4.9rem+env(safe-area-inset-bottom))] z-50 max-h-[78dvh] overflow-y-auto overscroll-contain rounded-3xl border border-white/10 bg-abyss/95 p-4 shadow-soft backdrop-blur-xl md:inset-x-auto md:bottom-auto md:right-4 md:top-20 md:max-h-[calc(100dvh-6.5rem)] md:w-[23rem]"
+        className="fixed inset-x-0 bottom-[calc(3.85rem+env(safe-area-inset-bottom))] z-50 max-h-[calc(100dvh-8rem)] overflow-y-auto overscroll-contain rounded-t-3xl border border-b-0 border-white/10 bg-abyss/[0.985] p-4 shadow-soft backdrop-blur-xl md:inset-x-auto md:bottom-auto md:right-4 md:top-20 md:max-h-[calc(100dvh-6.5rem)] md:w-[23rem] md:rounded-3xl md:border-b"
       >
         <div className="flex items-center justify-between gap-3 px-1 pb-3">
           <h2 className="font-display text-xl text-foam">Menu</h2>
@@ -77,6 +94,7 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
           <MenuRow tone="glow" icon="💌" title="Contact us" hint="Send an idea, report a bug or say thank you" onClick={onSuggest} />
           <MenuRow tone="coral" icon="🛟" title="Need help right now?" hint="Free helplines in the Maldives, 24 hours" href="/help" onClick={onClose} />
           <MenuRow icon="🎲" title="Surprise me" hint="Open a random bottle" onClick={() => { onClose(); if (!finding) openRandom(); }} />
+          <SoundRow />
         </div>
 
         <div className="mt-3 rounded-2xl border border-coral/25 bg-coral/[0.08] p-3.5 text-[13px] leading-snug text-foam/90">
@@ -178,10 +196,10 @@ export default function Nav() {
             {surprise}
           </div>
           <div className="flex items-center gap-1.5">
-            <button onClick={() => setAbout((v) => !v)} aria-label="Menu: contact, help and how it works" aria-expanded={about} aria-haspopup="dialog" className={`flex items-center gap-2 rounded-full px-3.5 py-2 text-sm transition hover:bg-white/10 hover:text-foam ${about ? "bg-white/10 text-foam" : "text-mist"}`}>{about ? <Close /> : <Bars />} Menu</button>
             <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={() => openWriter()} className="flex items-center gap-2 rounded-full bg-gradient-to-r from-glow to-sand px-5 py-2.5 text-sm font-semibold text-abyss shadow-glow">
               <Pen /> Write
             </motion.button>
+            <button onClick={() => setAbout((v) => !v)} aria-label="Menu: contact, help and how it works" aria-expanded={about} aria-haspopup="dialog" className={`flex items-center gap-2 rounded-full px-3.5 py-2 text-sm transition hover:bg-white/10 hover:text-foam ${about ? "bg-white/10 text-foam" : "text-mist"}`}>{about ? <Close /> : <Bars />} Menu</button>
           </div>
         </nav>
       </header>

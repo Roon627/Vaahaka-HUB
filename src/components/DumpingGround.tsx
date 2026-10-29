@@ -8,6 +8,7 @@ import BottleCard from "./BottleCard";
 import Bottle from "./Bottle";
 import FeedBar from "./FeedBar";
 import StickyNote from "./StickyNote";
+import SoulsOnline from "./SoulsOnline";
 import { useSea } from "./SeaProvider";
 
 const WAVE = "M0 60 Q150 20 300 60 T600 60 T900 60 T1200 60 T1500 60 T1800 60 T2100 60 T2400 60 V140 H0 Z";
@@ -111,6 +112,7 @@ export default function DumpingGround() {
               <button onClick={openRandom} disabled={finding} className="shore-secondary disabled:opacity-50">{finding ? "Finding a bottle…" : "Surprise me"} <span aria-hidden>↝</span></button>
             </div>
             <p className="mt-5 text-xs tracking-wide text-mist">No account. No name. Just you.</p>
+            <SoulsOnline />
           </div>
           <div className="shore-art">
             <div className="shore-orbit shore-orbit-one hidden lg:block" aria-hidden="true" />

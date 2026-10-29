@@ -67,3 +67,13 @@ clean dependency audit, SW v8, icon query v8, root install URL, request validati
 security headers, safer error handling and storage recovery. Build/browser tests pass.
 The historical report above was subsequently resolved with an embedded touch PNG.
 The owner confirmed success on iOS 27 on 2026-10-30; see the resolution update above.
+
+## Additions on 2026-10-30 (Claude)
+Audit of Codex's commits `4419b9a..b15cd58` found them sound (Next 15 upgrade, SW v8, install page, security headers; typecheck + `npm test` pass; both branches in sync). Half-finished things found and finished:
+- `SkyLine.tsx` (the "N here now" line) was **never rendered**, so the live online count (`useSea().online`, Supabase presence) had no UI. Added `SoulsOnline.tsx` in the hero ("3 souls on the shore right now", bobbing bottle faces; "Just you on the shore right now" when alone). `SkyLine.tsx` and `MoodButton.tsx` are still unused: delete or revive.
+- The letter you send used to play **no animation for you** (the broadcast is `self: false`). `BottleThrow.tsx` now throws the bottle in an arc, with splash rings, droplets and a water sound, for your own send and for other people's arrivals (arrivals are softer). Mounted in `SeaProvider.tsx` (`throwing` state).
+- Sounds: `src/lib/sound.ts` synthesises splash + paper tear with Web Audio (no files). The context is unlocked on the first pointerdown; a **Sounds** switch in the Menu (`SoundRow`) turns it off (localStorage `ihusaas.sound`).
+- Torn notepad pages now scrunch up (clip-path folds into a ball, crease overlay fades in, tear + scrunch sound) in `StickyNote.tsx`.
+- Desktop nav: **Write now sits before Menu** (Menu is last). The Menu panel is the same component everywhere; on phones it is a bottom sheet attached to the bar.
+- `package.json` now has `"test": "node --test tests/*.test.mjs"` (the existing test file was not wired to anything).
+- Note: Codex made `ihusaas.online` (apex) canonical and `www` redirects to it, the reverse of what older notes in this file say.

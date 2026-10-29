@@ -6,6 +6,7 @@ import { POST_COLUMNS } from "@/hooks/usePosts";
 import { ATOLL_BY_CODE } from "@/lib/constants";
 import type { Post } from "@/lib/types";
 import { useSea } from "./SeaProvider";
+import { playTear } from "@/lib/sound";
 import { looksLikeCrisis } from "./CrisisNudge";
 
 /** The notepad shows the most felt letters; swipe a page away to tear it off and read the next. */
@@ -41,11 +42,21 @@ function fromPost(p: Post): Note {
   return { id: p.id, felt: p.felt_count, eyebrow: "Found in a bottle", lines: [clip(p.body)], sign: where ? `Someone from ${where}` : "Someone, somewhere", post: p };
 }
 
+// The torn page is scrunched up as it leaves: its outline folds into an irregular ball while creases fade in over it.
+const FLAT = "polygon(0% 0%, 33% 0%, 66% 0%, 100% 0%, 100% 33%, 100% 66%, 100% 100%, 66% 100%, 33% 100%, 0% 100%, 0% 66%, 0% 33%)";
+const BALL = "polygon(14% 10%, 38% 0%, 60% 16%, 90% 6%, 100% 36%, 82% 58%, 96% 90%, 62% 100%, 40% 82%, 8% 94%, 2% 62%, 18% 34%)";
 const page = {
-  in: ({ calm }: { d: number; calm: boolean }) => (calm ? { opacity: 0 } : { opacity: 1 }), // the next page is already there, underneath
-  on: { opacity: 1, y: 0, scale: 1 },
+  in: ({ calm }: { d: number; calm: boolean }) => (calm ? { opacity: 0 } : { opacity: 1, clipPath: FLAT }), // the next page is already there, underneath
+  on: { opacity: 1, y: 0, scale: 1, clipPath: FLAT },
   out: ({ d, calm }: { d: number; calm: boolean }) =>
-    calm ? { opacity: 0 } : { x: d * 150, y: 70, rotate: d * 16, opacity: 0, zIndex: 20, transition: { duration: 0.34, ease: "easeIn" as const } },
+    calm ? { opacity: 0 } : {
+      x: [null, d * 40, d * 150] as [null, number, number], y: [null, -26, 150] as [null, number, number], rotate: [null, d * 14, d * 48] as [null, number, number], scale: [null, 0.78, 0.34] as [null, number, number], opacity: [null, 1, 0] as [null, number, number], clipPath: [FLAT, FLAT, BALL],
+      zIndex: 20, transition: { duration: 0.62, times: [0, 0.35, 1], ease: "easeIn" as const },
+    },
+};
+const creases = {
+  in: { opacity: 0 }, on: { opacity: 0 },
+  out: { opacity: [0, 0, 1], transition: { duration: 0.62, times: [0, 0.3, 0.6] } },
 };
 
 /** One page of the pad. It owns its drag position, so the next page always starts centred. */
@@ -72,6 +83,8 @@ const Page = forwardRef<HTMLDivElement, { note: Note; can: boolean; calm: boolea
       transition={{ type: "spring", stiffness: 180, damping: 18 }}
       className={`notepad relative flex h-[21.5rem] flex-col overflow-hidden ${can ? "cursor-grab active:cursor-grabbing" : ""}`}
     >
+      <motion.span aria-hidden variants={creases} className="pointer-events-none absolute inset-0 z-10 mix-blend-multiply"
+        style={{ background: "linear-gradient(62deg, transparent 36%, rgba(70,45,15,.5) 37%, rgba(255,255,255,.4) 38.2%, transparent 40%), linear-gradient(118deg, transparent 50%, rgba(255,255,255,.55) 51%, rgba(70,45,15,.45) 52.4%, transparent 55%), linear-gradient(8deg, transparent 22%, rgba(70,45,15,.4) 23%, transparent 25.5%), linear-gradient(152deg, transparent 64%, rgba(70,45,15,.38) 65%, transparent 68%), linear-gradient(95deg, transparent 30%, rgba(70,45,15,.3) 31%, transparent 33%), radial-gradient(ellipse at 28% 32%, rgba(70,45,15,.28), transparent 55%), radial-gradient(ellipse at 76% 72%, rgba(70,45,15,.3), transparent 50%)" }} />
       <p className="text-[10px] font-bold uppercase leading-8 tracking-[0.24em] text-inksoft">{note.eyebrow}</p>
       {note.greeting && <p className="font-hand text-3xl leading-8">{note.greeting}</p>}
       <div dir="auto" className={`font-hand leading-8 ${size} ${note.post ? "line-clamp-5" : ""}`}>
@@ -111,7 +124,7 @@ export default function StickyNote() {
   const notes = useMemo(() => [WELCOME, ...letters], [letters]);
   const note = notes[i % notes.length];
   const can = notes.length > 1;
-  const tear = useCallback((d: 1 | -1) => { if (notes.length > 1) { setDir(d); setI((n) => n + 1); } }, [notes.length]);
+  const tear = useCallback((d: 1 | -1) => { if (notes.length > 1) { playTear(); setDir(d); setI((n) => n + 1); } }, [notes.length]);
 
   return (
     <div className="relative mx-auto w-[min(88vw,22rem)] pt-3 lg:absolute lg:left-[2%] lg:top-[50px] lg:mx-0 lg:w-[21.5rem]">

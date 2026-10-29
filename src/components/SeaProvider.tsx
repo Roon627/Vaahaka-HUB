@@ -3,9 +3,10 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { getOpened, markOpened, uuid } from "@/lib/device";
+import { unlockAudio } from "@/lib/sound";
+import BottleThrow from "./BottleThrow";
 import { POST_COLUMNS } from "@/hooks/usePosts";
 import { ATOLL_BY_CODE, CATEGORY_BY_ID, type CategoryId } from "@/lib/constants";
-import Bottle from "./Bottle";
 import type { Post, ReactionCounts } from "@/lib/types";
 import DropStory from "./DropStory";
 import MessageReader from "./MessageReader";
@@ -57,6 +58,10 @@ export function SeaProvider({ children }: { children: React.ReactNode }) {
   const [online, setOnline] = useState(0);
   const [arrivals, setArrivals] = useState(0);
   const [sailing, setSailing] = useState<Arrival | null>(null);
+  // a bottle in the air: yours (thrown when you send) or someone else's (when their letter arrives)
+  const [throwing, setThrowing] = useState<{ id: number; color: string; soft: boolean } | null>(null);
+  // browsers allow sound only after a tap: wake the audio engine on the first one
+  useEffect(() => { window.addEventListener("pointerdown", unlockAudio, { once: true, passive: true }); return () => window.removeEventListener("pointerdown", unlockAudio); }, []);
   const channel = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   // Live sea: presence (who's here) + broadcast (a bottle was just sent). Only mood + atoll travel, never the text.
@@ -69,6 +74,7 @@ export function SeaProvider({ children }: { children: React.ReactNode }) {
         if (!CATEGORY_BY_ID[a.category]) return;
         setArrivals((n) => n + 1);
         setSailing({ id: Date.now(), ...a });
+        setThrowing({ id: Date.now(), color: CATEGORY_BY_ID[a.category].color, soft: true });
         navigator.vibrate?.([6, 40, 6]);
       })
       .subscribe((status) => { if (status === "SUBSCRIBED") ch.track({ at: Date.now() }); });
@@ -160,19 +166,21 @@ export function SeaProvider({ children }: { children: React.ReactNode }) {
                 defaultAtoll={writer.atoll}
                 defaultCategory={writer.category}
                 onClose={() => setWriter(null)}
-                onPosted={(p) => { postedCb.current?.(p); setWriter(null); channel.current?.send({ type: "broadcast", event: "bottle", payload: { category: p.category, atoll: p.atoll_code } }); }}
+                onPosted={(p) => { postedCb.current?.(p); setWriter(null); setTimeout(() => setThrowing({ id: Date.now(), color: CATEGORY_BY_ID[p.category].color, soft: false }), 250); channel.current?.send({ type: "broadcast", event: "bottle", payload: { category: p.category, atoll: p.atoll_code } }); }}
               />
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Someone, somewhere, just sent a bottle: it sails across the top of the screen */}
+      {/* A bottle thrown into the sea: arc, splash, ripples and the sound of water */}
+      {throwing && <BottleThrow key={throwing.id} color={throwing.color} soft={throwing.soft} onDone={() => setThrowing(null)} />}
+
+      {/* Someone, somewhere, just sent a bottle: a note at the top says where it came from */}
       <AnimatePresence>
         {sailing && (
           <motion.div key={sailing.id} className="pointer-events-none fixed inset-x-0 top-[calc(4rem+env(safe-area-inset-top))] z-[55] md:top-24"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div className="animate-sail"><span className="inline-block -rotate-[70deg]"><Bottle color={CATEGORY_BY_ID[sailing.category].color} height={56} /></span></div>
             <p className="mx-auto mt-1 w-fit rounded-full border border-white/10 bg-abyss/80 px-4 py-1.5 text-xs text-foam backdrop-blur-md">
               A {CATEGORY_BY_ID[sailing.category].label.toLowerCase()} bottle just washed ashore{ATOLL_BY_CODE[sailing.atoll] ? ` from ${ATOLL_BY_CODE[sailing.atoll].name}` : ""} 🌊
             </p>
