@@ -2,6 +2,13 @@
 
 Copy this file into the Vaahaka-HUB repo (e.g. `CODEX.md` or `docs/CODEX-HANDOFF.md`). It contains no secrets.
 
+## Current override — 2026-10-30
+
+**iOS 27 icon resolved and confirmed by the owner**, fix commit `b51800f`.
+Read [the confirmed fix](docs/PWA-IOS27-ICON-FIX.md) before changing install metadata.
+The embedded PNG touch icon must be preserved. Production uses `https://ihusaas.online/`;
+`www` redirects to the apex. Earlier pending-device-test and www guidance below is historical.
+
 ## What this is
 Vaahaka-HUB is the **Ihusaas** web app (Next.js, deployed on **Vercel**, production alias `husaasonline.vercel.app`, custom domain `ihusaas.online`). The owner's personal OS, **FODIBEY**, runs on a separate laptop server and talks to Ihusaas over a small API.
 
@@ -84,4 +91,6 @@ Ihusaas now uses the same approach: scripts/build-pwa-icons.mjs reads the existi
 generates src/lib/generated/pwa-icons.json for the server layout, and embeds it in public/install.html.
 prebuild/predev and brand:build regenerate it. Network PNGs remain available for manifest/other browsers.
 No remote files or services were changed. Confirm the live HTML contains data:image/png;base64
-before asking the owner to add the shortcut. Actual iOS home-screen result still requires their confirmation.
+before testing installation. The owner subsequently confirmed it worked on iOS 27
+on 2026-10-30 (fix commit `b51800f`). See docs/PWA-IOS27-ICON-FIX.md for the
+evidence, regeneration commands, and regression checks.

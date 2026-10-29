@@ -59,9 +59,10 @@ Run `node --test tests/pwa-security.test.mjs`, `npm run typecheck`, `npm audit`,
 When a local server is running, build separately: `NEXT_DIST_DIR=.next-sweep npm run build`.
 
 The install manifest uses a same-origin `/` launch URL. The correct production address is
-`https://ihusaas.online/` (without `www`). Icon URLs are versioned and
-opaque. After deploying an icon update, remove the old iPhone home-screen shortcut, open
-this address in Safari, let it load, and add it again. Device-side icon caching still requires
-real iPhone verification; desktop/browser tests cannot prove the iOS home-screen tile.
+`https://ihusaas.online/` (without `www`). The Apple touch icon is an opaque PNG
+embedded directly in the initial HTML head. **The owner confirmed the iOS 27
+black “I” icon was fixed on 2026-10-30.** Preserve this approach: `npm run pwa:build`
+regenerates the embedded icon; `npm run brand:build` also rebuilds the artwork.
+See [the confirmed fix and maintenance checks](docs/PWA-IOS27-ICON-FIX.md).
 
 See [the security review](docs/SECURITY-REVIEW-2026-10-29.md) for changes and remaining operational work.

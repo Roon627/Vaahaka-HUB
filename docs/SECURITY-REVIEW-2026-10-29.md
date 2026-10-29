@@ -17,7 +17,7 @@ Browser tests cover homepage/map and invalid suggestion requests. Regression tes
 ## Remaining operational work
 - The handover reports exposed credentials. Rotate the Fodibey and Supabase service-role credentials through their provider/Vercel settings, updating connected services. Code changes cannot revoke old credentials. No secrets were printed or committed.
 - Live database grants and deployed migrations were not exhaustively verified; anonymous device tokens are rate-limit identifiers, not strong user authentication. Concurrent database-level abuse testing was not performed.
-- Verify the installed icon on an actual iPhone after deployment and reinstallation. The old black tile can remain cached by iOS; server/browser checks alone cannot confirm its replacement.
+- Completed 2026-10-30: the owner confirmed the iOS 27 icon fix after deployment of `b51800f`. See [the embedded-PNG fix](PWA-IOS27-ICON-FIX.md). Future icon changes still require device testing.
 - Push does not guarantee Vercel has finished deployment. Check the deployed manifest, icon responses, and unauthenticated `/api/fodibey/v1/health` (401) after deployment.
 
 References: https://nextjs.org/docs/app/guides/upgrading/version-15 and
