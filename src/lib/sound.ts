@@ -4,7 +4,7 @@
  * Browsers only allow audio after a tap, so the context is created on the first pointer press (see unlockAudio), which
  * also downloads the little files (about 90 KB in all). Until then every play call quietly does nothing.
  * Each play picks one of a few takes at random with a touch of pitch variation, so it never sounds like a loop.
- * Sounds can be turned off from the Menu; the choice is remembered.
+ * Sounds are OFF by default; they can be turned on from the Menu and the choice is remembered.
  */
 const KEY = "ihusaas.sound";
 export const SOUND_EVENT = "ihusaas:sound";
@@ -20,7 +20,8 @@ let loading = false;
 const buffers: Record<Kind, AudioBuffer[]> = { tear: [], splash: [] };
 const last: Record<Kind, number> = { tear: -1, splash: -1 };
 
-export const soundOn = () => { try { return localStorage.getItem(KEY) !== "off"; } catch { return true; } };
+/** Off until the person turns it on in the Menu: a quiet place stays quiet by default. */
+export const soundOn = () => { try { return localStorage.getItem(KEY) === "on"; } catch { return false; } };
 export function setSound(on: boolean) {
   try { localStorage.setItem(KEY, on ? "on" : "off"); } catch { /* private mode: lasts until reload */ }
   window.dispatchEvent(new Event(SOUND_EVENT));

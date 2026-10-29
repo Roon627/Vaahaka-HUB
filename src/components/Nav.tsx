@@ -54,7 +54,7 @@ function Tile({ sticker, title, hint, onClick, href, tone = "plain", badge }: { 
 
 function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () => void }) {
   const { openRandom, finding } = useSea();
-  const [on, setOn] = useState(true);
+  const [on, setOn] = useState(false);
   useEffect(() => { const sync = () => setOn(soundOn()); sync(); window.addEventListener(SOUND_EVENT, sync); return () => window.removeEventListener(SOUND_EVENT, sync); }, []);
 
   const steps = [

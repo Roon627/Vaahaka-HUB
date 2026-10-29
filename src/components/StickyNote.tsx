@@ -11,6 +11,7 @@ import { looksLikeCrisis } from "./CrisisNudge";
 
 /** The notepad shows the most felt letters; swipe a page away to tear it off and read the next. */
 const MAX_CHARS = 150;
+const THAANA = /[\u0780-\u07BF]/;
 
 interface Note { id: string; felt?: number; eyebrow: string; greeting?: string; lines: string[]; sign: string; post?: Post }
 
@@ -30,8 +31,10 @@ function eligible(p: Post) {
 
 function clip(body: string) {
   const t = body.replace(/\s+/g, " ").trim();
-  if (t.length <= MAX_CHARS) return t;
-  const cut = t.slice(0, MAX_CHARS);
+  // Thaana is taller and its vowel marks hang below the line, so it gets fewer characters and is never line-clamped (see PageBody)
+  const max = THAANA.test(t) ? 130 : MAX_CHARS;
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max);
   const stop = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("! "), cut.lastIndexOf("? "), cut.lastIndexOf("۔ "));
   return (stop > 70 ? cut.slice(0, stop + 1) : cut.slice(0, cut.lastIndexOf(" ")) + "…").trim();
 }
@@ -72,7 +75,7 @@ function PageBody({ note, onOpen }: { note: Note; onOpen: (p: Post) => void }) {
     <>
     <p className="text-[10px] font-bold uppercase leading-8 tracking-[0.24em] text-inksoft">{note.eyebrow}</p>
     {note.greeting && <p className="font-hand text-3xl leading-8">{note.greeting}</p>}
-    <div dir="auto" className={`font-hand leading-8 ${size} ${note.post ? "line-clamp-5" : ""}`}>
+    <div dir="auto" className={`font-hand leading-8 ${size} ${note.post && !THAANA.test(note.lines.join(" ")) ? "line-clamp-5" : ""}`}>
       {note.lines.map((l, k) => <p key={k}>{l}</p>)}
     </div>
     {/* the sign-off and the button sit at the foot of the page, wherever the letter ends */}
