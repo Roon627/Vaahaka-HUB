@@ -7,7 +7,7 @@
  *  - Hashed build assets, brand images and map/island data: cache first, refreshed in the background.
  * Bump VERSION to invalidate caches after a change to this file's strategy.
  */
-const VERSION = "v6";
+const VERSION = "v7";
 const SHELL = `rf-shell-${VERSION}`;
 const RUNTIME = `rf-rt-${VERSION}`;
 const PRECACHE = ["/offline.html", "/brand/stickers/sad.svg", "/help", "/brand/mark.svg", "/brand/png/icon-192.png", "/manifest.webmanifest", "/data/maldives-atolls.geojson", "/data/maldives-islands.json"];
@@ -31,6 +31,8 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // never touch Supabase / other origins
+  // install metadata goes straight to the network: the worker must never sit between iOS and its home-screen icon / manifest
+  if (/^\/(apple-touch-icon|manifest\.webmanifest|favicon)/.test(url.pathname)) return;
 
   if (req.mode === "navigate") {
     event.respondWith(

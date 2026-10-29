@@ -21,7 +21,6 @@ export const metadata: Metadata = {
   title: { default: title, template: "%s · Ihusaas" },
   description,
   applicationName: "Ihusaas",
-  icons: { apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }] },
   appleWebApp: { capable: true, title: "Ihusaas", statusBarStyle: "black-translucent" },
   other: { "mobile-web-app-capable": "yes" },
   formatDetection: { telephone: false }, // we link helpline numbers explicitly; don't auto-link random digits
@@ -38,6 +37,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Hand-written (public/manifest.webmanifest) instead of app/manifest.ts: Next adds crossorigin="use-credentials" to its link,
             which makes iOS fetch the manifest icons in credentialed CORS mode and drop them (generic letter icon on Add to Home Screen). */}
         <link rel="manifest" href="/manifest.webmanifest" />
+        {/* Same recipe as Fodibey/Badhige: plain PNGs, every size listed, the old precomposed name too, and a ?v= on each URL.
+            iOS keeps a home-screen tile per icon URL (even a failed, generic one) and only a new URL makes it fetch again: bump ?v= when the artwork changes. */}
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=6" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152.png?v=6" />
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167.png?v=6" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=6" />
+        <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/apple-touch-icon.png?v=6" />
       </head>
       <body className="min-h-screen font-sans antialiased">
         <SeaProvider>
