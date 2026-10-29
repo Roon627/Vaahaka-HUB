@@ -30,3 +30,18 @@ test('Safari install page declares one real touch icon before its body', () => {
   assert.ok(readFileSync('public/pwa/ihusaas-install-180.png').length > 0);
   assert.match(html, /location.replace\('\/'\)/);
 });
+
+test('iOS touch icons embed the exact PNG bytes, without a network fetch', () => {
+  const source = readFileSync('public/pwa/ihusaas-install-180.png');
+  const generated = JSON.parse(readFileSync('src/lib/generated/pwa-icons.json'));
+  const install = readFileSync('public/install.html', 'utf8');
+  const head = install.slice(0, install.indexOf('</head>'));
+  const link = head.match(/<link\b[^>]*rel="apple-touch-icon"[^>]*>/)?.[0];
+  const href = link?.match(/href="([^"]+)"/)?.[1];
+  assert.equal(href, generated.appleTouchIcon);
+  assert.ok(href.startsWith('data:image/png;base64,'));
+  assert.deepEqual(Buffer.from(href.split(',')[1], 'base64'), source);
+  const layout = readFileSync('src/app/layout.tsx', 'utf8');
+  assert.match(layout, /href=\{appleTouchIcon\}/);
+  assert.match(layout, /@\/lib\/generated\/pwa-icons.json/);
+});

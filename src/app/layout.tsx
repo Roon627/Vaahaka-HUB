@@ -5,6 +5,9 @@ import Nav from "@/components/Nav";
 import Ocean from "@/components/Ocean";
 import { SeaProvider } from "@/components/SeaProvider";
 import PWA from "@/components/PWA";
+import pwaIcons from "@/lib/generated/pwa-icons.json";
+
+const { appleTouchIcon } = pwaIcons;
 
 // Soft, warm serif for stories + headings; rounded sans for UI.
 const display = Fraunces({ subsets: ["latin"], variable: "--font-display", style: ["normal", "italic"] });
@@ -35,9 +38,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`dark ${display.variable} ${sans.variable} ${hand.variable}`}>
       <head>
-        {/* Static, same-origin install metadata and opaque, versioned touch icons. */}
+        {/* Embed the PNG so iOS home-screen installation does not need a separate icon fetch. */}
         <link rel="manifest" href="/manifest.webmanifest" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/pwa/ihusaas-install-180.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href={appleTouchIcon} />
       </head>
       <body className="min-h-screen font-sans antialiased">
         <SeaProvider>

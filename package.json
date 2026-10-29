@@ -8,7 +8,10 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "geo:build": "node scripts/build-geo-data.mjs",
-    "brand:build": "node scripts/build-brand.mjs"
+    "brand:build": "node scripts/build-brand.mjs && npm run pwa:build",
+    "pwa:build": "node scripts/build-pwa-icons.mjs",
+    "prebuild": "npm run pwa:build",
+    "predev": "npm run pwa:build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

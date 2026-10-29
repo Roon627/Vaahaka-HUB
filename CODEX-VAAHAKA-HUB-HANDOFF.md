@@ -75,3 +75,13 @@ paths, so there is no redirect when installing from https://ihusaas.online/insta
 Update FODIBEY's externally configured API base to https://ihusaas.online/api/fodibey/v1
 and NEXT_PUBLIC_SITE_URL in Vercel to https://ihusaas.online. Existing www installations
 should be replaced from the apex. On-device icon rendering still needs user verification.
+
+## iOS 27 touch-icon correction — 2026-10-30
+The user's screenshot shows the logo in Share preview but a monogram already in the Add to Home Screen sheet.
+Read-only inspection of fodibey's current ~/Desktop/GUIFODI-main showed Badhige is now separate.
+~/Desktop/Badhige-source/scripts/build-badhige.mjs embeds its PNG as a data URI, as does its adminPwa.ts.
+Ihusaas now uses the same approach: scripts/build-pwa-icons.mjs reads the existing opaque PNG,
+generates src/lib/generated/pwa-icons.json for the server layout, and embeds it in public/install.html.
+prebuild/predev and brand:build regenerate it. Network PNGs remain available for manifest/other browsers.
+No remote files or services were changed. Confirm the live HTML contains data:image/png;base64
+before asking the owner to add the shortcut. Actual iOS home-screen result still requires their confirmation.
