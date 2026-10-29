@@ -45,7 +45,7 @@ const page = {
   in: ({ calm }: { d: number; calm: boolean }) => (calm ? { opacity: 0 } : { opacity: 1 }), // the next page is already there, underneath
   on: { opacity: 1, y: 0, scale: 1 },
   out: ({ d, calm }: { d: number; calm: boolean }) =>
-    calm ? { opacity: 0 } : { x: d * 150, y: 70, rotate: d * 16, opacity: 0, transition: { duration: 0.34, ease: "easeIn" as const } },
+    calm ? { opacity: 0 } : { x: d * 150, y: 70, rotate: d * 16, opacity: 0, zIndex: 20, transition: { duration: 0.34, ease: "easeIn" as const } },
 };
 
 /** One page of the pad. It owns its drag position, so the next page always starts centred. */
@@ -67,7 +67,7 @@ const Page = forwardRef<HTMLDivElement, { note: Note; can: boolean; calm: boolea
       dragSnapToOrigin
       dragElastic={0.7}
       onDragEnd={onEnd}
-      whileDrag={{ scale: 1.02 }}
+      whileDrag={{ scale: 1.02, zIndex: 20 }}
       style={{ x, rotate: calm ? 0 : dragTilt }}
       transition={{ type: "spring", stiffness: 180, damping: 18 }}
       className={`notepad relative flex h-[22.5rem] flex-col overflow-hidden ${can ? "cursor-grab active:cursor-grabbing" : ""}`}

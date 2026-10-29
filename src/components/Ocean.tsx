@@ -6,6 +6,9 @@ import { DAY_SKY, NIGHT_SKY, skyAt, type SkyState } from "@/lib/sky";
 import { useWeather } from "@/lib/weather";
 import Moon from "./Moon";
 
+/** Blend two #rrggbb colours (t = 0 → a, 1 → b). */
+const mix = (a: string, b: string, t: number) => "#" + [1, 3, 5].map((i) => { const x = parseInt(a.slice(i, i + 2), 16), y = parseInt(b.slice(i, i + 2), 16); return Math.round(x + (y - x) * t).toString(16).padStart(2, "0"); }).join("");
+
 interface Star { id: number; x: number; y: number; s: number; dur: number; delay: number }
 interface Rise { id: number; left: number; size: number; dur: number; delay: number; bubble: boolean; warm: boolean }
 interface Ripple { id: number; x: number; y: number }
@@ -117,8 +120,12 @@ export default function Ocean() {
         <>
           <motion.div className="absolute" style={{ right: "7%", top: `${sky.sun.y}%`, y: moonY, opacity: moonO, translateX: "50%", translateY: "-50%" }}>
             <div className="transition-opacity duration-[4000ms]" style={{ opacity: sky.sun.visible }}>
-              <div className="h-12 w-12 rounded-full sm:h-28 sm:w-28"
-                style={{ background: `radial-gradient(circle at 40% 38%, #fffdf2 0%, ${sky.sun.color} 62%)`, boxShadow: `0 0 ${50 * sky.sun.glow + 20}px ${14 * sky.sun.glow}px ${sky.sun.color}88, 0 0 160px 50px ${sky.sun.color}33` }} />
+              {/* a blown-out white core, a soft rim in the sun's real colour, and bloom: no 3D ball shading */}
+              <div className="h-12 w-12 rounded-full sm:h-24 sm:w-24"
+                style={{
+                  background: `radial-gradient(circle, ${mix(sky.sun.color, "#fffffa", 0.9 - 0.45 * sky.sun.glow)} 0%, ${mix(sky.sun.color, "#fffdf0", 0.8 - 0.45 * sky.sun.glow)} 46%, ${mix(sky.sun.color, "#fffdf0", 0.35 - 0.2 * sky.sun.glow)} 76%, ${sky.sun.color} 100%)`,
+                  boxShadow: `0 0 ${14 + 16 * sky.sun.glow}px ${4 + 6 * sky.sun.glow}px ${sky.sun.color}cc, 0 0 ${70 * sky.sun.glow + 40}px ${24 * sky.sun.glow + 10}px ${sky.sun.color}66, 0 0 260px 110px ${sky.sun.color}26`,
+                }} />
             </div>
           </motion.div>
 
