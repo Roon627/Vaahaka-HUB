@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useMotionValue, useReducedMotion, useTransform, type PanInfo } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { POST_COLUMNS } from "@/hooks/usePosts";
@@ -42,14 +42,14 @@ function fromPost(p: Post): Note {
 }
 
 const page = {
-  in: (calm: boolean) => (calm ? { opacity: 0 } : { opacity: 1 }), // the next page is already there, underneath
+  in: ({ calm }: { d: number; calm: boolean }) => (calm ? { opacity: 0 } : { opacity: 1 }), // the next page is already there, underneath
   on: { opacity: 1, y: 0, scale: 1 },
   out: ({ d, calm }: { d: number; calm: boolean }) =>
-    calm ? { opacity: 0 } : { x: d * 420, y: 60, rotate: d * 22, opacity: 0, transition: { duration: 0.42, ease: "easeIn" as const } },
+    calm ? { opacity: 0 } : { x: d * 150, y: 70, rotate: d * 16, opacity: 0, transition: { duration: 0.34, ease: "easeIn" as const } },
 };
 
 /** One page of the pad. It owns its drag position, so the next page always starts centred. */
-function Page({ note, can, calm, dir, onTear, onOpen }: { note: Note; can: boolean; calm: boolean; dir: 1 | -1; onTear: (d: 1 | -1) => void; onOpen: (p: Post) => void }) {
+const Page = forwardRef<HTMLDivElement, { note: Note; can: boolean; calm: boolean; dir: 1 | -1; onTear: (d: 1 | -1) => void; onOpen: (p: Post) => void }>(function Page({ note, can, calm, dir, onTear, onOpen }, ref) {
   const x = useMotionValue(0);
   const dragTilt = useTransform(x, [-200, 0, 200], [-14, 0, 14]);
   const onEnd = (_: unknown, info: PanInfo) => {
@@ -59,6 +59,7 @@ function Page({ note, can, calm, dir, onTear, onOpen }: { note: Note; can: boole
   const size = long < 130 ? "text-2xl md:text-[1.7rem]" : "text-xl md:text-2xl";
   return (
     <motion.div
+      ref={ref}
       custom={{ d: dir, calm }}
       variants={page}
       initial="in" animate="on" exit="out"
@@ -85,7 +86,7 @@ function Page({ note, can, calm, dir, onTear, onOpen }: { note: Note; can: boole
       )}
     </motion.div>
   );
-}
+});
 
 export default function StickyNote() {
   const { openPost } = useSea();

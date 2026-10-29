@@ -118,7 +118,7 @@ export default function DumpingGround() {
             <span aria-hidden="true" className="absolute right-6 top-6 hidden font-hand text-2xl text-sand/80 md:block">Let it all out.</span>
             <StickyNote />
             <div className="shore-hero-bottle hidden md:block" aria-hidden="true"><Bottle color="#9fe3d0" height={230} glow /></div>
-            <span aria-hidden="true" className="absolute -bottom-2 right-10 hidden font-hand text-2xl text-sand/80 md:block">The sea is listening.</span>
+            <span aria-hidden="true" className="absolute -bottom-6 right-2 hidden font-hand text-2xl text-sand/80 md:block">The sea is listening.</span>
             <span aria-hidden="true" className="absolute right-8 top-20 hidden text-xl text-sand md:block">✧</span>
           </div>
         </div>
