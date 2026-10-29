@@ -70,20 +70,23 @@ const Page = forwardRef<HTMLDivElement, { note: Note; can: boolean; calm: boolea
       whileDrag={{ scale: 1.02, zIndex: 20 }}
       style={{ x, rotate: calm ? 0 : dragTilt }}
       transition={{ type: "spring", stiffness: 180, damping: 18 }}
-      className={`notepad relative flex h-[22.5rem] flex-col overflow-hidden ${can ? "cursor-grab active:cursor-grabbing" : ""}`}
+      className={`notepad relative flex h-[21.5rem] flex-col overflow-hidden ${can ? "cursor-grab active:cursor-grabbing" : ""}`}
     >
       <p className="text-[10px] font-bold uppercase leading-8 tracking-[0.24em] text-inksoft">{note.eyebrow}</p>
       {note.greeting && <p className="font-hand text-3xl leading-8">{note.greeting}</p>}
       <div dir="auto" className={`font-hand leading-8 ${size} ${note.post ? "line-clamp-5" : ""}`}>
         {note.lines.map((l, k) => <p key={k}>{l}</p>)}
       </div>
-      <p className="mt-2 font-hand text-xl leading-8 text-inksoft">{note.sign}</p>
-      {note.post && (
-        <div className="mt-auto flex items-center justify-between gap-2 pt-2">
-          <button onClick={() => onOpen(note.post!)} onPointerDownCapture={(e) => e.stopPropagation()} className="notepad-btn">Read the whole letter →</button>
-          {!!note.felt && <span className="text-xs text-inksoft">{note.felt} felt this</span>}
-        </div>
-      )}
+      {/* the sign-off and the button sit at the foot of the page, wherever the letter ends */}
+      <div className={note.post ? "mt-auto" : "mt-2"}>
+        <p className="font-hand text-xl leading-8 text-inksoft">{note.sign}</p>
+        {note.post && (
+          <div className="mt-1.5 flex items-center justify-between gap-2">
+            <button onClick={() => onOpen(note.post!)} onPointerDownCapture={(e) => e.stopPropagation()} className="notepad-btn">Read the whole letter →</button>
+            {!!note.felt && <span className="text-xs text-inksoft">{note.felt} felt this</span>}
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 });
