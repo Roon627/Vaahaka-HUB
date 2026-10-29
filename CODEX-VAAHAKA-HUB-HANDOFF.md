@@ -67,3 +67,11 @@ A minimal `/install.html` now isolates installation from framework metadata; one
 icon plus 192/512 manifest icons use new physical `/pwa/ihusaas-install-*.png` paths.
 SW v9 bypasses these paths. Installed launch goes home. This is an unconfirmed workaround:
 a real iPhone reinstall is still required; do not claim a proven iOS cause or resolution.
+
+## Canonical domain correction — 2026-10-30 (supersedes www guidance above)
+Vercel now serves https://ihusaas.online directly (200) and redirects www to the apex (308).
+Metadata and install guidance now use the apex. Icon/manifest URLs remain same-origin relative
+paths, so there is no redirect when installing from https://ihusaas.online/install.html.
+Update FODIBEY's externally configured API base to https://ihusaas.online/api/fodibey/v1
+and NEXT_PUBLIC_SITE_URL in Vercel to https://ihusaas.online. Existing www installations
+should be replaced from the apex. On-device icon rendering still needs user verification.

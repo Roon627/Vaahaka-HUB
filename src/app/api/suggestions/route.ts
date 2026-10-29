@@ -20,7 +20,7 @@ function sameOrigin(req: Request): boolean {
   if (!origin) return true; // non-browser callers (curl) have no Origin; rate limits still apply
   try {
     const o = new URL(origin).host.replace(/^www\./, "");
-    const mine = [req.headers.get("host") ?? "", new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.ihusaas.online").host].map((h) => h.replace(/^www\./, ""));
+    const mine = [req.headers.get("host") ?? "", new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://ihusaas.online").host].map((h) => h.replace(/^www\./, ""));
     return mine.includes(o);
   } catch { return false; }
 }
