@@ -114,7 +114,7 @@ export default function StickyNote() {
   const tear = useCallback((d: 1 | -1) => { if (notes.length > 1) { setDir(d); setI((n) => n + 1); } }, [notes.length]);
 
   return (
-    <div className="relative mx-auto w-[min(88vw,22rem)] pt-3 md:absolute md:left-[2%] md:top-[50px] md:mx-0 md:w-[21.5rem]">
+    <div className="relative mx-auto w-[min(88vw,22rem)] pt-3 lg:absolute lg:left-[2%] lg:top-[50px] lg:mx-0 lg:w-[21.5rem]">
       <div className="notepad-pad">
         <div aria-hidden className="notepad-base" />
         <div className="relative">
@@ -125,7 +125,7 @@ export default function StickyNote() {
         <div aria-hidden className="notepad-bind" />
       </div>
       {can && (
-        <div className="mt-7 flex items-center justify-center gap-3 text-[11px] tracking-wide text-mist md:justify-start md:pl-3">
+        <div className="mt-7 flex items-center justify-center gap-3 text-[11px] tracking-wide text-mist lg:justify-start lg:pl-3">
           <span aria-hidden>👈 Swipe to tear off the page</span>
           <button onClick={() => tear(1)} className="min-h-9 rounded-full border border-white/15 px-3 text-xs text-foam transition hover:bg-white/10 active:scale-95">Next page</button>
         </div>

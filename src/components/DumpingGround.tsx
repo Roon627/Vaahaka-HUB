@@ -98,7 +98,7 @@ export default function DumpingGround() {
 
       {/* ---------------------------------------------------------- surface */}
       <div className="shore-hero mx-auto max-w-6xl px-5 pb-16 pt-8 sm:px-10 md:pb-24 lg:pt-12">
-        <div className="grid items-center gap-6 md:grid-cols-[1.2fr_1fr] md:gap-12">
+        <div className="grid items-center gap-6 lg:grid-cols-[1.2fr_1fr] lg:gap-12">
           <div className="relative z-10">
             <h1 className="font-display text-[clamp(2.75rem,7vw,5.5rem)] font-light leading-[1.04] tracking-[-0.055em] text-foam">
               Say it<br /><em className="text-glow">to the sea.</em>
@@ -113,13 +113,13 @@ export default function DumpingGround() {
             <p className="mt-5 text-xs tracking-wide text-mist">No account. No name. Just you.</p>
           </div>
           <div className="shore-art">
-            <div className="shore-orbit shore-orbit-one hidden md:block" aria-hidden="true" />
-            <div className="shore-orbit shore-orbit-two hidden md:block" aria-hidden="true" />
-            <span aria-hidden="true" className="absolute left-[8%] top-0 hidden font-hand text-2xl text-sand/80 md:block">Let it all out.</span>
+            <div className="shore-orbit shore-orbit-one hidden lg:block" aria-hidden="true" />
+            <div className="shore-orbit shore-orbit-two hidden lg:block" aria-hidden="true" />
+            <span aria-hidden="true" className="absolute left-[8%] top-0 hidden font-hand text-2xl text-sand/80 lg:block">Let it all out.</span>
             <StickyNote />
-            <div className="shore-hero-bottle hidden md:block" aria-hidden="true"><Bottle color="#9fe3d0" height={230} glow /></div>
-            <span aria-hidden="true" className="absolute -right-[4%] bottom-2 hidden font-hand text-xl text-sand/80 md:block">The sea is listening.</span>
-            <span aria-hidden="true" className="absolute right-8 top-20 hidden text-xl text-sand md:block">✧</span>
+            <div className="shore-hero-bottle hidden lg:block" aria-hidden="true"><Bottle color="#9fe3d0" height={230} glow /></div>
+            <span aria-hidden="true" className="absolute hidden text-center font-hand text-xl leading-tight text-sand/80 lg:block" style={{ top: 380, right: "calc(-5% - 4px)", width: 112 }}>The sea is<br />listening.</span>
+            <span aria-hidden="true" className="absolute right-8 top-20 hidden text-xl text-sand lg:block">✧</span>
           </div>
         </div>
       </div>
