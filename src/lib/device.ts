@@ -14,11 +14,22 @@ function safeSet(k: string, v: string) {
 
 let memoryToken: string | null = null;
 
+/** crypto.randomUUID() is missing before iOS 15.4 and on plain-http pages; calling it there crashes the whole app (blank screen). */
+export function uuid(): string {
+  const c = typeof crypto !== "undefined" ? crypto : undefined;
+  if (c?.randomUUID) return c.randomUUID();
+  const b = new Uint8Array(16);
+  if (c?.getRandomValues) c.getRandomValues(b); else for (let i = 0; i < 16; i++) b[i] = Math.floor(Math.random() * 256);
+  b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+  const h = Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
+
 export function getDeviceToken(): string {
   if (typeof window === "undefined") return "";
   let t = safeGet(TOKEN_KEY) ?? memoryToken;
   if (!t) {
-    t = crypto.randomUUID() + crypto.randomUUID().slice(0, 8);
+    t = uuid() + uuid().slice(0, 8);
     memoryToken = t;
     safeSet(TOKEN_KEY, t);
   }

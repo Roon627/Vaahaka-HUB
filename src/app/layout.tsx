@@ -16,7 +16,8 @@ const title = "Ihusaas — say it to the sea";
 const description = "A quiet, anonymous place for Maldivians to set down what they're carrying. Seal it in a bottle. Let the sea listen.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.ihusaas.online"),
+  // Always the canonical www host: the apex redirects, and a redirecting og:image / icon URL is dropped by iOS and chat apps.
+  metadataBase: new URL("https://www.ihusaas.online"),
   title: { default: title, template: "%s · Ihusaas" },
   description,
   applicationName: "Ihusaas",

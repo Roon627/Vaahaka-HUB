@@ -252,7 +252,7 @@ await Promise.all(jobs);
 
 // App-router conventions: favicon + apple touch icon
 writeFileSync(new URL("icon.svg", APP), icon);
-await sharp(Buffer.from(iconM), { density: 300 }).resize(180).png().toFile(new URL("apple-icon.png", APP).pathname);
+await sharp(Buffer.from(iconM), { density: 300 }).resize(180).flatten({ background: "#15506a" }).removeAlpha().png().toFile(new URL("apple-icon.png", APP).pathname); // iOS paints transparency black
 await sharp(Buffer.from(icon), { density: 300 }).resize(96).png().toFile(new URL("icon.png", APP).pathname);
 
 write("README.md", `# Ihusaas — logo pack

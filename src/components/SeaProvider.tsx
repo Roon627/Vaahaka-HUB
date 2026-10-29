@@ -2,7 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { getOpened, markOpened } from "@/lib/device";
+import { getOpened, markOpened, uuid } from "@/lib/device";
 import { POST_COLUMNS } from "@/hooks/usePosts";
 import { ATOLL_BY_CODE, CATEGORY_BY_ID, type CategoryId } from "@/lib/constants";
 import Bottle from "./Bottle";
@@ -61,7 +61,7 @@ export function SeaProvider({ children }: { children: React.ReactNode }) {
 
   // Live sea: presence (who's here) + broadcast (a bottle was just sent). Only mood + atoll travel, never the text.
   useEffect(() => {
-    const me = crypto.randomUUID(); // per tab, not the device token
+    const me = uuid(); // per tab, not the device token
     const ch = supabase.channel("ihusaas-sea", { config: { presence: { key: me }, broadcast: { self: false } } });
     ch.on("presence", { event: "sync" }, () => setOnline(Object.keys(ch.presenceState()).length))
       .on("broadcast", { event: "bottle" }, ({ payload }) => {
