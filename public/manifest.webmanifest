@@ -1,0 +1,85 @@
+{
+  "id": "/",
+  "name": "Ihusaas",
+  "short_name": "Ihusaas",
+  "description": "A quiet, anonymous place for Maldivians to set down what they're carrying. Seal it in a bottle. Let the sea listen.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a1c26",
+  "theme_color": "#0c2330",
+  "lang": "en",
+  "categories": [
+    "lifestyle",
+    "social",
+    "health"
+  ],
+  "icons": [
+    {
+      "src": "/brand/png/icon-180-opaque.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/png/icon-opaque-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/png/icon-opaque-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/png/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/brand/png/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Write a letter",
+      "short_name": "Write",
+      "url": "/?write=1",
+      "icons": [
+        {
+          "src": "/brand/png/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Open a random bottle",
+      "short_name": "Surprise",
+      "url": "/?surprise=1",
+      "icons": [
+        {
+          "src": "/brand/png/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Get help now",
+      "short_name": "Help",
+      "url": "/help",
+      "icons": [
+        {
+          "src": "/brand/png/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

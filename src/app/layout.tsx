@@ -34,6 +34,11 @@ export const viewport: Viewport = { themeColor: "#0c2330", width: "device-width"
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`dark ${display.variable} ${sans.variable} ${hand.variable}`}>
+      <head>
+        {/* Hand-written (public/manifest.webmanifest) instead of app/manifest.ts: Next adds crossorigin="use-credentials" to its link,
+            which makes iOS fetch the manifest icons in credentialed CORS mode and drop them (generic letter icon on Add to Home Screen). */}
+        <link rel="manifest" href="/manifest.webmanifest" />
+      </head>
       <body className="min-h-screen font-sans antialiased">
         <SeaProvider>
           <Ocean />
