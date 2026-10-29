@@ -128,9 +128,12 @@ button, a, [role="button"], select, summary { touch-action: manipulation; }
     linear-gradient(90deg, transparent 34px, #c9604f55 34px, #c9604f55 36px, transparent 36px),
     repeating-linear-gradient(180deg, transparent 0, transparent calc(2rem - 1px), #8a9bb855 calc(2rem - 1px), #8a9bb855 2rem) 0 38px / 100% 100% no-repeat,
     linear-gradient(135deg, #f7edda, #e5d3ad);
-  box-shadow: 0 2px 3px #0003, 0 26px 60px -14px #0008; }
-.notepad::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 30px; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, #2c3a46, #1d2933); box-shadow: 0 2px 4px #0005; }
-.notepad::after { content: ''; position: absolute; left: 14px; right: 14px; top: 9px; height: 12px; background: radial-gradient(circle at 6px 6px, #0b141b 0 4px, transparent 4.5px) 0 0 / 22px 12px repeat-x; }
+  box-shadow: 0 1px 2px #0003; }
+/* the pad: a fixed binding on top, pages tear off from under it, the edge of the stack shows below */
+.notepad-pad { position: relative; transform: rotate(-2deg); }
+.notepad-base { position: absolute; inset: 0; border-radius: 4px 4px 8px 8px; background: #e5d3ad; box-shadow: 0 5px 0 -1px #ecdfbc, 0 10px 0 -2px #dccaa0, 0 28px 55px -14px #000a; }
+.notepad-bind { position: absolute; left: -2px; right: -2px; top: -4px; z-index: 10; height: 32px; border-radius: 5px 5px 2px 2px; pointer-events: none; background: linear-gradient(180deg, #34444f, #1d2933); box-shadow: 0 2px 4px #0006; }
+.notepad-bind::after { content: ''; position: absolute; left: 14px; right: 14px; top: 10px; height: 12px; background: radial-gradient(circle at 6px 6px, #0b141b 0 4px, transparent 4.5px) 0 0 / 22px 12px repeat-x; }
 .notepad-btn { min-height: 44px; border-radius: 999px; padding: 8px 16px; font-size: 13px; font-weight: 700; color: #3a2d1f; background: #3a2d1f14; transition: background .2s, transform .2s; }
 .notepad-btn:hover { background: #3a2d1f26; }
 .notepad-btn:active { transform: scale(.96); }
