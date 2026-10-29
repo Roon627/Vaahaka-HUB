@@ -1,14 +1,24 @@
 "use client";
 /**
- * Tiny sound engine: every sound is synthesised with the Web Audio API (no audio files, nothing to download).
- * Browsers only allow audio after a tap, so the context is created on the first pointer press (see unlockAudio)
- * and every play call quietly does nothing until then. Sounds can be turned off from the Menu; the choice is remembered.
+ * Sound effects: short real recordings (public domain, see public/sounds/CREDITS.txt) played with the Web Audio API.
+ * Browsers only allow audio after a tap, so the context is created on the first pointer press (see unlockAudio), which
+ * also downloads the little files (about 90 KB in all). Until then every play call quietly does nothing.
+ * Each play picks one of a few takes at random with a touch of pitch variation, so it never sounds like a loop.
+ * Sounds can be turned off from the Menu; the choice is remembered.
  */
 const KEY = "ihusaas.sound";
 export const SOUND_EVENT = "ihusaas:sound";
 
+const FILES = {
+  tear: [1, 2, 3].map((i) => `/sounds/paper-crumple-${i}.mp3`),
+  splash: [1, 2, 3].map((i) => `/sounds/splash-${i}.mp3`),
+} as const;
+type Kind = keyof typeof FILES;
+
 let ctx: AudioContext | null = null;
-let noise: AudioBuffer | null = null;
+let loading = false;
+const buffers: Record<Kind, AudioBuffer[]> = { tear: [], splash: [] };
+const last: Record<Kind, number> = { tear: -1, splash: -1 };
 
 export const soundOn = () => { try { return localStorage.getItem(KEY) !== "off"; } catch { return true; } };
 export function setSound(on: boolean) {
@@ -27,57 +37,35 @@ function ac(): AudioContext | null {
   } catch { return null; }
 }
 
+async function preload(c: AudioContext) {
+  if (loading) return;
+  loading = true;
+  await Promise.all((Object.keys(FILES) as Kind[]).flatMap((k) => FILES[k].map(async (url) => {
+    try {
+      const data = await (await fetch(url)).arrayBuffer();
+      buffers[k].push(await new Promise<AudioBuffer>((ok, bad) => c.decodeAudioData(data, ok, bad)));
+    } catch { /* a missing take just means one fewer variation */ }
+  })));
+}
+
 /** Call from a user gesture (first tap anywhere). */
-export const unlockAudio = () => { ac(); };
+export function unlockAudio() { const c = ac(); if (c) void preload(c); }
 
-function noiseBuf(c: AudioContext) {
-  if (!noise) {
-    noise = c.createBuffer(1, c.sampleRate * 1.5, c.sampleRate);
-    const d = noise.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-  }
-  return noise;
-}
-
-/** A burst of filtered noise: the building block of water, paper and crumple sounds. */
-function burst(c: AudioContext, at: number, dur: number, type: BiquadFilterType, f0: number, f1: number, gain: number, q = 0.8) {
-  const src = c.createBufferSource(); src.buffer = noiseBuf(c);
-  const f = c.createBiquadFilter(); f.type = type; f.Q.value = q;
-  f.frequency.setValueAtTime(f0, at); f.frequency.exponentialRampToValueAtTime(Math.max(40, f1), at + dur);
-  const g = c.createGain();
-  g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(gain, at + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
-  src.connect(f).connect(g).connect(c.destination);
-  src.start(at, Math.random() * 0.4, dur + 0.05);
-}
-
-function blip(c: AudioContext, at: number, f0: number, f1: number, dur: number, gain: number) {
-  const o = c.createOscillator(); o.type = "sine";
-  o.frequency.setValueAtTime(f0, at); o.frequency.exponentialRampToValueAtTime(f1, at + dur);
-  const g = c.createGain();
-  g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(gain, at + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
-  o.connect(g).connect(c.destination); o.start(at); o.stop(at + dur + 0.02);
-}
-
-/** A bottle hitting the sea: a low "plonk", a bright splash, a soft wash, then a few rising bubbles. */
-export function playSplash(strength = 1) {
+function play(kind: Kind, gain: number) {
   if (!soundOn()) return;
-  const c = ac(); if (!c || c.state !== "running") return;
-  const t = c.currentTime + 0.01, s = Math.min(1, Math.max(0.2, strength));
-  blip(c, t, 170, 48, 0.22, 0.5 * s);                       // the plonk
-  burst(c, t, 0.5, "bandpass", 2600, 700, 0.42 * s, 0.9);  // the splash
-  burst(c, t + 0.04, 1.0, "lowpass", 1400, 260, 0.2 * s);  // the wash settling
-  for (let i = 0; i < 6; i++) {                              // bubbles
-    const at = t + 0.14 + Math.random() * 0.6, f = 380 + Math.random() * 600;
-    blip(c, at, f, f * (1.5 + Math.random() * 0.5), 0.07 + Math.random() * 0.05, 0.1 * s);
-  }
+  const c = ac(); const list = buffers[kind];
+  if (!c || c.state !== "running" || !list.length) return;
+  let i = Math.floor(Math.random() * list.length);
+  if (list.length > 1 && i === last[kind]) i = (i + 1) % list.length; // never the same take twice in a row
+  last[kind] = i;
+  const src = c.createBufferSource(); src.buffer = list[i];
+  src.playbackRate.value = 0.94 + Math.random() * 0.12;
+  const g = c.createGain(); g.gain.value = gain;
+  src.connect(g).connect(c.destination); src.start();
 }
 
-/** A page ripped off a pad and scrunched up. */
-export function playTear() {
-  if (!soundOn()) return;
-  const c = ac(); if (!c || c.state !== "running") return;
-  const t = c.currentTime + 0.01;
-  burst(c, t, 0.32, "bandpass", 5200, 1800, 0.34, 0.6);        // the rip
-  for (let i = 0; i < 7; i++) burst(c, t + 0.05 + i * 0.035, 0.04, "highpass", 3000, 2400, 0.1 + Math.random() * 0.08); // fibres snapping
-  for (let i = 0; i < 5; i++) burst(c, t + 0.3 + i * 0.07 + Math.random() * 0.03, 0.06, "bandpass", 1800 + Math.random() * 1500, 900, 0.16); // the scrunch
-}
+/** A bottle landing in the sea. `strength` 0..1: other people's bottles arrive softer than yours. */
+export const playSplash = (strength = 1) => play("splash", 0.5 + 0.5 * Math.min(1, Math.max(0, strength)));
+
+/** A page torn off the pad and crumpled. */
+export const playTear = () => play("tear", 0.9);

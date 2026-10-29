@@ -162,6 +162,12 @@ button, a, [role="button"], select, summary { touch-action: manipulation; }
   .shore-bottle-card > span:first-child { height: 120px; }
   .shore-bottle-card > span:first-child > span > svg { height: 108px; width: auto; }
 }
+/* three bottles across on a phone: smaller bottle, tighter card */
+@media (max-width: 519px) {
+  .shore-bottle-card { padding: 6px 3px 10px; border-radius: 16px; }
+  .shore-bottle-card > span:first-child { height: 92px; }
+  .shore-bottle-card > span:first-child > span > svg { height: 82px; width: auto; }
+}
 
 /* Compact actions keep their labels on one line, including narrow phones. */
 .shore-primary, .shore-secondary { min-height: 44px; padding: 10px 16px; gap: 12px; font-size: 13px; white-space: nowrap; flex: 0 1 auto; }

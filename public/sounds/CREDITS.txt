@@ -1,0 +1,11 @@
+Sound effects: real recordings, public domain.
+
+paper-crumple-1/2/3.mp3  Cut from "Book, Paper, Pages, assorted" by stephan (Wikimedia Commons, via PDSounds).
+                         https://commons.wikimedia.org/wiki/File:Book_paper_pages_assorted.ogg
+                         Released into the public domain by the author. Edited: trimmed, filtered, loudness-normalised, MP3.
+
+splash-1/2/3.mp3         Cut from "Bathtub water splashes" by gradha / Grzegorz Adam Hankiewicz (Wikimedia Commons, PDSounds #775).
+                         https://commons.wikimedia.org/wiki/File:Bathtub_water_splashes.ogg
+                         Released into the public domain by the author. Edited: trimmed, filtered, loudness-normalised, MP3.
+
+Sources are kept (not committed) in marketing/sfx-src/.

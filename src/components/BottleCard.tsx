@@ -49,9 +49,9 @@ export default function BottleCard({ post, index, onOpen }: Props) {
 
         <span aria-hidden className={SHELF} />
 
-        <span className="mt-2.5 block max-w-full truncate px-1 font-display text-[15px] text-foam/90 transition-colors group-hover:text-foam">{place}</span>
-        <span className="block max-w-full truncate px-1 text-[11px] text-mist">{cat.emoji} {cat.label} · {timeAgo(post.created_at)}</span>
-        <span className="mt-0.5 block text-[11px] text-mist/70">{isOpened ? "opened" : post.trigger_warning ? "sealed" : `🕯️ ${post.listening_count} listening`}</span>
+        <span className="mt-2 block max-w-full truncate px-1 font-display text-[12.5px] text-foam/90 min-[520px]:text-[15px] transition-colors group-hover:text-foam">{place}</span>
+        <span className="block max-w-full truncate px-1 text-[10px] text-mist min-[520px]:text-[11px]">{cat.emoji} {cat.label} · {timeAgo(post.created_at)}</span>
+        <span className="mt-0.5 block text-[10px] text-mist/70 min-[520px]:text-[11px]">{isOpened ? "opened" : post.trigger_warning ? "sealed" : `🕯️ ${post.listening_count} listening`}</span>
       </button>
     </motion.li>
   );

@@ -154,7 +154,7 @@ export default function DumpingGround() {
         </AnimatePresence>
 
         {/* the shelf: bottles stand still; only touch moves them */}
-        <ul className="mx-auto mt-5 grid max-w-[96rem] grid-cols-2 gap-3 px-5 sm:grid-cols-3 sm:gap-4 sm:px-10 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <ul className="mx-auto mt-5 grid max-w-[96rem] grid-cols-3 gap-2 px-4 sm:gap-4 sm:px-10 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {posts.map((p, i) => <BottleCard key={p.id} post={p} index={i} onOpen={open} />)}
           {loading && posts.length === 0 && Array.from({ length: 6 }, (_, i) => <BottleSkeleton key={i} />)}
         </ul>
