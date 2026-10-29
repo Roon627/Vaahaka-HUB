@@ -17,34 +17,16 @@
   ],
   "icons": [
     {
-      "src": "/brand/png/icon-180-opaque.png?v=8",
-      "sizes": "180x180",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/brand/png/icon-opaque-192.png?v=8",
+      "src": "/pwa/ihusaas-install-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/brand/png/icon-opaque-512.png?v=8",
+      "src": "/pwa/ihusaas-install-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/brand/png/icon-maskable-192.png?v=8",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/brand/png/icon-maskable-512.png?v=8",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ],
   "shortcuts": [
@@ -54,8 +36,9 @@
       "url": "/?write=1",
       "icons": [
         {
-          "src": "/brand/png/icon-192.png?v=8",
-          "sizes": "192x192"
+          "src": "/pwa/ihusaas-install-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     },
@@ -65,8 +48,9 @@
       "url": "/?surprise=1",
       "icons": [
         {
-          "src": "/brand/png/icon-192.png?v=8",
-          "sizes": "192x192"
+          "src": "/pwa/ihusaas-install-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     },
@@ -76,8 +60,9 @@
       "url": "/help",
       "icons": [
         {
-          "src": "/brand/png/icon-192.png?v=8",
-          "sizes": "192x192"
+          "src": "/pwa/ihusaas-install-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     }

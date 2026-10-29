@@ -17,8 +17,16 @@ test('worker never intercepts API, credentials, or install metadata', () => {
   vm.runInNewContext(readFileSync('public/sw.js', 'utf8'), {
     self: { location: { origin: 'https://www.ihusaas.online' }, addEventListener: (k,v) => handlers[k] = v }, URL,
   });
-  for (const path of ['/api/fodibey/v1/openapi.json', '/api/private.png', '/manifest.webmanifest', '/apple-touch-icon.png?v=8', '/apple-icon.png', '/brand/png/icon-opaque-192.png?v=8']) {
+  for (const path of ['/pwa/ihusaas-install-180.png', '/install.html', '/api/fodibey/v1/openapi.json', '/api/private.png', '/manifest.webmanifest', '/apple-touch-icon.png?v=8', '/apple-icon.png', '/brand/png/icon-opaque-192.png?v=8']) {
     handlers.fetch({ request: new Request('https://www.ihusaas.online' + path), respondWith: () => assert.fail('intercepted ' + path) });
   }
   handlers.fetch({ request: new Request('https://www.ihusaas.online/data/a.json', { headers: { authorization: 'Bearer test' } }), respondWith: () => assert.fail('cached credentials') });
+});
+
+test('Safari install page declares one real touch icon before its body', () => {
+  const html = readFileSync('public/install.html', 'utf8');
+  assert.equal((html.match(/rel="apple-touch-icon"/g) || []).length, 1);
+  assert.ok(html.indexOf('rel="apple-touch-icon"') < html.indexOf('</head>'));
+  assert.ok(readFileSync('public/pwa/ihusaas-install-180.png').length > 0);
+  assert.match(html, /location.replace\('\/'\)/);
 });

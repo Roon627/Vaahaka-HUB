@@ -36,11 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Static, same-origin install metadata and opaque, versioned touch icons. */}
         <link rel="manifest" href="/manifest.webmanifest" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=8" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152.png?v=8" />
-        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167.png?v=8" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=8" />
-        <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/apple-touch-icon.png?v=8" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/pwa/ihusaas-install-180.png" />
       </head>
       <body className="min-h-screen font-sans antialiased">
         <SeaProvider>

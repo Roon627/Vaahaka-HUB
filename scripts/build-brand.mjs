@@ -254,6 +254,10 @@ await Promise.all(jobs);
 for (const size of [152, 167, 180, 192, 512]) {
   const bytes = await sharp(Buffer.from(iconM), { density: 300 }).resize(size).flatten({ background: "#15506a" }).removeAlpha().png().toBuffer();
   writeFileSync(new URL(`png/${size === 180 ? "icon-180-opaque" : `icon-opaque-${size}`}.png`, OUT), bytes);
+  if ([180, 192, 512].includes(size)) {
+    mkdirSync(new URL("../pwa/", OUT), { recursive: true });
+    writeFileSync(new URL(`../pwa/ihusaas-install-${size}.png`, OUT), bytes);
+  }
   if (size <= 180) writeFileSync(new URL(`../apple-touch-icon${size === 180 ? "" : `-${size}`}.png`, OUT), bytes);
 }
 

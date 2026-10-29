@@ -59,3 +59,11 @@ patched dependency lock, SW v8, icon URL v8, root PWA start URL, bounded request
 error/privacy hardening, and security headers. iPhone installation must still be verified
 on-device. Rotate previously exposed credentials in provider settings. Config backups use
 `.bak-2026-10-29-sweep`; public backups moved to ignored `.local-backups/`.
+
+## iPhone installed-icon follow-up
+User clarified the logo previews correctly but the installed icon becomes a black “I”.
+Live v8 touch PNG was confirmed 180×180 opaque RGB, HTTP 200, and present in initial head.
+A minimal `/install.html` now isolates installation from framework metadata; one touch
+icon plus 192/512 manifest icons use new physical `/pwa/ihusaas-install-*.png` paths.
+SW v9 bypasses these paths. Installed launch goes home. This is an unconfirmed workaround:
+a real iPhone reinstall is still required; do not claim a proven iOS cause or resolution.

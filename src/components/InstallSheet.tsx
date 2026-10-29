@@ -45,7 +45,10 @@ export default function InstallSheet({ onClose }: { onClose: () => void }) {
       )}
 
       {mode === "ios" && (
-        <Steps items={[<>Tap the <b>Share</b> button <Share /> in Safari (or Chrome).</>, <>Scroll down and tap <b>Add to Home Screen</b>.</>, <>Tap <b>Add</b>. Ihusaas now opens like an app.</>]} />
+        <>
+          <p className="mt-4 text-sm text-mist">Open the install page in Safari, then add Ihusaas to your home screen.</p>
+          <a href="/install.html" className="mt-4 flex min-h-11 items-center justify-center rounded-full bg-glow px-4 text-sm font-semibold text-abyss">Open install page</a>
+        </>
       )}
 
       {mode === "inapp" && (
