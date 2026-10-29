@@ -21,10 +21,11 @@ export const metadata: Metadata = {
   title: { default: title, template: "%s · Ihusaas" },
   description,
   applicationName: "Ihusaas",
+  icons: { apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }] },
   appleWebApp: { capable: true, title: "Ihusaas", statusBarStyle: "black-translucent" },
   other: { "mobile-web-app-capable": "yes" },
   formatDetection: { telephone: false }, // we link helpline numbers explicitly; don't auto-link random digits
-  openGraph: { type: "website", siteName: "Ihusaas", title, description, images: [{ url: "/brand/og.png", width: 1200, height: 630, alt: "Ihusaas" }] },
+  openGraph: { type: "website", siteName: "Ihusaas", title, description, images: [{ url: "/brand/og-square.png", width: 1200, height: 1200, alt: "Ihusaas" }, { url: "/brand/og.png", width: 1200, height: 630, alt: "Ihusaas" }] },
   twitter: { card: "summary_large_image", title, description, images: ["/brand/og.png"] },
 };
 // viewportFit "cover" lets the scene run under the notch; safe-area insets keep controls clear of it.

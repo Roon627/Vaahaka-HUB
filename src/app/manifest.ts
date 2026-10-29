@@ -16,8 +16,10 @@ export default function manifest(): MetadataRoute.Manifest {
     lang: "en",
     categories: ["lifestyle", "social", "health"],
     icons: [
-      { src: "/brand/png/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/brand/png/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      // Opaque, square, full-bleed: iOS paints any transparency black, so even the "any" icons have none.
+      { src: "/brand/png/icon-180-opaque.png", sizes: "180x180", type: "image/png", purpose: "any" },
+      { src: "/brand/png/icon-opaque-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/brand/png/icon-opaque-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
       { src: "/brand/png/icon-maskable-192.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
       { src: "/brand/png/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
