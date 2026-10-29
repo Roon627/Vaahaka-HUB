@@ -77,3 +77,11 @@ Audit of Codex's commits `4419b9a..b15cd58` found them sound (Next 15 upgrade, S
 - Desktop nav: **Write now sits before Menu** (Menu is last). The Menu panel is the same component everywhere; on phones it is a bottom sheet attached to the bar.
 - `package.json` now has `"test": "node --test tests/*.test.mjs"` (the existing test file was not wired to anything).
 - Note: Codex made `ihusaas.online` (apex) canonical and `www` redirects to it, the reverse of what older notes in this file say.
+
+### Later on 2026-10-30 (Claude): owner feedback round
+- **No install nags.** The mobile header "Install" pill and the "Keep Ihusaas close" popup are gone (`PWA.tsx` now only registers the service worker and hosts the how-to sheet). Installing is offered only in the Menu (`InstallRow`, shown only when installable). Don't bring the popup back.
+- **Menu is a `Sheet`** (same component as the mood and suggestion sheets) on phone and desktop, with sticker tiles (Contact us, Need help now?, Surprise me, Sounds) instead of a custom dropdown. The button uses one icon everywhere (a straight line plus two lines of sea) and no longer flips to an X.
+- **Paper wrinkles while you drag**, not on release: in `StickyNote.tsx` everything (clip-path polygon folding into a ball, three layers of creases, squash, shade) is derived from the drag distance via `amount`. The exit animation only moves x/y/opacity; the crumple follows x automatically. The next page is rendered underneath (`PageBody`, `inert`) so a crumpling page reveals text, not blank paper.
+- `.shore-art` has `z-index: 20` so a dragged page stays above the headline.
+- Souls-online is now a tiny inline chip (`SoulsOnline.tsx`) next to "No account. No name. Just you."
+- Bottle shelf is wider (`max-w-[96rem]`) with 2/3/4/5/6 columns (sm/md/lg/xl); `PAGE_SIZE` is 60 so the last row is never ragged. Desktop nav pill is more opaque (`bg-abyss/85`).

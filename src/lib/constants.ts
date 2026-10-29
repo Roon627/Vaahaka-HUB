@@ -80,4 +80,4 @@ export const ATOLL_GEOJSON_URL =
 
 export const BODY_MIN = 10;
 export const BODY_MAX = 5000;
-export const PAGE_SIZE = 20;
+export const PAGE_SIZE = 60; // divides evenly into 2, 3, 4, 5 and 6 columns, so the last row is never ragged

@@ -111,8 +111,10 @@ export default function DumpingGround() {
               <button onClick={() => openWriter({ atoll, category })} className="shore-primary">Write a letter <span aria-hidden>↗</span></button>
               <button onClick={openRandom} disabled={finding} className="shore-secondary disabled:opacity-50">{finding ? "Finding a bottle…" : "Surprise me"} <span aria-hidden>↝</span></button>
             </div>
-            <p className="mt-5 text-xs tracking-wide text-mist">No account. No name. Just you.</p>
-            <SoulsOnline />
+            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2">
+              <p className="text-xs tracking-wide text-mist">No account. No name. Just you.</p>
+              <SoulsOnline />
+            </div>
           </div>
           <div className="shore-art">
             <div className="shore-orbit shore-orbit-one hidden lg:block" aria-hidden="true" />
@@ -130,7 +132,7 @@ export default function DumpingGround() {
       <div id="bottles" className="relative min-h-[60vh] scroll-mt-24 pb-24" style={{ background: WATER }}>
         <Surface />
 
-        <div className="mx-auto max-w-6xl px-5 pt-3 sm:px-10">
+        <div className="mx-auto max-w-[96rem] px-5 pt-3 sm:px-10">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2 className="font-display text-2xl tracking-tight text-foam sm:text-3xl">Washed ashore</h2>
@@ -152,7 +154,7 @@ export default function DumpingGround() {
         </AnimatePresence>
 
         {/* the shelf: bottles stand still; only touch moves them */}
-        <ul className="mx-auto mt-5 grid max-w-6xl grid-cols-2 gap-3 px-5 sm:grid-cols-3 sm:gap-4 sm:px-10 md:grid-cols-4">
+        <ul className="mx-auto mt-5 grid max-w-[96rem] grid-cols-2 gap-3 px-5 sm:grid-cols-3 sm:gap-4 sm:px-10 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {posts.map((p, i) => <BottleCard key={p.id} post={p} index={i} onOpen={open} />)}
           {loading && posts.length === 0 && Array.from({ length: 6 }, (_, i) => <BottleSkeleton key={i} />)}
         </ul>

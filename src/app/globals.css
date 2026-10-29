@@ -117,7 +117,7 @@ button, a, [role="button"], select, summary { touch-action: manipulation; }
 .shore-primary:hover { background: #d0f1e3; transform: translateY(-2px); }
 .shore-secondary { border: 1px solid #ffffff24; color: #f5efe4; background: #0a1c2633; }
 .shore-secondary:hover { background: #ffffff0c; }
-.shore-art { position: relative; height: 410px; isolation: isolate; }
+.shore-art { position: relative; z-index: 20; height: 410px; isolation: isolate; } /* above the headline, so a page dragged left stays on top of it */
 .shore-art::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: 50%; background: radial-gradient(ellipse, #9fe3d019, transparent 67%); }
 .shore-orbit { position: absolute; border: 1px solid #9fe3d019; border-radius: 50%; transform: rotate(-25deg); }
 .shore-orbit-one { inset: 35px -5px; }

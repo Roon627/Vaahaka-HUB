@@ -42,32 +42,67 @@ function fromPost(p: Post): Note {
   return { id: p.id, felt: p.felt_count, eyebrow: "Found in a bottle", lines: [clip(p.body)], sign: where ? `Someone from ${where}` : "Someone, somewhere", post: p };
 }
 
-// The torn page is scrunched up as it leaves: its outline folds into an irregular ball while creases fade in over it.
-const FLAT = "polygon(0% 0%, 33% 0%, 66% 0%, 100% 0%, 100% 33%, 100% 66%, 100% 100%, 66% 100%, 33% 100%, 0% 100%, 0% 66%, 0% 33%)";
-const BALL = "polygon(14% 10%, 38% 0%, 60% 16%, 90% 6%, 100% 36%, 82% 58%, 96% 90%, 62% 100%, 40% 82%, 8% 94%, 2% 62%, 18% 34%)";
+// The page wrinkles as you pull it, not after you let go: everything below is driven by how far it has been dragged
+// (`amount`, 0..1), so the outline folds into a ball, creases pile up and the paper darkens a little, all at the finger's pace.
+// Letting go just carries on from wherever the finger left it.
+const FLAT_PTS: [number, number][] = [[0, 0], [33, 0], [66, 0], [100, 0], [100, 33], [100, 66], [100, 100], [66, 100], [33, 100], [0, 100], [0, 66], [0, 33]];
+const BALL_PTS: [number, number][] = [[14, 10], [38, 0], [60, 16], [90, 6], [100, 36], [82, 58], [96, 90], [62, 100], [40, 82], [8, 94], [2, 62], [18, 34]];
+const poly = (a: number) => `polygon(${FLAT_PTS.map(([x, y], i) => `${(x + (BALL_PTS[i][0] - x) * a).toFixed(1)}% ${(y + (BALL_PTS[i][1] - y) * a).toFixed(1)}%`).join(",")})`;
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+const CREASES = [
+  "linear-gradient(62deg, transparent 36%, rgba(70,45,15,.5) 37%, rgba(255,255,255,.45) 38.3%, transparent 40%), linear-gradient(8deg, transparent 22%, rgba(70,45,15,.4) 23%, transparent 25.5%)",
+  "linear-gradient(118deg, transparent 50%, rgba(255,255,255,.55) 51%, rgba(70,45,15,.45) 52.4%, transparent 55%), linear-gradient(152deg, transparent 64%, rgba(70,45,15,.38) 65%, transparent 68%), radial-gradient(ellipse at 28% 32%, rgba(70,45,15,.26), transparent 55%)",
+  "linear-gradient(95deg, transparent 30%, rgba(70,45,15,.34) 31%, transparent 33%), linear-gradient(35deg, transparent 44%, rgba(255,255,255,.45) 45%, rgba(70,45,15,.4) 46.4%, transparent 49%), linear-gradient(170deg, transparent 12%, rgba(70,45,15,.34) 13%, transparent 16%), radial-gradient(ellipse at 76% 72%, rgba(70,45,15,.32), transparent 50%)",
+];
 const page = {
-  in: ({ calm }: { d: number; calm: boolean }) => (calm ? { opacity: 0 } : { opacity: 1, clipPath: FLAT }), // the next page is already there, underneath
-  on: { opacity: 1, y: 0, scale: 1, clipPath: FLAT },
+  in: ({ calm }: { d: number; calm: boolean }) => (calm ? { opacity: 0 } : { opacity: 1 }), // the next page is already there, underneath
+  on: { opacity: 1, y: 0 },
   out: ({ d, calm }: { d: number; calm: boolean }) =>
     calm ? { opacity: 0 } : {
-      x: [null, d * 40, d * 150] as [null, number, number], y: [null, -26, 150] as [null, number, number], rotate: [null, d * 14, d * 48] as [null, number, number], scale: [null, 0.78, 0.34] as [null, number, number], opacity: [null, 1, 0] as [null, number, number], clipPath: [FLAT, FLAT, BALL],
-      zIndex: 20, transition: { duration: 0.62, times: [0, 0.35, 1], ease: "easeIn" as const },
+      x: [null, d * 70, d * 240] as [null, number, number], y: [null, -20, 150] as [null, number, number], opacity: [null, 1, 0] as [null, number, number],
+      zIndex: 20, transition: { duration: 0.6, times: [0, 0.35, 1], ease: "easeIn" as const },
     },
 };
-const creases = {
-  in: { opacity: 0 }, on: { opacity: 0 },
-  out: { opacity: [0, 0, 1], transition: { duration: 0.62, times: [0, 0.3, 0.6] } },
-};
+
+/** What is written on a page: shared by the live page and the copy waiting underneath. */
+function PageBody({ note, onOpen }: { note: Note; onOpen: (p: Post) => void }) {
+  const long = note.lines.join(" ").length;
+  const size = long < 130 ? "text-2xl md:text-[1.7rem]" : "text-xl md:text-2xl";
+  return (
+    <>
+    <p className="text-[10px] font-bold uppercase leading-8 tracking-[0.24em] text-inksoft">{note.eyebrow}</p>
+    {note.greeting && <p className="font-hand text-3xl leading-8">{note.greeting}</p>}
+    <div dir="auto" className={`font-hand leading-8 ${size} ${note.post ? "line-clamp-5" : ""}`}>
+      {note.lines.map((l, k) => <p key={k}>{l}</p>)}
+    </div>
+    {/* the sign-off and the button sit at the foot of the page, wherever the letter ends */}
+    <div className={note.post ? "mt-auto" : "mt-2"}>
+      <p className="font-hand text-xl leading-8 text-inksoft">{note.sign}</p>
+      {note.post && (
+        <div className="mt-1.5 flex items-center justify-between gap-2">
+          <button onClick={() => onOpen(note.post!)} onPointerDownCapture={(e) => e.stopPropagation()} className="notepad-btn">Read the whole letter →</button>
+          {!!note.felt && <span className="text-xs text-inksoft">{note.felt} felt this</span>}
+        </div>
+      )}
+    </div>
+    </>
+  );
+}
 
 /** One page of the pad. It owns its drag position, so the next page always starts centred. */
 const Page = forwardRef<HTMLDivElement, { note: Note; can: boolean; calm: boolean; dir: 1 | -1; onTear: (d: 1 | -1) => void; onOpen: (p: Post) => void }>(function Page({ note, can, calm, dir, onTear, onOpen }, ref) {
   const x = useMotionValue(0);
-  const dragTilt = useTransform(x, [-200, 0, 200], [-14, 0, 14]);
+  const dragTilt = useTransform(x, [-260, -100, 0, 100, 260], [-46, -10, 0, 10, 46]);
+  const amount = useTransform(x, (v) => Math.pow(clamp01(Math.abs(v) / 190), 1.35)); // how scrunched: 0 flat .. 1 a ball
+  const clipPath = useTransform(amount, poly);
+  const squash = useTransform(amount, [0, 1], [1, 0.46]);
+  const shade = useTransform(amount, (a) => `brightness(${(1 - 0.16 * a).toFixed(3)})`);
+  const c1 = useTransform(amount, (a) => clamp01((a - 0.03) / 0.22));
+  const c2 = useTransform(amount, (a) => clamp01((a - 0.22) / 0.3));
+  const c3 = useTransform(amount, (a) => clamp01((a - 0.48) / 0.3));
   const onEnd = (_: unknown, info: PanInfo) => {
     if (Math.abs(info.offset.x) > 90 || Math.abs(info.velocity.x) > 500) onTear(info.offset.x < 0 || info.velocity.x < -500 ? -1 : 1);
   };
-  const long = note.lines.join(" ").length;
-  const size = long < 130 ? "text-2xl md:text-[1.7rem]" : "text-xl md:text-2xl";
   return (
     <motion.div
       ref={ref}
@@ -78,28 +113,15 @@ const Page = forwardRef<HTMLDivElement, { note: Note; can: boolean; calm: boolea
       dragSnapToOrigin
       dragElastic={0.7}
       onDragEnd={onEnd}
-      whileDrag={{ scale: 1.02, zIndex: 20 }}
-      style={{ x, rotate: calm ? 0 : dragTilt }}
+      whileDrag={{ zIndex: 20 }}
+      style={calm ? { x } : { x, rotate: dragTilt, clipPath, scale: squash, filter: shade }}
       transition={{ type: "spring", stiffness: 180, damping: 18 }}
       className={`notepad relative flex h-[21.5rem] flex-col overflow-hidden ${can ? "cursor-grab active:cursor-grabbing" : ""}`}
     >
-      <motion.span aria-hidden variants={creases} className="pointer-events-none absolute inset-0 z-10 mix-blend-multiply"
-        style={{ background: "linear-gradient(62deg, transparent 36%, rgba(70,45,15,.5) 37%, rgba(255,255,255,.4) 38.2%, transparent 40%), linear-gradient(118deg, transparent 50%, rgba(255,255,255,.55) 51%, rgba(70,45,15,.45) 52.4%, transparent 55%), linear-gradient(8deg, transparent 22%, rgba(70,45,15,.4) 23%, transparent 25.5%), linear-gradient(152deg, transparent 64%, rgba(70,45,15,.38) 65%, transparent 68%), linear-gradient(95deg, transparent 30%, rgba(70,45,15,.3) 31%, transparent 33%), radial-gradient(ellipse at 28% 32%, rgba(70,45,15,.28), transparent 55%), radial-gradient(ellipse at 76% 72%, rgba(70,45,15,.3), transparent 50%)" }} />
-      <p className="text-[10px] font-bold uppercase leading-8 tracking-[0.24em] text-inksoft">{note.eyebrow}</p>
-      {note.greeting && <p className="font-hand text-3xl leading-8">{note.greeting}</p>}
-      <div dir="auto" className={`font-hand leading-8 ${size} ${note.post ? "line-clamp-5" : ""}`}>
-        {note.lines.map((l, k) => <p key={k}>{l}</p>)}
-      </div>
-      {/* the sign-off and the button sit at the foot of the page, wherever the letter ends */}
-      <div className={note.post ? "mt-auto" : "mt-2"}>
-        <p className="font-hand text-xl leading-8 text-inksoft">{note.sign}</p>
-        {note.post && (
-          <div className="mt-1.5 flex items-center justify-between gap-2">
-            <button onClick={() => onOpen(note.post!)} onPointerDownCapture={(e) => e.stopPropagation()} className="notepad-btn">Read the whole letter →</button>
-            {!!note.felt && <span className="text-xs text-inksoft">{note.felt} felt this</span>}
-          </div>
-        )}
-      </div>
+      {!calm && [c1, c2, c3].map((o, k) => (
+        <motion.span key={k} aria-hidden className="pointer-events-none absolute inset-0 z-10 mix-blend-multiply" style={{ opacity: o, background: CREASES[k] }} />
+      ))}
+      <PageBody note={note} onOpen={onOpen} />
     </motion.div>
   );
 });
@@ -131,6 +153,12 @@ export default function StickyNote() {
       <div className="notepad-pad">
         <div aria-hidden className="notepad-base" />
         <div className="relative">
+          {/* the next page, already written, so a crumpling page reveals it instead of blank paper */}
+          {can && (
+            <div aria-hidden {...({ inert: "" } as object)} className="notepad pointer-events-none flex h-[21.5rem] flex-col overflow-hidden" style={{ position: "absolute", left: 0, right: 0, top: 0 }}>
+              <PageBody note={notes[(i + 1) % notes.length]} onOpen={() => {}} />
+            </div>
+          )}
           <AnimatePresence mode="popLayout" custom={{ d: dir, calm }} initial={false}>
             <Page key={note.id} note={note} can={can} calm={calm} dir={dir} onTear={tear} onOpen={openPost} />
           </AnimatePresence>
