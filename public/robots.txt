@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /map
+Allow: /help
+Allow: /privacy
+Disallow: /api/
+Disallow: /.well-known/
+
+# Sitemaps
+Sitemap: https://ihusaas.online/sitemap.xml

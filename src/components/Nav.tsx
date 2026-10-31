@@ -290,6 +290,28 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
           </div>
           <Chevron className="h-4 w-4 shrink-0 text-coral/70 transition-transform group-hover:translate-x-0.5" />
         </Link>
+
+        {/* Privacy & Safety */}
+        <Link
+          href="/privacy"
+          onClick={onClose}
+          className="group flex w-full items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.03] p-3.5 text-left transition-all hover:border-sand/35 hover:bg-white/[0.06]"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-sand transition-transform group-hover:scale-105 text-sm">
+              🛡️
+            </span>
+            <div>
+              <span className="block text-sm font-medium text-foam group-hover:text-sand">
+                {lang === "dv" ? "ޕްރައިވެސީ އަދި ރައްކާތެރިކަން" : "Privacy & Anonymity"}
+              </span>
+              <span className="block text-xs text-mist">
+                {lang === "dv" ? "ތިބާގެ ވަނަވަރު ރައްކާތެރިކުރާ ގޮތް" : "How we protect your identity & safety"}
+              </span>
+            </div>
+          </div>
+          <Chevron className="h-4 w-4 shrink-0 text-mist/60 transition-transform group-hover:translate-x-0.5" />
+        </Link>
       </div>
 
       {/* Editorial Sanctuary Note */}
