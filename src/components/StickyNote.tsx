@@ -8,6 +8,7 @@ import type { Post } from "@/lib/types";
 import { useSea } from "./SeaProvider";
 import { playTear } from "@/lib/sound";
 import { looksLikeCrisis } from "./CrisisNudge";
+import { useLanguage } from "@/lib/i18n";
 
 /** The notepad shows the most felt letters; swipe a page away to tear it off and read the next. */
 const MAX_CHARS = 150;
@@ -15,12 +16,20 @@ const THAANA = /[\u0780-\u07BF]/;
 
 interface Note { id: string; felt?: number; eyebrow: string; greeting?: string; lines: string[]; sign: string; post?: Post }
 
-const WELCOME: Note = {
+const WELCOME_EN: Note = {
   id: "welcome",
   eyebrow: "A place for your words",
   greeting: "Dear sea,",
   lines: ["I don’t need all the answers.", "Just somewhere to begin."],
   sign: "With love, someone.",
+};
+
+const WELCOME_DV: Note = {
+  id: "welcome",
+  eyebrow: "ހިތުގެ ބަސްތަކަށް ޖާގައެއް",
+  greeting: "ލޮބުވެތި ކަނޑަށް،",
+  lines: ["ހުރިހާ ޖަވާބެއް ބޭނުމެއް ނޫން.", "ހަމައެކަނި ފަށާނެ ތަނެއް."],
+  sign: "ލޯތްބާއެކު، މީހަކު.",
 };
 
 /** Short, gentle, public letters only: no content-warning letters, nothing that reads like a crisis. */
@@ -69,6 +78,7 @@ const page = {
 
 /** What is written on a page: shared by the live page and the copy waiting underneath. */
 function PageBody({ note, onOpen }: { note: Note; onOpen: (p: Post) => void }) {
+  const { t } = useLanguage();
   const long = note.lines.join(" ").length;
   const size = long < 130 ? "text-2xl md:text-[1.7rem]" : "text-xl md:text-2xl";
   return (
@@ -83,8 +93,8 @@ function PageBody({ note, onOpen }: { note: Note; onOpen: (p: Post) => void }) {
       <p className="font-hand text-xl leading-8 text-inksoft">{note.sign}</p>
       {note.post && (
         <div className="mt-1.5 flex items-center justify-between gap-2">
-          <button onClick={() => onOpen(note.post!)} onPointerDownCapture={(e) => e.stopPropagation()} className="notepad-btn">Read the whole letter →</button>
-          {!!note.felt && <span className="text-xs text-inksoft">{note.felt} felt this</span>}
+          <button onClick={() => onOpen(note.post!)} onPointerDownCapture={(e) => e.stopPropagation()} className="notepad-btn">{t("notepadReadWhole")}</button>
+          {!!note.felt && <span className="text-xs text-inksoft">{note.felt} {t("iFeltThis")}</span>}
         </div>
       )}
     </div>
@@ -119,7 +129,7 @@ const Page = forwardRef<HTMLDivElement, { note: Note; can: boolean; calm: boolea
       whileDrag={{ zIndex: 20 }}
       style={calm ? { x } : { x, rotate: dragTilt, clipPath, scale: squash, filter: shade }}
       transition={{ type: "spring", stiffness: 180, damping: 18 }}
-      className={`notepad relative flex h-[21.5rem] flex-col overflow-hidden ${can ? "cursor-grab active:cursor-grabbing" : ""}`}
+      className={`notepad relative flex h-[19.5rem] flex-col overflow-hidden ${can ? "cursor-grab active:cursor-grabbing" : ""}`}
     >
       {!calm && [c1, c2, c3].map((o, k) => (
         <motion.span key={k} aria-hidden className="pointer-events-none absolute inset-0 z-10 mix-blend-multiply" style={{ opacity: o, background: CREASES[k] }} />
@@ -131,6 +141,7 @@ const Page = forwardRef<HTMLDivElement, { note: Note; can: boolean; calm: boolea
 
 export default function StickyNote() {
   const { openPost } = useSea();
+  const { lang, t } = useLanguage();
   const calm = !!useReducedMotion();
   const [letters, setLetters] = useState<Note[]>([]);
   const [i, setI] = useState(0);
@@ -146,19 +157,20 @@ export default function StickyNote() {
     return () => { live = false; };
   }, []);
 
-  const notes = useMemo(() => [WELCOME, ...letters], [letters]);
+  const welcomeNote = lang === "dv" ? WELCOME_DV : WELCOME_EN;
+  const notes = useMemo(() => [welcomeNote, ...letters], [welcomeNote, letters]);
   const note = notes[i % notes.length];
   const can = notes.length > 1;
   const tear = useCallback((d: 1 | -1) => { if (notes.length > 1) { playTear(); setDir(d); setI((n) => n + 1); } }, [notes.length]);
 
   return (
-    <div className="relative mx-auto w-full max-w-[22rem] pt-2 lg:mx-0 lg:max-w-[23.5rem]">
+    <div className="relative mx-auto w-full max-w-[21rem] pt-2 lg:mx-0 lg:max-w-[22rem]">
       <div className="notepad-pad">
         <div aria-hidden className="notepad-base" />
         <div className="relative">
           {/* the next page, already written, so a crumpling page reveals it instead of blank paper */}
           {can && (
-            <div aria-hidden {...({ inert: "" } as object)} className="notepad pointer-events-none flex h-[21.5rem] flex-col overflow-hidden" style={{ position: "absolute", left: 0, right: 0, top: 0 }}>
+            <div aria-hidden {...({ inert: "" } as object)} className="notepad pointer-events-none flex h-[19.5rem] flex-col overflow-hidden" style={{ position: "absolute", left: 0, right: 0, top: 0 }}>
               <PageBody note={notes[(i + 1) % notes.length]} onOpen={() => {}} />
             </div>
           )}
@@ -170,14 +182,12 @@ export default function StickyNote() {
       </div>
       {can && (
         <div className="mt-4 flex items-center justify-center gap-2.5 text-xs tracking-wide text-mist">
-          <span className="hidden sm:inline">👈 Drag or click to tear</span>
-          <span className="sm:hidden">👈 Swipe to tear</span>
+          <span>👈 {t("notepadTearHint")}</span>
           <button
             onClick={() => tear(1)}
             className="flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 text-xs text-foam transition hover:border-sand/40 hover:bg-white/10 active:scale-95"
           >
-            <span>Next page</span>
-            <span aria-hidden>→</span>
+            <span>{t("nextPage")}</span>
           </button>
         </div>
       )}

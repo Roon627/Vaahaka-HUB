@@ -9,6 +9,7 @@ import FeedBar from "./FeedBar";
 import StickyNote from "./StickyNote";
 import SoulsOnline from "./SoulsOnline";
 import { useSea } from "./SeaProvider";
+import { useLanguage } from "@/lib/i18n";
 
 const WATER = "rgba(8, 26, 38, 0.75)";
 
@@ -137,39 +138,46 @@ export default function DumpingGround() {
       posts
     );
 
+  const { lang, t } = useLanguage();
+
   return (
     <section className="w-full">
       {/* ---------------------------------------------------------- hero */}
-      <div className="mx-auto max-w-6xl px-5 pb-14 pt-6 sm:px-10 md:pb-20 lg:pb-24 lg:pt-10">
+      <div className="mx-auto max-w-6xl px-5 pb-16 pt-6 sm:px-10 md:pb-28 lg:pb-36 lg:pt-12">
         <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
           <div className="relative z-10">
             <h1 className="font-display text-[clamp(2.5rem,6vw,4.75rem)] font-light leading-[1.05] tracking-tight text-foam">
-              Say it <br />
-              <span className="font-serif italic text-sand">to the sea.</span>
+              {lang === "dv" ? (
+                <span className="font-serif font-normal">{t("heroTitle")}</span>
+              ) : (
+                <>
+                  Say it <br />
+                  <span className="font-serif italic text-sand">to the sea.</span>
+                </>
+              )}
             </h1>
-            <p className="mt-4 max-w-md text-base leading-relaxed text-mist">
-              A quiet, anonymous sanctuary for Maldivians to write down what they are carrying.
-              No names, no accounts. Only the sea listens.
+            <p className={`mt-4 max-w-md text-base leading-relaxed text-mist ${lang === "dv" ? "font-serif text-lg leading-relaxed" : ""}`}>
+              {t("heroSubtitle")}
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <button
                 onClick={() => openWriter({ atoll, category })}
                 className="shore-primary"
               >
-                Write a letter <span aria-hidden>↗</span>
+                <span>{t("writeALetter")}</span> <span aria-hidden>↗</span>
               </button>
               <button
                 onClick={openRandom}
                 disabled={finding}
                 className="shore-secondary disabled:opacity-50"
               >
-                {finding ? "Uncorking a letter…" : "Surprise me"} <span aria-hidden>↝</span>
+                <span>{finding ? (lang === "dv" ? "ސިޓީއެއް ނަގަނީ…" : "Uncorking a letter…") : t("surpriseMe")}</span> <span aria-hidden>↝</span>
               </button>
             </div>
             <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-mist/80">
               <span className="flex items-center gap-1.5">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-sand/60" />
-                Anonymous & free
+                <span>{t("anonFree")}</span>
               </span>
               <span className="text-white/20">·</span>
               <SoulsOnline />
@@ -183,7 +191,7 @@ export default function DumpingGround() {
                     }}
                     className="flex items-center gap-1 font-medium text-sand hover:underline"
                   >
-                    <span>✦ {newPosts.length} new since your last visit</span>
+                    <span>✦ {newPosts.length} {t("newSinceLastVisit")}</span>
                   </button>
                 </>
               )}
@@ -204,8 +212,10 @@ export default function DumpingGround() {
         <div className="mx-auto max-w-7xl px-5 pt-8 sm:px-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h2 className="font-display text-2xl tracking-tight text-foam sm:text-3xl">Washed ashore</h2>
-              <p className="mt-1 text-sm text-mist">Real thoughts released from across the islands. Tap any letter to read.</p>
+              <h2 className="font-display text-2xl tracking-tight text-foam sm:text-3xl">
+                {t("washedAshore")}
+              </h2>
+              <p className="mt-1 text-sm text-mist">{t("washedAshoreDesc")}</p>
             </div>
           </div>
           <FeedBar
@@ -234,14 +244,16 @@ export default function DumpingGround() {
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-serif text-base font-medium text-foam">
-                          The tide washed ashore {newPosts.length} new {newPosts.length === 1 ? "letter" : "letters"}
+                          {lang === "dv"
+                            ? `${t("tideWashedAshore")} އާ ${newPosts.length} ސިޓީ`
+                            : `${t("tideWashedAshore")} ${newPosts.length} new ${newPosts.length === 1 ? "letter" : "letters"}`}
                         </h3>
                         <span className="rounded-full border border-sand/30 bg-sand/15 px-2.5 py-0.5 text-[10px] font-bold text-sand">
-                          Since your last visit
+                          {t("sinceLastVisit")}
                         </span>
                       </div>
                       <p className="mt-0.5 text-xs text-mist">
-                        Quiet thoughts released from across the islands while you were away.
+                        {t("tideSubtitle")}
                       </p>
                     </div>
                   </div>
@@ -255,14 +267,14 @@ export default function DumpingGround() {
                           : "border border-sand/40 bg-sand/15 text-sand hover:bg-sand/25"
                       }`}
                     >
-                      {filterNewArrivals ? "Showing new arrivals ✓" : `View new arrivals (${newPosts.length})`}
+                      {filterNewArrivals ? t("showingNewArrivals") : `${t("showNewArrivalsBtn")} (${newPosts.length})`}
                     </button>
                     {filterNewArrivals && (
                       <button
                         onClick={() => setFilterNewArrivals(false)}
                         className="text-xs text-mist hover:text-foam underline underline-offset-4"
                       >
-                        Show all letters
+                        {t("showAllLetters")}
                       </button>
                     )}
                   </div>
@@ -330,7 +342,7 @@ export default function DumpingGround() {
               </div>
             ) : (
               <span className="font-serif text-sm tracking-wide text-mist/70">
-                You have reached the calm of the shoreline. 🐚
+                {t("calmShoreline")} 🐚
               </span>
             )
           ) : null}

@@ -9,6 +9,7 @@ import SoulsOnline from "./SoulsOnline";
 import { startInstall, useInstall } from "@/lib/pwa";
 import { SUGGEST_EVENT } from "@/lib/suggest";
 import { SOUND_EVENT, setSound, soundOn } from "@/lib/sound";
+import { useLanguage } from "@/lib/i18n";
 import SuggestionSheet from "./SuggestionSheet";
 import Sheet from "./Sheet";
 
@@ -56,6 +57,7 @@ function Logo({ showDhivehi = true }: { showDhivehi?: boolean }) {
 /* ------------------------------------------------------------- about menu */
 function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () => void }) {
   const { openRandom, finding, newArrivalsCount, setFilterNewArrivals } = useSea();
+  const { lang, setLang, t } = useLanguage();
   const [on, setOn] = useState(false);
   useEffect(() => {
     const sync = () => setOn(soundOn());
@@ -65,7 +67,7 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
   }, []);
 
   return (
-    <Sheet title="Ihusaas Sanctuary Menu" onClose={onClose}>
+    <Sheet title={t("sanctuaryMenu")} onClose={onClose}>
       {/* Editorial Header */}
       <div className="flex items-start justify-between border-b border-white/[0.08] pb-4">
         <div className="flex items-center gap-3">
@@ -77,7 +79,7 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
               <h2 className="font-display text-2xl tracking-tight text-foam">Ihusaas</h2>
               <span className="font-serif text-sm font-normal text-sand/80">އިޙްސާސް</span>
             </div>
-            <p className="text-xs text-mist">A quiet sanctuary for words left to the sea.</p>
+            <p className="text-xs text-mist">{t("sanctuaryTagline")}</p>
           </div>
         </div>
         <button
@@ -96,14 +98,16 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-sand">
                 <Waves className="h-4 w-4" />
-                High Tide Arrivals
+                {t("highTide")}
               </span>
               <span className="rounded-full bg-sand/20 px-2.5 py-0.5 text-[10px] font-bold text-sand">
-                {newArrivalsCount} new {newArrivalsCount === 1 ? "letter" : "letters"}
+                {newArrivalsCount} {newArrivalsCount === 1 ? t("newLetter") : t("newLetters")}
               </span>
             </div>
             <p className="mt-2 font-serif text-sm italic text-foam/95">
-              The tide has carried {newArrivalsCount} new {newArrivalsCount === 1 ? "thought" : "thoughts"} ashore since your last visit.
+              {lang === "dv"
+                ? `އެންމެ ފަހުން ޒިޔާރަތްކުރި ފަހުން އާ ${newArrivalsCount} ސިޓީ އައްސޭރިއަށް ބީވެއްޖެއެވެ.`
+                : `The tide has carried ${newArrivalsCount} new ${newArrivalsCount === 1 ? "thought" : "thoughts"} ashore since your last visit.`}
             </p>
             <button
               onClick={() => {
@@ -113,7 +117,7 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
               }}
               className="mt-3 inline-flex items-center gap-2 rounded-full bg-sand px-4 py-1.5 text-xs font-semibold text-abyss transition hover:bg-[#fae8c8] active:scale-95"
             >
-              <span>Walk the shore & read them</span>
+              <span>{t("showNewArrivalsBtn")}</span>
               <span aria-hidden>→</span>
             </button>
           </div>
@@ -121,15 +125,54 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
           <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 text-xs text-mist/90">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-sand/80 shadow-[0_0_8px_rgba(236,217,181,0.6)]" />
-              <span className="font-medium text-foam">Quiet sea over the atolls</span>
+              <span className="font-medium text-foam">
+                {lang === "dv" ? "ރާއްޖޭގެ ކަނޑުތައް ހިމޭންވެފައި" : "Quiet sea over the atolls"}
+              </span>
             </div>
-            <span className="text-[11px] text-mist/70">20 atolls listening</span>
+            <span className="text-[11px] text-mist/70">
+              {lang === "dv" ? "20 އަތޮޅު އަޑުއަހަނީ" : "20 atolls listening"}
+            </span>
           </div>
         )}
       </div>
 
       {/* Editorial Actions */}
       <div className="mt-4 space-y-2.5">
+        {/* Language Setting Switcher */}
+        <div className="flex w-full items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.03] p-3.5 text-left transition-all hover:border-white/15">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-sand text-sm">
+              🌐
+            </span>
+            <div>
+              <span className="block text-sm font-medium text-foam">
+                {t("languageSetting")}
+              </span>
+              <span className="block text-xs text-mist">
+                {lang === "en" ? "English (Active)" : "ދިވެހި (އެކްޓިވް)"}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1">
+            <button
+              onClick={() => setLang("en")}
+              className={`rounded-full px-2.5 py-1 text-xs font-semibold transition ${
+                lang === "en" ? "bg-sand text-abyss shadow-sm" : "text-mist hover:text-foam"
+              }`}
+            >
+              EN
+            </button>
+            <button
+              onClick={() => setLang("dv")}
+              className={`rounded-full px-2.5 py-1 text-xs font-serif transition ${
+                lang === "dv" ? "bg-sand text-abyss shadow-sm font-semibold" : "text-mist hover:text-foam"
+              }`}
+            >
+              ދިވެހި
+            </button>
+          </div>
+        </div>
+
         {/* Surprise letter */}
         <button
           onClick={() => {
@@ -145,9 +188,11 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
             </span>
             <div>
               <span className="block text-sm font-medium text-foam group-hover:text-sand">
-                Surprise me
+                {t("surpriseMe")}
               </span>
-              <span className="block text-xs text-mist">Uncork a random letter from the sea</span>
+              <span className="block text-xs text-mist">
+                {lang === "dv" ? "ކަނޑުން ކޮންމެވެސް ސިޓީއެއް ނަގާލަން" : "Uncork a random letter from the sea"}
+              </span>
             </div>
           </div>
           <Chevron className="h-4 w-4 shrink-0 text-mist/60 transition-transform group-hover:translate-x-0.5" />
@@ -161,9 +206,11 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
             </span>
             <div>
               <span className="block text-sm font-medium text-foam">
-                Ambient sounds
+                {t("ambientSounds")}
               </span>
-              <span className="block text-xs text-mist">Ocean wash and tactile paper tears</span>
+              <span className="block text-xs text-mist">
+                {t("ambientDesc")}
+              </span>
             </div>
           </div>
           <button
@@ -172,7 +219,7 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
               on ? "bg-sand text-abyss shadow-sm hover:bg-[#fae8c8]" : "border border-white/15 bg-white/5 text-mist hover:text-foam"
             }`}
           >
-            {on ? "Sound: On" : "Sound: Off"}
+            {on ? t("soundOn") : t("soundOff")}
           </button>
         </div>
 
@@ -187,9 +234,11 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
             </span>
             <div>
               <span className="block text-sm font-medium text-foam group-hover:text-sand">
-                Contact the creator
+                {t("contactCreator")}
               </span>
-              <span className="block text-xs text-mist">Send a quiet note, idea, or issue to Harun</span>
+              <span className="block text-xs text-mist">
+                {t("contactDesc")}
+              </span>
             </div>
           </div>
           <Chevron className="h-4 w-4 shrink-0 text-mist/60 transition-transform group-hover:translate-x-0.5" />
@@ -207,9 +256,9 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
             </span>
             <div>
               <span className="block text-sm font-medium text-foam group-hover:text-coral">
-                Need support right now?
+                {t("needSupport")}
               </span>
-              <span className="block text-xs text-mist">Free 24h helplines in the Maldives (1677, 1412, 911)</span>
+              <span className="block text-xs text-mist">{t("supportDesc")}</span>
             </div>
           </div>
           <Chevron className="h-4 w-4 shrink-0 text-coral/70 transition-transform group-hover:translate-x-0.5" />
@@ -220,13 +269,13 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
       <div className="mt-4 rounded-2xl border border-white/[0.06] bg-[#091b24] p-4 text-xs leading-relaxed text-mist">
         <div className="flex items-center gap-2 font-serif text-sm font-medium text-foam/90">
           <span className="text-sand">✦</span>
-          <span>Our Promise</span>
+          <span>{t("ourPromise")}</span>
         </div>
         <p className="mt-1.5 text-mist/85">
-          No accounts. No algorithms. No tracking. You release letters into the sea anonymously, and strangers respond only with quiet kindness.
+          {t("promiseDesc")}
         </p>
         <p className="mt-2 text-right font-serif text-[11px] italic text-sand/70">
-          — Ihusaas (Say it to the sea)
+          {t("promiseSign")}
         </p>
       </div>
 
@@ -268,11 +317,17 @@ export default function Nav() {
     filterNewArrivals,
     setFilterNewArrivals,
   } = useSea();
+  const { lang, setLang, toggleLang, t } = useLanguage();
   const [about, setAbout] = useState(false);
   useEffect(() => setAbout(false), [path]);
   // "Send us a note" can be opened from the About menu or from other pages (see lib/suggest.ts)
   const [suggest, setSuggest] = useState(false);
   useEffect(() => { const open = () => { setAbout(false); setSuggest(true); }; window.addEventListener(SUGGEST_EVENT, open); return () => window.removeEventListener(SUGGEST_EVENT, open); }, []);
+
+  const navTabs = [
+    { href: "/", label: t("drift"), Icon: Waves },
+    { href: "/map", label: t("map"), Icon: MapPin },
+  ];
 
   return (
     <>
@@ -286,7 +341,7 @@ export default function Nav() {
 
           {/* Center: Editorial navigation + dynamic High Tide Revisit Experience */}
           <nav aria-label="Main" className="flex items-center gap-1 lg:gap-2">
-            {TABS.map(({ href, label, Icon }) => {
+            {navTabs.map(({ href, label, Icon }) => {
               const on = path === href;
               return (
                 <Link
@@ -298,7 +353,7 @@ export default function Nav() {
                   }`}
                 >
                   <Icon className="h-4 w-4" />
-                  <span>{label}</span>
+                  <span className={lang === "dv" ? "font-serif text-sm normal-case" : ""}>{label}</span>
                   {on && (
                     <motion.span
                       layoutId="nav-active-pip"
@@ -320,7 +375,7 @@ export default function Nav() {
               title="Uncork a random letter from the sea"
             >
               <Dice className={`h-4 w-4 ${finding ? "animate-spin text-sand" : ""}`} />
-              <span className="hidden xl:inline">Surprise me</span>
+              <span className={`hidden xl:inline ${lang === "dv" ? "font-serif text-sm normal-case" : ""}`}>{t("surpriseMe")}</span>
             </button>
 
             {/* Dynamic Revisit Experience: High Tide Pill */}
@@ -346,10 +401,10 @@ export default function Nav() {
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sand opacity-75" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-sand" />
                   </span>
-                  <span className="font-serif italic text-sand/90">High tide:</span>
-                  <span>{newArrivalsCount} new {newArrivalsCount === 1 ? "letter" : "letters"}</span>
+                  <span className="font-serif italic text-sand/90">{t("highTide")}:</span>
+                  <span>{newArrivalsCount} {newArrivalsCount === 1 ? t("newLetter") : t("newLetters")}</span>
                   <span className="text-[11px] opacity-75 transition-transform group-hover:translate-x-0.5">
-                    {filterNewArrivals ? "✓ showing" : "read →"}
+                    {filterNewArrivals ? `✓ ${t("showing")}` : `${t("read")} →`}
                   </span>
                 </motion.button>
               </div>
@@ -357,9 +412,31 @@ export default function Nav() {
           </nav>
 
           {/* Right: Tactile Sanctuary Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <div className="hidden xl:block">
               <SoulsOnline />
+            </div>
+
+            {/* Language Switcher */}
+            <div className="flex items-center rounded-full border border-sand/30 bg-sand/10 p-0.5 text-xs shadow-sm">
+              <button
+                onClick={() => setLang("en")}
+                className={`rounded-full px-2.5 py-1 font-semibold transition ${
+                  lang === "en" ? "bg-sand text-abyss shadow-sm" : "text-sand/80 hover:text-foam"
+                }`}
+                title="Switch to English"
+              >
+                EN
+              </button>
+              <button
+                onClick={() => setLang("dv")}
+                className={`rounded-full px-2.5 py-1 font-serif transition ${
+                  lang === "dv" ? "bg-sand text-abyss font-semibold shadow-sm" : "text-sand/80 hover:text-foam"
+                }`}
+                title="ދިވެހި ބަހަށް ބަދަލުކުރައްވާ"
+              >
+                ދިވެހި
+              </button>
             </div>
 
             <motion.button
@@ -369,7 +446,7 @@ export default function Nav() {
               className="flex items-center gap-2 rounded-full border border-sand/40 bg-sand/15 px-4 py-2 text-xs font-semibold tracking-wide text-sand transition-all hover:bg-sand hover:text-abyss"
             >
               <Pen className="h-3.5 w-3.5" />
-              <span>Write a letter</span>
+              <span className={lang === "dv" ? "font-serif text-sm font-normal" : ""}>{t("writeALetter")}</span>
             </motion.button>
 
             <button
@@ -384,7 +461,7 @@ export default function Nav() {
               }`}
             >
               <Bars className="h-4 w-4" />
-              <span>Menu</span>
+              <span className={lang === "dv" ? "font-serif text-sm font-normal" : ""}>{t("menu")}</span>
             </button>
           </div>
         </div>
@@ -411,16 +488,20 @@ export default function Nav() {
                 }`}
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-sand animate-pulse" />
-                <span>{newArrivalsCount} new</span>
+                <span>{newArrivalsCount} {t("newLetter")}</span>
               </button>
             )}
-            {/* Cute Thaana Translation Pill on Right */}
-            <span
-              className="inline-flex items-center rounded-full border border-sand/25 bg-sand/10 px-3 py-1 font-serif text-xs font-normal tracking-wider text-sand/90 shadow-sm"
-              aria-label="Ihusaas in Dhivehi"
+            {/* Cute Interactive Language Switcher Toggle on Right */}
+            <button
+              onClick={toggleLang}
+              className="inline-flex items-center gap-1 rounded-full border border-sand/30 bg-sand/10 px-2.5 py-1 text-xs transition active:scale-95 shadow-sm hover:bg-sand/20"
+              aria-label="Switch language / ބަސް ބަދަލުކުރައްވާ"
+              title="Switch language / ބަސް ބަދަލުކުރައްވާ"
             >
-              އިޙްސާސް
-            </span>
+              <span className={lang === "en" ? "font-bold text-foam" : "opacity-60 text-sand"}>EN</span>
+              <span className="opacity-40 text-sand">·</span>
+              <span className={lang === "dv" ? "font-bold text-foam font-serif" : "opacity-60 text-sand font-serif"}>ދިވެހި</span>
+            </button>
           </div>
         </div>
       </header>
@@ -428,11 +509,11 @@ export default function Nav() {
       {/* ---- mobile dock ---- */}
       <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[rgba(8,26,38,0.95)] pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden">
         <div className="mx-auto flex max-w-md items-center justify-around px-2 py-1.5">
-          {TABS.slice(0, 1).map(({ href, label, Icon }) => <DockLink key={href} href={href} label={label} Icon={Icon} on={path === href} />)}
-          <DockLink href="/map" label="Map" Icon={MapPin} on={path === "/map"} />
+          <DockLink href="/" label={t("drift")} Icon={Waves} on={path === "/"} />
+          <DockLink href="/map" label={t("map")} Icon={MapPin} on={path === "/map"} />
           <motion.button whileTap={{ scale: 0.92 }} onClick={() => openWriter()} aria-label="Write a letter" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sand text-abyss shadow-sm"><Pen className="h-5 w-5" /></motion.button>
           <MoodDock variant="dock" />
-          <button onClick={() => setAbout((v) => !v)} aria-label="Menu: contact, help and how it works" aria-expanded={about} aria-haspopup="dialog" className={`flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-2 text-[10px] ${about ? "bg-white/10 text-foam" : "text-mist"}`}><Bars className="h-5 w-5" />Menu</button>
+          <button onClick={() => setAbout((v) => !v)} aria-label="Menu: contact, help and how it works" aria-expanded={about} aria-haspopup="dialog" className={`flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-2 text-[10px] ${about ? "bg-white/10 text-foam" : "text-mist"}`}><Bars className="h-5 w-5" />{t("menu")}</button>
         </div>
       </nav>
 

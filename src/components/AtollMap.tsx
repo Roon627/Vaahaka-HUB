@@ -24,6 +24,7 @@ import { supabase } from "@/lib/supabase";
 import { POST_COLUMNS } from "@/hooks/usePosts";
 import type { Post } from "@/lib/types";
 import MoodSheet from "./MoodSheet";
+import { useLanguage } from "@/lib/i18n";
 
 // Leaflet touches `window`, so it only loads in the browser.
 const LeafletMap = dynamic(() => import("./LeafletMap"), {
@@ -71,6 +72,7 @@ export default function AtollMap() {
   const router = useRouter();
   const { openWriter, openPost, lastArrival } = useSea();
   const { stats, recent, loading } = useAtollStats();
+  const { lang, t } = useLanguage();
 
   const [category, setCategory] = useState<CategoryId | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -238,16 +240,22 @@ export default function AtollMap() {
             ދިވެހިރާއްޖޭގެ ކަނޑު · އަތޮޅުތަކުގެ އަޑު
           </span>
           <span className="h-1 w-1 rounded-full bg-sand/60" />
-          <span className="text-xs text-mist/70">26 atolls · 1,192 islands</span>
+          <span className="text-xs text-mist/70">{t("atollsAndIslands")}</span>
         </div>
         <h1 className="mt-1 font-display text-3xl font-normal text-foam sm:text-4xl">
-          The Archipelago of{" "}
-          <em className="font-italic font-normal transition-colors duration-700" style={{ color: heat }}>
-            Whispers.
-          </em>
+          {lang === "dv" ? (
+            <span className="font-serif">{t("mapTitle")}</span>
+          ) : (
+            <>
+              The Archipelago of{" "}
+              <em className="font-italic font-normal transition-colors duration-700" style={{ color: heat }}>
+                Whispers.
+              </em>
+            </>
+          )}
         </h1>
-        <p className="mt-2 text-sm text-mist max-w-2xl leading-relaxed">
-          Follow the ocean currents carrying sealed letters across 20 atolls. Tap any shore to listen to its voices.
+        <p className={`mt-2 text-sm text-mist max-w-2xl leading-relaxed ${lang === "dv" ? "font-serif text-base" : ""}`}>
+          {t("mapSubtitle")}
         </p>
       </header>
 
@@ -266,7 +274,7 @@ export default function AtollMap() {
             height={22}
             className="h-4 w-auto"
           />
-          <span>{category ? CATEGORY_BY_ID[category].label : "All feelings"}</span>
+          <span className={lang === "dv" ? "font-serif text-xs" : ""}>{category ? CATEGORY_BY_ID[category].label : t("allFeelings")}</span>
           <span aria-hidden>⌄</span>
         </button>
 
@@ -285,7 +293,9 @@ export default function AtollMap() {
           }`}
         >
           <span>⛵</span>
-          <span>{drifting ? "Drifting with currents (pause)" : "Drift with current"}</span>
+          <span className={lang === "dv" ? "font-serif text-xs font-normal" : ""}>
+            {drifting ? t("driftingWithCurrentPause") : t("driftWithCurrent")}
+          </span>
         </motion.button>
 
         <button
@@ -293,7 +303,7 @@ export default function AtollMap() {
           disabled={loading}
           onClick={() => discover()}
         >
-          ✧ Surprise me
+          <span className={lang === "dv" ? "font-serif text-xs" : ""}>✧ {t("surpriseMe")}</span>
         </button>
 
         <button
@@ -306,7 +316,7 @@ export default function AtollMap() {
             mapRef.current?.reset();
           }}
         >
-          Reset view <span aria-hidden>↺</span>
+          <span className={lang === "dv" ? "font-serif text-xs" : ""}>{t("resetView")}</span>
         </button>
       </div>
 
@@ -487,10 +497,12 @@ export default function AtollMap() {
                 {/* Real Letters from this Shore */}
                 <div className="mt-4 border-t border-white/[0.08] pt-3.5">
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="text-[11px] uppercase tracking-wider font-semibold text-sand">
-                      Letters Resting on this Shore
+                    <span className={`text-[11px] uppercase tracking-wider font-semibold text-sand ${lang === "dv" ? "font-serif normal-case" : ""}`}>
+                      {t("shoreLetters")}
                     </span>
-                    <span className="text-[10px] text-mist/75">tap to read</span>
+                    <span className={`text-[10px] text-mist/75 ${lang === "dv" ? "font-serif" : ""}`}>
+                      {t("tapToRead")}
+                    </span>
                   </div>
 
                   {loadingPosts ? (
@@ -526,16 +538,16 @@ export default function AtollMap() {
                               <span>{CATEGORY_BY_ID[p.category].emoji}</span>
                               <span>{CATEGORY_BY_ID[p.category].label}</span>
                             </span>
-                            <span className="text-sand/80 group-hover:text-sand font-medium transition">
-                              Read letter →
+                            <span className={`text-sand/80 group-hover:text-sand font-medium transition ${lang === "dv" ? "font-serif" : ""}`}>
+                              {t("readLetter")}
                             </span>
                           </div>
                         </button>
                       ))}
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-dashed border-white/10 p-3 text-center text-xs text-mist/75">
-                      A quiet lagoon. No letters have washed ashore on this atoll yet.
+                    <div className={`rounded-xl border border-dashed border-white/10 p-3 text-center text-xs text-mist/75 ${lang === "dv" ? "font-serif text-sm" : ""}`}>
+                      {t("quietLagoon")}
                     </div>
                   )}
                 </div>
@@ -544,15 +556,15 @@ export default function AtollMap() {
                 <div className="mt-4 flex flex-wrap gap-2 border-t border-white/[0.08] pt-3.5">
                   <button
                     onClick={() => goRead(sel.code)}
-                    className="flex-1 rounded-full bg-sand px-4 py-2 text-xs font-semibold text-abyss transition hover:bg-[#fae8c8] text-center"
+                    className={`flex-1 rounded-full bg-sand px-4 py-2 text-xs font-semibold text-abyss transition hover:bg-[#fae8c8] text-center ${lang === "dv" ? "font-serif" : ""}`}
                   >
-                    Read all from {sel.name} →
+                    {t("readAllFrom")} {sel.name} →
                   </button>
                   <button
                     onClick={() => openWriter({ atoll: sel.code, category })}
-                    className="rounded-full border border-sand/40 bg-sand/10 px-4 py-2 text-xs font-medium text-sand transition hover:bg-sand/20"
+                    className={`rounded-full border border-sand/40 bg-sand/10 px-4 py-2 text-xs font-medium text-sand transition hover:bg-sand/20 ${lang === "dv" ? "font-serif" : ""}`}
                   >
-                    Write to {sel.name} ✍️
+                    {t("writeToAtoll")} {sel.name} ✍️
                   </button>
                 </div>
               </motion.div>
@@ -569,10 +581,10 @@ export default function AtollMap() {
                     <span className="text-2xl">🧭</span>
                   </div>
                   <div>
-                    <h2 className="font-display text-xl text-foam">Island Trail</h2>
+                    <h2 className="font-display text-xl text-foam">{t("islandTrail")}</h2>
                     <p className="text-xs text-mist">
                       {visited.length
-                        ? `${visited.length} of ${ATOLLS.length} shores explored`
+                        ? `${visited.length} of ${ATOLLS.length} ${t("shoresExplored")}`
                         : "Tap any bottle on the map or start drifting"}
                     </p>
                   </div>
@@ -597,7 +609,7 @@ export default function AtollMap() {
                     onClick={() => discover(-1)}
                     className="hover:text-foam flex items-center gap-1"
                   >
-                    ← Northwards
+                    {t("northwards")}
                   </button>
                   <button
                     onClick={() => {
@@ -606,13 +618,13 @@ export default function AtollMap() {
                     }}
                     className="font-medium text-sand hover:underline"
                   >
-                    {drifting ? "Pause voyage" : "Start voyage ⛵"}
+                    {drifting ? t("pauseVoyage") : t("startVoyage")}
                   </button>
                   <button
                     onClick={() => discover(1)}
                     className="hover:text-foam flex items-center gap-1"
                   >
-                    Southwards →
+                    {t("southwards")}
                   </button>
                 </div>
               </motion.div>
@@ -622,11 +634,11 @@ export default function AtollMap() {
           {/* Regional Explorer with Thaana Badges */}
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
             <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-sand">
-                Archipelago Directory
+              <h2 className={`text-xs font-semibold uppercase tracking-wider text-sand ${lang === "dv" ? "font-serif normal-case" : ""}`}>
+                {t("archipelagoDirectory")}
               </h2>
               <span className="text-[11px] text-mist">
-                {category ? CATEGORY_BY_ID[category].label : "all feelings"}
+                {category ? CATEGORY_BY_ID[category].label : (lang === "dv" ? "ހުރިހާ އިޙްސާސްތައް" : "all feelings")}
               </span>
             </div>
             <label className="sr-only" htmlFor="region-search">
@@ -637,7 +649,7 @@ export default function AtollMap() {
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by English or Thaana name (e.g. Baa, މާލެ)..."
+              placeholder={t("searchAtollPlaceholder")}
               className="mb-3 min-h-10 w-full rounded-xl border border-white/15 bg-abyss/50 px-3 text-sm text-foam placeholder:text-mist/70 focus:border-sand focus:outline-none"
             />
             <ol className="max-h-72 space-y-1 overflow-y-auto overscroll-contain pr-1">

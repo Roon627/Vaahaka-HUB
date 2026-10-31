@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ATOLL_BY_CODE, CATEGORY_BY_ID } from "@/lib/constants";
+import { ATOLL_BY_CODE, ATOLL_THAANA, CATEGORY_BY_ID } from "@/lib/constants";
 import { timeAgo } from "@/lib/time";
 import type { Post } from "@/lib/types";
 import { useSea } from "./SeaProvider";
@@ -9,6 +9,7 @@ import Bottle from "./Bottle";
 import WaxSeal from "./WaxSeal";
 import { getDeviceToken, getMyReactions, setMyReaction } from "@/lib/device";
 import { supabase } from "@/lib/supabase";
+import { useLanguage } from "@/lib/i18n";
 
 const THAANA = /[\u0780-\u07BF]/;
 
@@ -30,6 +31,7 @@ interface Props {
  */
 export default function BottleCard({ post, index, onOpen, onPatch }: Props) {
   const { opened, previousVisit } = useSea();
+  const { lang, t } = useLanguage();
   const isOpened = opened.has(post.id);
   const isNew = !!(previousVisit && new Date(post.created_at) > new Date(previousVisit) && !isOpened);
   const cat = CATEGORY_BY_ID[post.category] ?? {
@@ -39,9 +41,11 @@ export default function BottleCard({ post, index, onOpen, onPatch }: Props) {
     emoji: "🌊",
   };
   const atoll = ATOLL_BY_CODE[post.atoll_code];
+  const atollTh = ATOLL_THAANA[post.atoll_code];
+  const placeName = lang === "dv" && atollTh ? atollTh.dv : atoll?.name || post.atoll_code;
   const place = post.island
-    ? `${post.island}${atoll ? `, ${atoll.name}` : ""}`
-    : atoll?.name || post.atoll_code || "The sea";
+    ? `${post.island}${placeName ? `, ${placeName}` : ""}`
+    : placeName || (lang === "dv" ? "ކަނޑު" : "The sea");
 
   const isThaana = THAANA.test(post.body);
 
@@ -172,7 +176,7 @@ export default function BottleCard({ post, index, onOpen, onPatch }: Props) {
             <div className="flex items-center gap-1.5">
               {isNew && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-sand/30 bg-sand/15 px-2 py-0.5 text-[10px] font-semibold text-sand">
-                  ✦ New arrival
+                  ✦ {t("newArrivalBadge")}
                 </span>
               )}
               <span className="truncate text-[11px] text-mist/80">
@@ -187,7 +191,9 @@ export default function BottleCard({ post, index, onOpen, onPatch }: Props) {
               <div className="flex items-center gap-2.5 rounded-xl border border-coral/20 bg-coral/[0.06] p-2.5 text-xs text-foam/90">
                 <WaxSeal color="#b4563f" emoji="🤍" size={24} />
                 <span className="leading-snug">
-                  <strong className="font-semibold text-coral">Sealed letter:</strong>{" "}
+                  <strong className="font-semibold text-coral">
+                    {lang === "dv" ? "ބަންދުކޮށްފައިވާ ސިޓީ:" : "Sealed letter:"}
+                  </strong>{" "}
                   {post.trigger_warning}
                 </span>
               </div>
@@ -206,8 +212,8 @@ export default function BottleCard({ post, index, onOpen, onPatch }: Props) {
 
         {/* Foot: Read prompt & Reactions */}
         <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3 text-[11px] text-mist">
-          <span className="font-medium text-sand/80 transition-colors group-hover:text-sand">
-            {isOpened ? "Read letter →" : "Open letter →"}
+          <span className={`font-medium text-sand/80 transition-colors group-hover:text-sand ${lang === "dv" ? "font-serif text-xs" : ""}`}>
+            {isOpened ? t("readLetter") : t("openLetter")}
           </span>
 
           <div className="flex items-center gap-2">
@@ -267,7 +273,7 @@ export default function BottleCard({ post, index, onOpen, onPatch }: Props) {
               </span>
             )}
             {heartCount === 0 && post.comment_count === 0 && (
-              <span className="text-[10px] text-mist/50">New arrival</span>
+              <span className="text-[10px] text-mist/50">{t("newArrivalBadge")}</span>
             )}
           </div>
         </div>

@@ -7,6 +7,8 @@ import { SeaProvider } from "@/components/SeaProvider";
 import PWA from "@/components/PWA";
 import pwaIcons from "@/lib/generated/pwa-icons.json";
 
+import { LanguageProvider } from "@/lib/i18n";
+
 const { appleTouchIcon } = pwaIcons;
 
 // Soft, warm serif for stories + headings; rounded sans for UI.
@@ -43,13 +45,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" sizes="180x180" href={appleTouchIcon} />
       </head>
       <body className="min-h-screen font-sans antialiased">
-        <SeaProvider>
-          <Ocean />
-          <Nav />
-          <PWA />
-          {/* top padding clears the floating nav; bottom padding clears the mobile dock */}
-          <main className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-[calc(3.5rem+env(safe-area-inset-top))] md:pb-0 md:pt-24">{children}</main>
-        </SeaProvider>
+        <LanguageProvider>
+          <SeaProvider>
+            <Ocean />
+            <Nav />
+            <PWA />
+            {/* top padding clears the floating nav; bottom padding clears the mobile dock */}
+            <main className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-[calc(3.5rem+env(safe-area-inset-top))] md:pb-0 md:pt-24">{children}</main>
+          </SeaProvider>
+        </LanguageProvider>
       </body>
     </html>
   );
