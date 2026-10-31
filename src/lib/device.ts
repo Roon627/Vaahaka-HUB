@@ -65,3 +65,33 @@ export function markOpened(postId: string) {
   ids.push(postId);
   safeSet(OPENED_KEY, JSON.stringify(ids.slice(-500))); // cap so it never grows unbounded
 }
+
+// ---- revisit tracking: when did this browser last visit the shore? ----
+const LAST_VISIT_KEY = "ihusaas.last_visit";
+const SESSION_PREV_KEY = "ihusaas.session_prev_visit";
+
+export function getPreviousVisit(): string | null {
+  if (typeof window === "undefined") return null;
+  // If we already cached the previous visit for this browser session, keep returning it
+  const sessionCached = safeGet(SESSION_PREV_KEY);
+  if (sessionCached) return sessionCached;
+
+  // Otherwise read what was in localStorage before this visit
+  const prev = safeGet(LAST_VISIT_KEY);
+  if (prev) {
+    safeSet(SESSION_PREV_KEY, prev);
+    return prev;
+  }
+  return null;
+}
+
+export function getLastVisit(): string | null {
+  return getPreviousVisit();
+}
+
+export function recordVisit(): void {
+  if (typeof window === "undefined") return;
+  safeSet(LAST_VISIT_KEY, new Date().toISOString());
+}
+
+

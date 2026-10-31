@@ -79,7 +79,7 @@ function PageBody({ note, onOpen }: { note: Note; onOpen: (p: Post) => void }) {
       {note.lines.map((l, k) => <p key={k}>{l}</p>)}
     </div>
     {/* the sign-off and the button sit at the foot of the page, wherever the letter ends */}
-    <div className={note.post ? "mt-auto" : "mt-2"}>
+    <div className="mt-auto pt-2">
       <p className="font-hand text-xl leading-8 text-inksoft">{note.sign}</p>
       {note.post && (
         <div className="mt-1.5 flex items-center justify-between gap-2">
@@ -169,9 +169,16 @@ export default function StickyNote() {
         <div aria-hidden className="notepad-bind" />
       </div>
       {can && (
-        <div className="mt-5 flex items-center justify-center gap-3 text-xs tracking-wide text-mist">
-          <span aria-hidden>👈 Swipe to tear off the page</span>
-          <button onClick={() => tear(1)} className="min-h-8 rounded-full border border-white/15 px-3 py-1 text-xs text-foam transition hover:bg-white/10 active:scale-95">Next page</button>
+        <div className="mt-4 flex items-center justify-center gap-2.5 text-xs tracking-wide text-mist">
+          <span className="hidden sm:inline">👈 Drag or click to tear</span>
+          <span className="sm:hidden">👈 Swipe to tear</span>
+          <button
+            onClick={() => tear(1)}
+            className="flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 text-xs text-foam transition hover:border-sand/40 hover:bg-white/10 active:scale-95"
+          >
+            <span>Next page</span>
+            <span aria-hidden>→</span>
+          </button>
         </div>
       )}
     </div>

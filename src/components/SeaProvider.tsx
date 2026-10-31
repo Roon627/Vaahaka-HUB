@@ -2,7 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { getOpened, markOpened, uuid } from "@/lib/device";
+import { getOpened, markOpened, uuid, getLastVisit, recordVisit } from "@/lib/device";
 import { unlockAudio } from "@/lib/sound";
 import BottleThrow from "./BottleThrow";
 import { POST_COLUMNS } from "@/hooks/usePosts";
@@ -31,6 +31,14 @@ interface Sea {
   /** Bottles other people sent since this tab opened (the feed offers to show them). */
   arrivals: number;
   clearArrivals: () => void;
+  /** Previous visit timestamp if the visitor is revisiting. */
+  previousVisit: string | null;
+  /** Number of new letters arrived since previousVisit. */
+  newArrivalsCount: number;
+  setNewArrivalsCount: (count: number) => void;
+  /** Filter to show only new arrivals since last visit. */
+  filterNewArrivals: boolean;
+  setFilterNewArrivals: (filter: boolean) => void;
   /** The most recent bottle someone else sent (null once its animation is over). */
   lastArrival: { id: number; category: CategoryId; atoll: string } | null;
 }
@@ -57,6 +65,9 @@ export function SeaProvider({ children }: { children: React.ReactNode }) {
   const postedCb = useRef<((p: Post) => void) | null>(null);
   const [online, setOnline] = useState(0);
   const [arrivals, setArrivals] = useState(0);
+  const [previousVisit, setPreviousVisit] = useState<string | null>(null);
+  const [newArrivalsCount, setNewArrivalsCount] = useState(0);
+  const [filterNewArrivals, setFilterNewArrivals] = useState(false);
   const [sailing, setSailing] = useState<Arrival | null>(null);
   // a bottle in the air: yours (thrown when you send) or someone else's (when their letter arrives)
   const [throwing, setThrowing] = useState<{ id: number; color: string; soft: boolean } | null>(null);
@@ -83,7 +94,14 @@ export function SeaProvider({ children }: { children: React.ReactNode }) {
   }, []);
   useEffect(() => { if (!sailing) return; const t = setTimeout(() => setSailing(null), 5200); return () => clearTimeout(t); }, [sailing]);
 
-  useEffect(() => { setOpened(new Set(getOpened())); }, []);
+  useEffect(() => {
+    setOpened(new Set(getOpened()));
+    const prev = getLastVisit();
+    if (prev) setPreviousVisit(prev);
+    // Record current visit timestamp for subsequent revisits
+    const t = setTimeout(() => { recordVisit(); }, 5000);
+    return () => clearTimeout(t);
+  }, []);
 
   const flash = useCallback((msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3200); }, []);
 
@@ -124,8 +142,13 @@ export function SeaProvider({ children }: { children: React.ReactNode }) {
       openPost, openRandom, finding, opened,
       onPosted: (cb) => { postedCb.current = cb; },
       online, arrivals, clearArrivals: () => setArrivals(0), lastArrival: sailing,
+      previousVisit,
+      newArrivalsCount,
+      setNewArrivalsCount,
+      filterNewArrivals,
+      setFilterNewArrivals,
     }),
-    [openPost, openRandom, finding, opened, online, arrivals, sailing]
+    [openPost, openRandom, finding, opened, online, arrivals, sailing, previousVisit, newArrivalsCount, filterNewArrivals]
   );
 
   return (

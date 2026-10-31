@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePosts } from "@/hooks/usePosts";
@@ -64,7 +64,21 @@ function BottleSkeleton() {
 export default function DumpingGround() {
   const router = useRouter();
   const params = useSearchParams();
-  const { openWriter, openRandom, finding, openPost, onPosted, arrivals, clearArrivals } = useSea();
+  const {
+    openWriter,
+    openRandom,
+    finding,
+    openPost,
+    onPosted,
+    arrivals,
+    clearArrivals,
+    previousVisit,
+    opened,
+    newArrivalsCount,
+    setNewArrivalsCount,
+    filterNewArrivals,
+    setFilterNewArrivals,
+  } = useSea();
 
   const catParam = params.get("cat");
   const category = CATEGORIES.some((c) => c.id === catParam) ? (catParam as CategoryId) : null;
@@ -72,6 +86,21 @@ export default function DumpingGround() {
   const atoll = atollParam && ATOLL_BY_CODE[atollParam] ? atollParam : null;
 
   const { posts, loading, done, error, loadMore, prepend, patch, reload } = usePosts({ category, atoll });
+
+  // Calculate new letters arrived since the visitor's previous visit
+  const newPosts = useMemo(() => {
+    if (!previousVisit) return [];
+    const visitDate = new Date(previousVisit);
+    return posts.filter((p) => new Date(p.created_at) > visitDate && !opened.has(p.id));
+  }, [posts, previousVisit, opened]);
+
+  // Sync count to sea context so the Nav Menu also displays the high tide count
+  useEffect(() => {
+    setNewArrivalsCount(newPosts.length);
+  }, [newPosts.length, setNewArrivalsCount]);
+
+  // Filtered letters if returning visitor activated "View new arrivals"
+  const visiblePosts = filterNewArrivals && newPosts.length > 0 ? newPosts : posts;
 
   // New letters sent from anywhere land at the top of this feed.
   useEffect(() => {
@@ -111,8 +140,8 @@ export default function DumpingGround() {
   return (
     <section className="w-full">
       {/* ---------------------------------------------------------- hero */}
-      <div className="mx-auto max-w-6xl px-5 pb-14 pt-6 sm:px-10 md:pb-20 lg:pt-10">
-        <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
+      <div className="mx-auto max-w-6xl px-5 pb-12 pt-6 sm:px-10 md:pb-16 lg:pt-8">
+        <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
           <div className="relative z-10">
             <h1 className="font-display text-[clamp(2.5rem,6vw,4.75rem)] font-light leading-[1.05] tracking-tight text-foam">
               Say it <br />
@@ -144,6 +173,20 @@ export default function DumpingGround() {
               </span>
               <span className="text-white/20">·</span>
               <SoulsOnline />
+              {previousVisit && newPosts.length > 0 && (
+                <>
+                  <span className="text-white/20">·</span>
+                  <button
+                    onClick={() => {
+                      setFilterNewArrivals(true);
+                      document.getElementById("bottles")?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className="flex items-center gap-1 font-medium text-sand hover:underline"
+                  >
+                    <span>✦ {newPosts.length} new since your last visit</span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
@@ -173,7 +216,63 @@ export default function DumpingGround() {
           />
         </div>
 
-        {/* New arrivals banner */}
+        {/* Creative Revisit Tide Banner */}
+        <AnimatePresence>
+          {previousVisit && newPosts.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mx-auto mt-6 max-w-7xl px-5 sm:px-8"
+            >
+              <div className="relative overflow-hidden rounded-2xl border border-sand/40 bg-gradient-to-r from-[#0d2634] via-[#112f42] to-[#0d2634] p-4 sm:p-5 shadow-lg">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-3.5">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sand/15 text-lg text-sand shadow-inner">
+                      🌊
+                    </span>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-serif text-base font-medium text-foam">
+                          The tide washed ashore {newPosts.length} new {newPosts.length === 1 ? "letter" : "letters"}
+                        </h3>
+                        <span className="rounded-full border border-sand/30 bg-sand/15 px-2.5 py-0.5 text-[10px] font-bold text-sand">
+                          Since your last visit
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-xs text-mist">
+                        Quiet thoughts released from across the islands while you were away.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pl-12 sm:pl-0">
+                    <button
+                      onClick={() => setFilterNewArrivals(!filterNewArrivals)}
+                      className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
+                        filterNewArrivals
+                          ? "bg-sand text-abyss shadow-md"
+                          : "border border-sand/40 bg-sand/15 text-sand hover:bg-sand/25"
+                      }`}
+                    >
+                      {filterNewArrivals ? "Showing new arrivals ✓" : `View new arrivals (${newPosts.length})`}
+                    </button>
+                    {filterNewArrivals && (
+                      <button
+                        onClick={() => setFilterNewArrivals(false)}
+                        className="text-xs text-mist hover:text-foam underline underline-offset-4"
+                      >
+                        Show all letters
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Live new arrivals banner (sent while tab is open) */}
         <AnimatePresence>
           {arrivals > 0 && (
             <motion.div
@@ -198,7 +297,7 @@ export default function DumpingGround() {
 
         {/* Shore Letter Grid */}
         <ul className="mx-auto mt-6 grid max-w-7xl grid-cols-1 gap-4 px-5 sm:grid-cols-2 sm:gap-5 sm:px-8 lg:grid-cols-3">
-          {posts.map((p, i) => (
+          {visiblePosts.map((p, i) => (
             <BottleCard key={p.id} post={p} index={i} onOpen={open} />
           ))}
           {loading && posts.length === 0 && Array.from({ length: 6 }, (_, i) => <BottleSkeleton key={i} />)}

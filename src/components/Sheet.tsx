@@ -24,7 +24,7 @@ export default function Sheet({ title, onClose, children }: { title: string; onC
     >
       <motion.div
         role="dialog" aria-modal="true" aria-label={title}
-        className="max-h-[92dvh] w-full max-w-md overflow-y-auto overscroll-contain rounded-t-3xl border border-white/10 bg-gradient-to-b from-tide to-deep p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-soft sm:rounded-3xl"
+        className="max-h-[92dvh] w-full max-w-lg overflow-y-auto overscroll-contain rounded-t-3xl border border-white/[0.1] bg-gradient-to-b from-[#0c232f] to-[#071720] p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] sm:rounded-3xl"
         initial={{ y: 70 }} animate={{ y: 0 }} exit={{ y: 70 }} transition={{ type: "spring", damping: 28, stiffness: 260 }}
         onClick={(e) => e.stopPropagation()}
       >

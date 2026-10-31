@@ -36,69 +36,182 @@ function Logo() {
 }
 
 /* ------------------------------------------------------------- about menu */
-/** A sticker tile, the same shape as the mood tiles in "How does it feel?", so every sheet in the app looks like one family. */
-function Tile({ sticker, title, hint, onClick, href, tone = "plain", badge }: { sticker: string; title: string; hint: string; onClick?: () => void; href?: string; tone?: "plain" | "glow" | "coral"; badge?: string }) {
-  const cls = `relative flex min-h-[7.5rem] flex-col items-center justify-center gap-1 rounded-2xl border px-2 py-3 text-center transition ${
-    tone === "glow" ? "border-glow/35 bg-glow/[0.09] hover:bg-glow/15" : tone === "coral" ? "border-coral/30 bg-coral/[0.08] hover:bg-coral/15" : "border-white/10 bg-white/[0.04] hover:bg-white/10"}`;
-  const inner = (
-    <>
-      <motion.img src={`/brand/stickers/${sticker}.svg`} alt="" width={40} height={48} className="h-11 w-auto" whileHover={{ rotate: [0, -8, 8, 0], scale: 1.1 }} transition={{ duration: 0.5 }} />
-      <span className="text-sm font-semibold text-foam">{title}</span>
-      <span className="text-[11.5px] leading-tight text-mist">{hint}</span>
-      {badge && <span className="absolute right-2 top-2 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-foam">{badge}</span>}
-    </>
-  );
-  const props = { whileTap: { scale: 0.96 }, className: cls };
-  return href ? <Link href={href} onClick={onClick} className={cls}>{inner}</Link> : <motion.button onClick={onClick} {...props}>{inner}</motion.button>;
-}
-
 function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () => void }) {
-  const { openRandom, finding } = useSea();
+  const { openRandom, finding, newArrivalsCount, setFilterNewArrivals } = useSea();
   const [on, setOn] = useState(false);
-  useEffect(() => { const sync = () => setOn(soundOn()); sync(); window.addEventListener(SOUND_EVENT, sync); return () => window.removeEventListener(SOUND_EVENT, sync); }, []);
+  useEffect(() => {
+    const sync = () => setOn(soundOn());
+    sync();
+    window.addEventListener(SOUND_EVENT, sync);
+    return () => window.removeEventListener(SOUND_EVENT, sync);
+  }, []);
 
-  const steps = [
-    ["✍️", "Write a letter", "No account, no email. Choose an ink for how it feels."],
-    ["🍾", "Seal it in a bottle", "It drifts into the sea for strangers to find."],
-    ["🕯️", "They only listen", "Readers offer supportive reactions and kind anonymous notes."],
-  ];
-  const fold = "group mt-3 rounded-2xl border border-white/10 bg-white/[0.03] open:bg-white/[0.05]";
-  const sum = "flex min-h-12 cursor-pointer list-none items-center justify-between px-4 text-sm font-medium text-foam [&::-webkit-details-marker]:hidden";
   return (
-    <Sheet title="Menu" onClose={onClose}>
-      <h2 className="font-display text-2xl text-foam">Menu</h2>
-      <p className="font-hand text-xl text-sand/80">Everything is a tap away.</p>
-
-      <div className="mt-4 grid grid-cols-2 gap-2.5">
-        <Tile tone="glow" sticker="relationships" title="Contact us" hint="An idea, a bug or a thank-you" onClick={onSuggest} />
-        <Tile tone="coral" sticker="sad" title="Need help now?" hint="Free helplines, 24 hours" href="/help" onClick={onClose} />
-        <Tile sticker="secrets" title="Surprise me" hint="Open a random bottle" onClick={() => { onClose(); if (!finding) openRandom(); }} />
-        <Tile sticker="happy" title="Sounds" hint="Splashes and paper tears" badge={on ? "On" : "Off"} onClick={() => setSound(!on)} />
+    <Sheet title="Ihusaas Sanctuary Menu" onClose={onClose}>
+      {/* Editorial Header */}
+      <div className="flex items-start justify-between border-b border-white/[0.08] pb-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sand/20 bg-sand/10 shadow-sm">
+            <img src="/brand/mark.svg" alt="" width={20} height={33} className="h-6 w-auto" />
+          </div>
+          <div>
+            <div className="flex items-baseline gap-2">
+              <h2 className="font-display text-2xl tracking-tight text-foam">Ihusaas</h2>
+              <span className="font-serif text-sm font-normal text-sand/80">އިޙްސާސް</span>
+            </div>
+            <p className="text-xs text-mist">A quiet sanctuary for words left to the sea.</p>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          aria-label="Close menu"
+          className="rounded-full p-2 text-mist transition hover:bg-white/10 hover:text-foam"
+        >
+          <Close className="h-5 w-5" />
+        </button>
       </div>
 
-      <div className="mt-3 rounded-2xl border border-coral/25 bg-coral/[0.08] p-3.5 text-[13px] leading-snug text-foam/90">
-        <strong className="font-medium text-coral">In distress?</strong> Call the national mental health helpline <a href="tel:1677" className="font-semibold underline">1677</a>. In an emergency call <a href="tel:911" className="font-semibold underline">911</a>.
+      {/* Dynamic Tide Update for Returning Visitors */}
+      <div className="mt-4">
+        {newArrivalsCount > 0 ? (
+          <div className="relative overflow-hidden rounded-2xl border border-sand/40 bg-gradient-to-br from-[#123040] via-[#0e2736] to-[#0a1c26] p-4 text-left shadow-lg">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-sand">
+                <Waves className="h-4 w-4" />
+                High Tide Arrivals
+              </span>
+              <span className="rounded-full bg-sand/20 px-2.5 py-0.5 text-[10px] font-bold text-sand">
+                {newArrivalsCount} new {newArrivalsCount === 1 ? "letter" : "letters"}
+              </span>
+            </div>
+            <p className="mt-2 font-serif text-sm italic text-foam/95">
+              The tide has carried {newArrivalsCount} new {newArrivalsCount === 1 ? "thought" : "thoughts"} ashore since your last visit.
+            </p>
+            <button
+              onClick={() => {
+                onClose();
+                setFilterNewArrivals(true);
+                document.getElementById("bottles")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="mt-3 inline-flex items-center gap-2 rounded-full bg-sand px-4 py-1.5 text-xs font-semibold text-abyss transition hover:bg-[#fae8c8] active:scale-95"
+            >
+              <span>Walk the shore & read them</span>
+              <span aria-hidden>→</span>
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 text-xs text-mist/90">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-sand/80 shadow-[0_0_8px_rgba(236,217,181,0.6)]" />
+              <span className="font-medium text-foam">Quiet sea over the atolls</span>
+            </div>
+            <span className="text-[11px] text-mist/70">20 atolls listening</span>
+          </div>
+        )}
       </div>
 
-      <details className={fold}>
-        <summary className={sum}>How Ihusaas works<Chevron className="h-4 w-4 text-mist transition group-open:rotate-90" /></summary>
-        <ol className="space-y-3 px-4 pb-4">
-          {steps.map(([e, t, d]) => (
-            <li key={t} className="flex gap-3">
-              <span className="mt-0.5 text-lg">{e}</span>
-              <span><span className="block text-sm font-medium text-foam">{t}</span><span className="text-[13px] leading-snug text-mist">{d}</span></span>
-            </li>
-          ))}
-        </ol>
-      </details>
-      <details className={fold}>
-        <summary className={sum}>Our promise<Chevron className="h-4 w-4 text-mist transition group-open:rotate-90" /></summary>
-        <ul className="space-y-1.5 px-4 pb-4 text-[13px] leading-snug text-mist">
-          <li>· No name, email or account is attached to a letter.</li>
-          <li>· Kind anonymous notes and supportive reactions. No downvotes.</li>
-          <li>· Please keep names and identifying details out. Reports hide a letter for review.</li>
-        </ul>
-      </details>
+      {/* Editorial Actions */}
+      <div className="mt-4 space-y-2.5">
+        {/* Surprise letter */}
+        <button
+          onClick={() => {
+            onClose();
+            if (!finding) openRandom();
+          }}
+          disabled={finding}
+          className="group flex w-full items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.03] p-3.5 text-left transition-all hover:border-sand/35 hover:bg-white/[0.06]"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sand/15 text-sand transition-transform group-hover:scale-105">
+              <Dice className={`h-5 w-5 ${finding ? "animate-spin" : ""}`} />
+            </span>
+            <div>
+              <span className="block text-sm font-medium text-foam group-hover:text-sand">
+                Surprise me
+              </span>
+              <span className="block text-xs text-mist">Uncork a random letter from the sea</span>
+            </div>
+          </div>
+          <Chevron className="h-4 w-4 shrink-0 text-mist/60 transition-transform group-hover:translate-x-0.5" />
+        </button>
+
+        {/* Ambient Sounds */}
+        <div className="flex w-full items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.03] p-3.5 text-left transition-all hover:border-white/15">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-sand">
+              {on ? <Speaker className="h-5 w-5" /> : <SpeakerOff className="h-5 w-5" />}
+            </span>
+            <div>
+              <span className="block text-sm font-medium text-foam">
+                Ambient sounds
+              </span>
+              <span className="block text-xs text-mist">Ocean wash and tactile paper tears</span>
+            </div>
+          </div>
+          <button
+            onClick={() => setSound(!on)}
+            className={`min-h-8 shrink-0 rounded-full px-3.5 py-1 text-xs font-semibold transition ${
+              on ? "bg-sand text-abyss shadow-sm hover:bg-[#fae8c8]" : "border border-white/15 bg-white/5 text-mist hover:text-foam"
+            }`}
+          >
+            {on ? "Sound: On" : "Sound: Off"}
+          </button>
+        </div>
+
+        {/* Contact creator */}
+        <button
+          onClick={onSuggest}
+          className="group flex w-full items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.03] p-3.5 text-left transition-all hover:border-sand/35 hover:bg-white/[0.06]"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-sand transition-transform group-hover:scale-105">
+              <Pen className="h-5 w-5" />
+            </span>
+            <div>
+              <span className="block text-sm font-medium text-foam group-hover:text-sand">
+                Contact the creator
+              </span>
+              <span className="block text-xs text-mist">Send a quiet note, idea, or issue to Harun</span>
+            </div>
+          </div>
+          <Chevron className="h-4 w-4 shrink-0 text-mist/60 transition-transform group-hover:translate-x-0.5" />
+        </button>
+
+        {/* Crisis Support Card */}
+        <Link
+          href="/help"
+          onClick={onClose}
+          className="group flex w-full items-center justify-between rounded-xl border border-coral/25 bg-coral/[0.06] p-3.5 text-left transition-all hover:border-coral/40 hover:bg-coral/[0.12]"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-coral/15 text-coral">
+              🤍
+            </span>
+            <div>
+              <span className="block text-sm font-medium text-foam group-hover:text-coral">
+                Need support right now?
+              </span>
+              <span className="block text-xs text-mist">Free 24h helplines in the Maldives (1677, 1412, 911)</span>
+            </div>
+          </div>
+          <Chevron className="h-4 w-4 shrink-0 text-coral/70 transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      </div>
+
+      {/* Editorial Sanctuary Note */}
+      <div className="mt-4 rounded-2xl border border-white/[0.06] bg-[#091b24] p-4 text-xs leading-relaxed text-mist">
+        <div className="flex items-center gap-2 font-serif text-sm font-medium text-foam/90">
+          <span className="text-sand">✦</span>
+          <span>Our Promise</span>
+        </div>
+        <p className="mt-1.5 text-mist/85">
+          No accounts. No algorithms. No tracking. You release letters into the sea anonymously, and strangers respond only with quiet kindness.
+        </p>
+        <p className="mt-2 text-right font-serif text-[11px] italic text-sand/70">
+          — Ihusaas (Say it to the sea)
+        </p>
+      </div>
+
       <InstallRow />
     </Sheet>
   );
@@ -109,9 +222,9 @@ function InstallRow() {
   const { show, can, mode } = useInstall();
   if (!show) return null;
   return (
-    <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5 text-[13px] text-mist">
-      <span>{mode === "inapp" ? "Open in your browser to add Ihusaas to your home screen." : "Add Ihusaas to your home screen."}</span>
-      <button onClick={() => startInstall()} className="min-h-10 shrink-0 rounded-full bg-gradient-to-r from-glow to-sand px-4 text-xs font-semibold text-abyss">{can ? "Install" : "How"}</button>
+    <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-xs text-mist">
+      <span>{mode === "inapp" ? "Open in browser to add Ihusaas to your home screen." : "Add Ihusaas to your home screen."}</span>
+      <button onClick={() => startInstall()} className="min-h-8 shrink-0 rounded-full bg-sand px-3.5 text-xs font-semibold text-abyss transition hover:bg-[#fae8c8]">{can ? "Install" : "How"}</button>
     </div>
   );
 }

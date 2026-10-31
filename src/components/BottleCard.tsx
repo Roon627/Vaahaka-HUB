@@ -22,8 +22,9 @@ interface Props {
  * genuine excerpt of the words (or a respectful wax seal if content-warned).
  */
 export default function BottleCard({ post, index, onOpen }: Props) {
-  const { opened } = useSea();
+  const { opened, previousVisit } = useSea();
   const isOpened = opened.has(post.id);
+  const isNew = !!(previousVisit && new Date(post.created_at) > new Date(previousVisit) && !isOpened);
   const cat = CATEGORY_BY_ID[post.category] ?? {
     id: post.category,
     label: "Feeling",
@@ -54,6 +55,8 @@ export default function BottleCard({ post, index, onOpen }: Props) {
         className={`group relative flex w-full flex-col justify-between rounded-2xl border p-4 text-left transition-all sm:p-5 ${
           isOpened
             ? "border-white/[0.06] bg-[#0c222e]/50 opacity-75 hover:opacity-100"
+            : isNew
+            ? "border-sand/35 bg-[#0e2736] shadow-sm hover:-translate-y-0.5 hover:border-sand/60"
             : "border-white/[0.09] bg-[#0c222e]/85 shadow-sm hover:-translate-y-0.5 hover:border-sand/40 hover:bg-[#102b3a]"
         }`}
       >
@@ -72,9 +75,16 @@ export default function BottleCard({ post, index, onOpen }: Props) {
               <span>{cat.label}</span>
             </span>
 
-            <span className="truncate text-[11px] text-mist/80">
-              {place} · {timeAgo(post.created_at)}
-            </span>
+            <div className="flex items-center gap-1.5">
+              {isNew && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-sand/30 bg-sand/15 px-2 py-0.5 text-[10px] font-semibold text-sand">
+                  ✦ New arrival
+                </span>
+              )}
+              <span className="truncate text-[11px] text-mist/80">
+                {place} · {timeAgo(post.created_at)}
+              </span>
+            </div>
           </div>
 
           {/* Letter excerpt or sealed notice */}
