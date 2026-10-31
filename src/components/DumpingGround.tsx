@@ -140,7 +140,7 @@ export default function DumpingGround() {
   return (
     <section className="w-full">
       {/* ---------------------------------------------------------- hero */}
-      <div className="mx-auto max-w-6xl px-5 pb-12 pt-6 sm:px-10 md:pb-16 lg:pt-8">
+      <div className="mx-auto max-w-6xl px-5 pb-14 pt-6 sm:px-10 md:pb-20 lg:pb-24 lg:pt-10">
         <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
           <div className="relative z-10">
             <h1 className="font-display text-[clamp(2.5rem,6vw,4.75rem)] font-light leading-[1.05] tracking-tight text-foam">
