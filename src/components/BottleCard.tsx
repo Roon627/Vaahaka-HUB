@@ -3,55 +3,127 @@ import { motion } from "framer-motion";
 import { ATOLL_BY_CODE, CATEGORY_BY_ID } from "@/lib/constants";
 import { timeAgo } from "@/lib/time";
 import type { Post } from "@/lib/types";
-import Bottle from "./Bottle";
 import { useSea } from "./SeaProvider";
+import Bottle from "./Bottle";
 import WaxSeal from "./WaxSeal";
 
-interface Props { post: Post; index: number; onOpen: (post: Post) => void }
+const THAANA = /[\u0780-\u07BF]/;
 
-/** The glass plank every bottle stands on. Adjacent cells overlap by the grid gap, so a row reads as one shelf. */
-const SHELF = "h-px w-3/4 bg-gradient-to-r from-transparent via-glow/25 to-transparent";
+interface Props {
+  post: Post;
+  index: number;
+  onOpen: (post: Post) => void;
+}
 
 /**
- * One sealed bottle, standing still on its shelf: no bobbing, no random offsets. It only moves when you
- * touch it (lifts and tilts). The message is NOT shown: just where it came from, how it feels and how
- * long it has been drifting; uncork it to read. Opened bottles stay on the shelf, uncorked and faded.
- * The caption always has the same three lines, so rows never jump around.
+ * Shore Letter Card:
+ * Instead of an empty cartoon bottle that hides the confession, each card is a
+ * tactile letter washed ashore. It shows the mood, origin atoll/island, and a
+ * genuine excerpt of the words (or a respectful wax seal if content-warned).
  */
 export default function BottleCard({ post, index, onOpen }: Props) {
   const { opened } = useSea();
   const isOpened = opened.has(post.id);
-  const cat = CATEGORY_BY_ID[post.category];
+  const cat = CATEGORY_BY_ID[post.category] ?? {
+    id: post.category,
+    label: "Feeling",
+    color: "#9fe3d0",
+    emoji: "🌊",
+  };
   const atoll = ATOLL_BY_CODE[post.atoll_code];
-  const place = post.island || atoll?.name || post.atoll_code;
+  const place = post.island
+    ? `${post.island}${atoll ? `, ${atoll.name}` : ""}`
+    : atoll?.name || post.atoll_code || "The sea";
+
+  const isThaana = THAANA.test(post.body);
 
   return (
     <motion.li
-      initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-20px" }}
-      transition={{ duration: 0.5, delay: (index % 4) * 0.04, ease: "easeOut" }}
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-20px" }}
+      transition={{ duration: 0.4, delay: (index % 3) * 0.05, ease: "easeOut" }}
       className="flex"
     >
       <button
-        onClick={() => { navigator.vibrate?.(8); onOpen(post); }}
-        aria-label={`${isOpened ? "Reopen" : "Open"} a ${cat.label.toLowerCase()} message from ${place}${post.trigger_warning ? " (sealed with a content note)" : ""}`}
-        className="shore-bottle-card group flex w-full flex-col items-center rounded-2xl px-3 pb-5 pt-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-glow/60"
+        onClick={() => {
+          navigator.vibrate?.(8);
+          onOpen(post);
+        }}
+        aria-label={`${isOpened ? "Re-read" : "Read"} a ${cat.label.toLowerCase()} letter from ${place}${post.trigger_warning ? " (sealed with a note)" : ""}`}
+        className={`group relative flex w-full flex-col justify-between rounded-2xl border p-4 text-left transition-all sm:p-5 ${
+          isOpened
+            ? "border-white/[0.06] bg-[#0c222e]/50 opacity-75 hover:opacity-100"
+            : "border-white/[0.09] bg-[#0c222e]/85 shadow-sm hover:-translate-y-0.5 hover:border-sand/40 hover:bg-[#102b3a]"
+        }`}
       >
-        <span className="relative flex h-[8.75rem] w-full items-end justify-center">
-          {/* a pool of the mood's light under the bottle, shown on hover / press */}
-          <span aria-hidden className="absolute bottom-0 h-6 w-20 rounded-full opacity-0 blur-xl transition-opacity duration-300 group-hover:opacity-70 group-active:opacity-80" style={{ background: cat.color }} />
-          <span className={`relative block origin-bottom transition-all duration-300 ease-out group-hover:-translate-y-1.5 group-hover:rotate-[5deg] group-active:scale-95 ${isOpened ? "opacity-50" : ""}`}>
-            <Bottle color={cat.color} height={128} uncorked={isOpened} glow={!isOpened} />
+        {/* Top: Mood badge + Origin & Time */}
+        <div>
+          <div className="flex items-center justify-between gap-2 text-xs">
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium"
+              style={{
+                backgroundColor: `${cat.color}18`,
+                color: cat.color,
+                border: `1px solid ${cat.color}33`,
+              }}
+            >
+              <Bottle color={cat.color} height={16} uncorked={isOpened} />
+              <span>{cat.label}</span>
+            </span>
+
+            <span className="truncate text-[11px] text-mist/80">
+              {place} · {timeAgo(post.created_at)}
+            </span>
+          </div>
+
+          {/* Letter excerpt or sealed notice */}
+          <div className="mt-3.5">
+            {post.trigger_warning && !isOpened ? (
+              <div className="flex items-center gap-2.5 rounded-xl border border-coral/20 bg-coral/[0.06] p-2.5 text-xs text-foam/90">
+                <WaxSeal color="#b4563f" emoji="🤍" size={24} />
+                <span className="leading-snug">
+                  <strong className="font-semibold text-coral">Sealed letter:</strong>{" "}
+                  {post.trigger_warning}
+                </span>
+              </div>
+            ) : (
+              <p
+                dir="auto"
+                className={`line-clamp-3 text-sm leading-relaxed text-foam/90 transition-colors group-hover:text-foam ${
+                  isThaana ? "font-sans leading-loose text-right" : "font-serif text-[14.5px]"
+                }`}
+              >
+                {post.body}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Foot: Read prompt & Reactions */}
+        <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3 text-[11px] text-mist">
+          <span className="font-medium text-sand/80 transition-colors group-hover:text-sand">
+            {isOpened ? "Read letter →" : "Open letter →"}
           </span>
-          {post.trigger_warning && !isOpened && (
-            <span className="absolute right-[18%] top-3" title="Sealed with a content note"><WaxSeal color="#b4563f" emoji="🤍" size={22} /></span>
-          )}
-        </span>
 
-        <span aria-hidden className={SHELF} />
-
-        <span className="mt-2 block max-w-full truncate px-1 font-display text-[12.5px] text-foam/90 min-[520px]:text-[15px] transition-colors group-hover:text-foam">{place}</span>
-        <span className="block max-w-full truncate px-1 text-[10px] text-mist min-[520px]:text-[11px]">{cat.emoji} {cat.label} · {timeAgo(post.created_at)}</span>
-        <span className="mt-0.5 block text-[10px] text-mist/70 min-[520px]:text-[11px]">{isOpened ? "opened" : post.trigger_warning ? "sealed" : `🕯️ ${post.listening_count} listening`}</span>
+          <div className="flex items-center gap-3">
+            {post.felt_count > 0 && (
+              <span className="inline-flex items-center gap-1" title="Felt by readers">
+                <span className="text-[10px]">🤍</span>
+                <span>{post.felt_count}</span>
+              </span>
+            )}
+            {post.comment_count > 0 && (
+              <span className="inline-flex items-center gap-1" title="Kind notes left">
+                <span className="text-[10px]">💬</span>
+                <span>{post.comment_count}</span>
+              </span>
+            )}
+            {post.felt_count === 0 && post.comment_count === 0 && (
+              <span className="text-[10px] text-mist/60">New arrival</span>
+            )}
+          </div>
+        </div>
       </button>
     </motion.li>
   );

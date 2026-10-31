@@ -29,7 +29,7 @@ const Chevron = I(<path d="M9 6l6 6-6 6" />);
 function Logo() {
   return (
     <span className="flex items-center gap-2 font-display text-xl text-foam">
-      <img src="/brand/mark.svg" alt="" width={20} height={33} className="h-[33px] w-auto animate-drift" />
+      <img src="/brand/mark.svg" alt="" width={20} height={33} className="h-[30px] w-auto" />
       <span>Ihusaas</span>
     </span>
   );
@@ -162,7 +162,7 @@ export default function Nav() {
             {surprise}
           </div>
           <div className="flex items-center gap-1.5">
-            <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={() => openWriter()} className="flex items-center gap-2 rounded-full bg-gradient-to-r from-glow to-sand px-5 py-2.5 text-sm font-semibold text-abyss shadow-glow">
+            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => openWriter()} className="flex items-center gap-2 rounded-full bg-sand px-5 py-2.5 text-sm font-semibold text-abyss transition hover:bg-[#fae8c8]">
               <Pen /> Write
             </motion.button>
             <button onClick={() => setAbout((v) => !v)} aria-label="Menu: contact, help and how it works" aria-expanded={about} aria-haspopup="dialog" className={`flex items-center gap-2 rounded-full px-3.5 py-2 text-sm transition hover:bg-white/10 hover:text-foam ${about ? "bg-white/10 text-foam" : "text-mist"}`}><Bars /> Menu</button>
@@ -180,7 +180,7 @@ export default function Nav() {
         <div className="mx-auto flex max-w-md items-center justify-around px-2 py-1.5">
           {TABS.slice(0, 1).map(({ href, label, Icon }) => <DockLink key={href} href={href} label={label} Icon={Icon} on={path === href} />)}
           <DockLink href="/map" label="Map" Icon={MapPin} on={path === "/map"} />
-          <motion.button whileTap={{ scale: 0.92 }} onClick={() => openWriter()} aria-label="Write a letter" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-glow to-sand text-abyss shadow-glow"><Pen className="h-5 w-5" /></motion.button>
+          <motion.button whileTap={{ scale: 0.92 }} onClick={() => openWriter()} aria-label="Write a letter" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sand text-abyss shadow-sm"><Pen className="h-5 w-5" /></motion.button>
           <MoodDock variant="dock" />
           <button onClick={() => setAbout((v) => !v)} aria-label="Menu: contact, help and how it works" aria-expanded={about} aria-haspopup="dialog" className={`flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-2 text-[10px] ${about ? "bg-white/10 text-foam" : "text-mist"}`}><Bars className="h-5 w-5" />Menu</button>
         </div>
