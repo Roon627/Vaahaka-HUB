@@ -298,7 +298,7 @@ export default function DumpingGround() {
         {/* Shore Letter Grid */}
         <ul className="mx-auto mt-6 grid max-w-7xl grid-cols-1 gap-4 px-5 sm:grid-cols-2 sm:gap-5 sm:px-8 lg:grid-cols-3">
           {visiblePosts.map((p, i) => (
-            <BottleCard key={p.id} post={p} index={i} onOpen={open} />
+            <BottleCard key={p.id} post={p} index={i} onOpen={open} onPatch={patch} />
           ))}
           {loading && posts.length === 0 && Array.from({ length: 6 }, (_, i) => <BottleSkeleton key={i} />)}
         </ul>

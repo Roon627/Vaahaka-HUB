@@ -34,7 +34,7 @@ export type ReactionKind = "felt" | "heart" | "listening";
 
 export const REACTIONS: { kind: ReactionKind; emoji: string; label: string }[] = [
   { kind: "felt", emoji: "🫂", label: "Felt" },
-  { kind: "heart", emoji: "🫀", label: "Heart" },
+  { kind: "heart", emoji: "❤️", label: "Heart" },
   { kind: "listening", emoji: "🕯️", label: "Listening" },
 ];
 
