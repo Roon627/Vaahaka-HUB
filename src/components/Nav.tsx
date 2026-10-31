@@ -56,7 +56,16 @@ function Logo({ showDhivehi = true }: { showDhivehi?: boolean }) {
 
 /* ------------------------------------------------------------- about menu */
 function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () => void }) {
-  const { openRandom, finding, newArrivalsCount, setFilterNewArrivals } = useSea();
+  const {
+    openRandom,
+    finding,
+    newArrivalsCount,
+    setFilterNewArrivals,
+    myPosts,
+    fingerprintEnabled,
+    setFingerprintEnabled,
+    setFilterMyPosts,
+  } = useSea();
   const { lang, setLang, t } = useLanguage();
   const [on, setOn] = useState(false);
   useEffect(() => {
@@ -171,6 +180,59 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
               ދިވެހި
             </button>
           </div>
+        </div>
+
+        {/* Device Memory & Fingerprinting Setting */}
+        <div className="flex w-full flex-col gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3.5 text-left transition-all hover:border-white/15">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-sand text-sm">
+                🔒
+              </span>
+              <div>
+                <span className="block text-sm font-medium text-foam">
+                  {lang === "dv" ? "ޑިވައިސް ފިންގަރޕްރިންޓް" : "Device Memory & Fingerprint"}
+                </span>
+                <span className="block text-xs text-mist">
+                  {lang === "dv"
+                    ? "އަމިއްލަ ސިޓީތަކަށް ކޮމެންޓްކުރުން ހުއްޓުވާ"
+                    : "Prevents commenting on your own letters"}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => setFingerprintEnabled(!fingerprintEnabled)}
+              className={`min-h-8 shrink-0 rounded-full px-3.5 py-1 text-xs font-semibold transition ${
+                fingerprintEnabled
+                  ? "bg-sand text-abyss shadow-sm hover:bg-[#fae8c8]"
+                  : "border border-white/15 bg-white/5 text-mist hover:text-foam"
+              }`}
+            >
+              {fingerprintEnabled
+                ? (lang === "dv" ? "އޮން" : "On")
+                : (lang === "dv" ? "އޮފް" : "Off")}
+            </button>
+          </div>
+
+          {fingerprintEnabled && myPosts.size > 0 && (
+            <div className="mt-1 flex items-center justify-between border-t border-white/[0.06] pt-2 text-xs">
+              <span className="text-mist/80">
+                {lang === "dv"
+                  ? `މި ޑިވައިސްއިން ދޫކޮށްލި ${myPosts.size} ސިޓީ ހަނދާނުގައި އެބަހުރި`
+                  : `Recognized: ${myPosts.size} ${myPosts.size === 1 ? "letter" : "letters"} from this device`}
+              </span>
+              <button
+                onClick={() => {
+                  onClose();
+                  setFilterMyPosts(true);
+                  document.getElementById("bottles")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="font-medium text-sand hover:underline"
+              >
+                {lang === "dv" ? "ސިޓީތައް ބަލާލަން →" : "View my letters →"}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Surprise letter */}

@@ -2,7 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { getOpened, markOpened, uuid, getLastVisit, recordVisit } from "@/lib/device";
+import { getOpened, markOpened, uuid, getLastVisit, recordVisit, getMyPosts, isMyPost as checkIsMyPost, isFingerprintEnabled as checkFpEnabled, setFingerprintEnabled as saveFpEnabled } from "@/lib/device";
 import { unlockAudio } from "@/lib/sound";
 import BottleThrow from "./BottleThrow";
 import { POST_COLUMNS } from "@/hooks/usePosts";
@@ -39,6 +39,14 @@ interface Sea {
   /** Filter to show only new arrivals since last visit. */
   filterNewArrivals: boolean;
   setFilterNewArrivals: (filter: boolean) => void;
+  /** Post IDs released from this device (device fingerprint memory). */
+  myPosts: Set<string>;
+  isMyPost: (id: string) => boolean;
+  fingerprintEnabled: boolean;
+  setFingerprintEnabled: (enabled: boolean) => void;
+  /** Filter to show only letters written by this device. */
+  filterMyPosts: boolean;
+  setFilterMyPosts: (filter: boolean) => void;
   /** The most recent bottle someone else sent (null once its animation is over). */
   lastArrival: { id: number; category: CategoryId; atoll: string } | null;
 }
@@ -68,6 +76,9 @@ export function SeaProvider({ children }: { children: React.ReactNode }) {
   const [previousVisit, setPreviousVisit] = useState<string | null>(null);
   const [newArrivalsCount, setNewArrivalsCount] = useState(0);
   const [filterNewArrivals, setFilterNewArrivals] = useState(false);
+  const [myPosts, setMyPosts] = useState<Set<string>>(new Set());
+  const [fingerprintEnabled, setFingerprintEnabledState] = useState(true);
+  const [filterMyPosts, setFilterMyPosts] = useState(false);
   const [sailing, setSailing] = useState<Arrival | null>(null);
   // a bottle in the air: yours (thrown when you send) or someone else's (when their letter arrives)
   const [throwing, setThrowing] = useState<{ id: number; color: string; soft: boolean } | null>(null);
@@ -102,6 +113,36 @@ export function SeaProvider({ children }: { children: React.ReactNode }) {
     const t = setTimeout(() => { recordVisit(); }, 5000);
     return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    setMyPosts(getMyPosts());
+    setFingerprintEnabledState(checkFpEnabled());
+
+    const onMyPosts = () => setMyPosts(getMyPosts());
+    const onFp = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      setFingerprintEnabledState(detail?.enabled ?? checkFpEnabled());
+    };
+    window.addEventListener("ihusaas:myposts_change", onMyPosts);
+    window.addEventListener("ihusaas:fingerprint_change", onFp);
+    return () => {
+      window.removeEventListener("ihusaas:myposts_change", onMyPosts);
+      window.removeEventListener("ihusaas:fingerprint_change", onFp);
+    };
+  }, []);
+
+  const handleSetFp = useCallback((enabled: boolean) => {
+    saveFpEnabled(enabled);
+    setFingerprintEnabledState(enabled);
+  }, []);
+
+  const isMyPost = useCallback(
+    (id: string) => {
+      if (!fingerprintEnabled) return false;
+      return myPosts.has(id);
+    },
+    [fingerprintEnabled, myPosts]
+  );
 
   const flash = useCallback((msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3200); }, []);
 
@@ -147,8 +188,14 @@ export function SeaProvider({ children }: { children: React.ReactNode }) {
       setNewArrivalsCount,
       filterNewArrivals,
       setFilterNewArrivals,
+      myPosts,
+      isMyPost,
+      fingerprintEnabled,
+      setFingerprintEnabled: handleSetFp,
+      filterMyPosts,
+      setFilterMyPosts,
     }),
-    [openPost, openRandom, finding, opened, online, arrivals, sailing, previousVisit, newArrivalsCount, filterNewArrivals]
+    [openPost, openRandom, finding, opened, online, arrivals, sailing, previousVisit, newArrivalsCount, filterNewArrivals, myPosts, isMyPost, fingerprintEnabled, handleSetFp, filterMyPosts]
   );
 
   return (

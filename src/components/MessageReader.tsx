@@ -9,6 +9,8 @@ import Comments from "./Comments";
 import ReactionBar from "./ReactionBar";
 import ReportSheet from "./ReportSheet";
 import WaxSeal from "./WaxSeal";
+import { useSea } from "./SeaProvider";
+import { useLanguage } from "@/lib/i18n";
 
 /** Bigger type for short letters, gently smaller for long ones, so the letter fits the first screen. */
 const textSize = (n: number) => (n < 200 ? "text-[20px] leading-8" : n < 420 ? "text-[17px] leading-7" : n < 800 ? "text-[15px] leading-7" : "text-[14px] leading-6");
@@ -22,6 +24,9 @@ interface Props { post: Post; onClose: () => void; onCounts: (c: ReactionCounts)
  * until the reader chooses to break the seal. On phones it's a bottom sheet: drag the handle down to close.
  */
 export default function MessageReader({ post, onClose, onCounts, onStep, hasPrev, hasNext }: Props) {
+  const { isMyPost } = useSea();
+  const { lang } = useLanguage();
+  const isMine = isMyPost(post.id);
   const cat = CATEGORY_BY_ID[post.category];
   const atoll = ATOLL_BY_CODE[post.atoll_code];
   const reduce = useReducedMotion();
@@ -78,6 +83,26 @@ export default function MessageReader({ post, onClose, onCounts, onStep, hasPrev
             </div>
           </div>
 
+          {/* Author recognition banner */}
+          {isMine && (
+            <div className="mt-4 flex items-center justify-between rounded-2xl border border-amber-900/25 bg-amber-900/[0.08] p-3.5 text-xs text-amber-950">
+              <div className="flex items-center gap-2.5">
+                <span className="text-base">✍️</span>
+                <div>
+                  <span className="font-semibold block text-ink">
+                    {lang === "dv" ? "މިއީ ތިބާ ކަނޑަށް ދޫކޮށްލި އަމިއްލަ ސިޓީއެކެވެ" : "You released this letter into the sea"}
+                  </span>
+                  <span className="text-[11px] text-inksoft">
+                    {lang === "dv" ? "އައްސޭރިއަށް ބީވެފައި. އެހެން މީހުން ކިޔައި ހެޔޮ ބަސްތައް ދޫކުރާނެއެވެ." : "Resting on the shore. Others can read and leave kind notes for you."}
+                  </span>
+                </div>
+              </div>
+              <span className="rounded-full bg-amber-900/15 px-2.5 py-1 text-[10px] font-bold text-ink uppercase tracking-wider">
+                {lang === "dv" ? "ތިބާގެ ސިޓީ" : "Author"}
+              </span>
+            </div>
+          )}
+
           <p className="mt-3 font-hand text-4xl text-ink sm:mt-6">Dear sea,</p>
 
           {sealed ? (
@@ -108,7 +133,7 @@ export default function MessageReader({ post, onClose, onCounts, onStep, hasPrev
             </div>
           )}
 
-          {!sealed && <Comments postId={post.id} />}
+          {!sealed && <Comments postId={post.id} isAuthor={isMine} />}
 
           <div className="mt-6 flex items-center justify-between border-t border-ink/15 pt-3 text-xs text-inksoft">
             <button onClick={() => setReporting(true)} disabled={reported} className="-ml-2 flex min-h-11 items-center gap-1.5 rounded-full px-3 transition hover:bg-ink/10 hover:text-wax disabled:opacity-60">

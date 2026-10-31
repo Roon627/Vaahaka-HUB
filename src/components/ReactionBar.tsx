@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { getDeviceToken, getMyReactions, setMyReaction } from "@/lib/device";
 import { REACTIONS, type ReactionKind } from "@/lib/constants";
 import type { Post, ReactionCounts } from "@/lib/types";
+import { useSea } from "./SeaProvider";
 
 interface Burst { id: number; kind: ReactionKind; emoji: string; drifts: number[] }
 let burstId = 0;
@@ -25,6 +26,8 @@ interface Props {
  * Giving a reaction releases a little shower of emoji that float up and fade.
  */
 export default function ReactionBar({ post, tone = "sea", onCounts, compact = false }: Props) {
+  const { isMyPost } = useSea();
+  const isMine = isMyPost(post.id);
   const [counts, setCounts] = useState<ReactionCounts>({
     felt: post.felt_count, heart: post.heart_count, listening: post.listening_count,
   });
@@ -45,6 +48,10 @@ export default function ReactionBar({ post, tone = "sea", onCounts, compact = fa
   }
 
   async function toggle(kind: ReactionKind, emoji: string) {
+    if (isMine) {
+      navigator.vibrate?.([8, 30, 8]);
+      return;
+    }
     if (busy) return;
     setBusy(kind);
     const wasOn = mine.has(kind);
@@ -86,12 +93,20 @@ export default function ReactionBar({ post, tone = "sea", onCounts, compact = fa
         return (
           <div key={kind} className="relative">
             <motion.button
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.9 }}
+              whileHover={isMine ? {} : { y: -2 }}
+              whileTap={isMine ? {} : { scale: 0.9 }}
               onClick={() => toggle(kind, emoji)}
+              disabled={isMine}
               aria-pressed={on}
-              aria-label={`${label} (${counts[kind]})`}
-              className={`flex min-h-11 items-center gap-1.5 rounded-full border ${compact ? "px-3" : "px-4"} py-2 text-sm transition-colors ${on ? onCls : offCls}`}
+              aria-label={isMine ? `Your letter (${counts[kind]})` : `${label} (${counts[kind]})`}
+              title={isMine ? "You wrote this letter" : label}
+              className={`flex min-h-11 items-center gap-1.5 rounded-full border ${compact ? "px-3" : "px-4"} py-2 text-sm transition-colors ${
+                isMine
+                  ? "border-amber-900/25 bg-amber-900/[0.06] text-inksoft cursor-default"
+                  : on
+                  ? onCls
+                  : offCls
+              }`}
             >
               <motion.span
                 key={String(on)}

@@ -1,9 +1,12 @@
 // A random, locally-stored token. It is NOT an account: it only lets the DB
 // dedupe reactions and rate-limit posting. Clearing site data resets it.
 import type { ReactionKind } from "./constants";
+import { getDeviceFingerprint } from "./fingerprint";
 
 const TOKEN_KEY = "raalhu.device";
 const MINE_KEY = "raalhu.reactions";
+const MY_POSTS_KEY = "ihusaas:my_posts";
+const FINGERPRINT_ENABLED_KEY = "ihusaas:fingerprint_enabled";
 
 function safeGet(k: string) {
   try { return localStorage.getItem(k); } catch { return null; }
@@ -29,11 +32,52 @@ export function getDeviceToken(): string {
   if (typeof window === "undefined") return "";
   let t = safeGet(TOKEN_KEY) ?? memoryToken;
   if (!t) {
-    t = uuid() + uuid().slice(0, 8);
+    if (isFingerprintEnabled()) {
+      t = getDeviceFingerprint();
+    } else {
+      t = uuid() + uuid().slice(0, 8);
+    }
     memoryToken = t;
     safeSet(TOKEN_KEY, t);
   }
   return t;
+}
+
+// ---- Author post tracking & device memory ----
+export function isFingerprintEnabled(): boolean {
+  if (typeof window === "undefined") return true;
+  const val = safeGet(FINGERPRINT_ENABLED_KEY);
+  return val === null ? true : val === "true";
+}
+
+export function setFingerprintEnabled(enabled: boolean): void {
+  safeSet(FINGERPRINT_ENABLED_KEY, enabled ? "true" : "false");
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("ihusaas:fingerprint_change", { detail: { enabled } }));
+  }
+}
+
+export function getMyPosts(): Set<string> {
+  try {
+    const val = JSON.parse(safeGet(MY_POSTS_KEY) ?? "[]");
+    return new Set(Array.isArray(val) ? val.filter((x): x is string => typeof x === "string") : []);
+  } catch {
+    return new Set();
+  }
+}
+
+export function recordMyPost(postId: string): void {
+  if (!postId || typeof window === "undefined") return;
+  const set = getMyPosts();
+  set.add(postId);
+  safeSet(MY_POSTS_KEY, JSON.stringify([...set].slice(-500)));
+  window.dispatchEvent(new CustomEvent("ihusaas:myposts_change", { detail: { postId } }));
+}
+
+export function isMyPost(postId: string): boolean {
+  if (!postId || typeof window === "undefined") return false;
+  if (!isFingerprintEnabled()) return false;
+  return getMyPosts().has(postId);
 }
 
 /** Which reactions this browser has already given: { [postId]: ["felt", ...] } */

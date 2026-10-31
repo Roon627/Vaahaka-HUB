@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useComments } from "@/hooks/useComments";
 import { timeAgo } from "@/lib/time";
 import ReportSheet, { type ReportTarget } from "./ReportSheet";
+import { useLanguage } from "@/lib/i18n";
 
 // One tap, always kind. These also nudge the whole space toward support instead of advice or debate.
 const QUICK = ["You're not alone 🫂", "Sending you strength 🕯️", "Thank you for sharing this 🤍", "I felt this too", "You matter 🫶", "Be gentle with yourself 🌊"];
@@ -14,8 +15,9 @@ const MAX = 500;
  * Moderation is layered: the database filters rude/harsh wording (English + Dhivehi), links and phone
  * numbers; people can report any note; a few reports hide it. Rate limits stop floods.
  */
-export default function Comments({ postId }: { postId: string }) {
+export default function Comments({ postId, isAuthor = false }: { postId: string; isAuthor?: boolean }) {
   const { comments, loading, add, hide, hearts, heartCounts, toggleHeart } = useComments(postId);
+  const { lang, t } = useLanguage();
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,27 +83,45 @@ export default function Comments({ postId }: { postId: string }) {
         {!loading && comments.length === 0 && <li className="rounded-2xl border border-dashed border-ink/20 px-4 py-4 text-center text-sm text-inksoft">No notes yet. Be the first to say something kind.</li>}
       </ul>
 
-      {/* one-tap kind notes */}
-      <div className="no-scrollbar -mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1">
-        {QUICK.map((q) => (
-          <button key={q} onClick={() => send(q)} disabled={sending} className="min-h-11 shrink-0 rounded-full border border-ink/20 bg-ink/[0.04] px-4 text-sm text-ink transition hover:bg-ink/10 disabled:opacity-50">{q}</button>
-        ))}
-      </div>
-
-      <form onSubmit={(e) => { e.preventDefault(); send(text); }} className="mt-3">
-        <label htmlFor={`note-${postId}`} className="sr-only">Leave an anonymous note</label>
-        <textarea
-          dir="auto"
-          id={`note-${postId}`} value={text} onChange={(e) => { setText(e.target.value); setError(null); }}
-          rows={2} maxLength={MAX} placeholder="Leave a kind, anonymous note…"
-          className="w-full resize-none rounded-2xl border border-ink/20 bg-ink/[0.04] px-4 py-3 font-display text-base leading-relaxed text-ink placeholder:text-inksoft/60 focus:border-ink/50 focus:outline-none"
-        />
-        <div className="mt-2 flex items-center justify-between gap-3">
-          <p className="text-[11px] leading-snug text-inksoft">Kind words only. Rude or harsh wording (Dhivehi or English), links and phone numbers are blocked.</p>
-          <button type="submit" disabled={sending || text.trim().length < 2} className="min-h-11 shrink-0 rounded-full bg-ink px-6 text-sm font-medium text-[#fbf3de] transition disabled:opacity-30">{sending ? "Sending…" : "Send"}</button>
+      {isAuthor ? (
+        <div className="mt-5 rounded-2xl border border-dashed border-ink/20 bg-ink/[0.04] p-4 text-center">
+          <span className="text-xl">🤍</span>
+          <p className="mt-1 font-display text-sm font-medium text-ink">
+            {lang === "dv"
+              ? "މިއީ ތިބާގެ އަމިއްލަ ސިޓީއެވެ. އަމިއްލަ ސިޓީއަށް ކޮމެންޓެއް ނުކުރެވޭނެއެވެ."
+              : "You wrote this letter. You cannot comment on your own words."}
+          </p>
+          <p className="mt-1 text-xs text-inksoft">
+            {lang === "dv"
+              ? "އެހެން މީހުން ކިޔައި، ދޫކުރާ ހެޔޮ ބަސްތައް މިތަނުން ފެންނާނެއެވެ."
+              : "Kind notes left by strangers will appear here."}
+          </p>
         </div>
-        {error && <p role="alert" className="mt-2 rounded-xl bg-wax/10 px-3 py-2 text-sm text-wax">{error}</p>}
-      </form>
+      ) : (
+        <>
+          {/* one-tap kind notes */}
+          <div className="no-scrollbar -mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1">
+            {QUICK.map((q) => (
+              <button key={q} onClick={() => send(q)} disabled={sending} className="min-h-11 shrink-0 rounded-full border border-ink/20 bg-ink/[0.04] px-4 text-sm text-ink transition hover:bg-ink/10 disabled:opacity-50">{q}</button>
+            ))}
+          </div>
+
+          <form onSubmit={(e) => { e.preventDefault(); send(text); }} className="mt-3">
+            <label htmlFor={`note-${postId}`} className="sr-only">Leave an anonymous note</label>
+            <textarea
+              dir="auto"
+              id={`note-${postId}`} value={text} onChange={(e) => { setText(e.target.value); setError(null); }}
+              rows={2} maxLength={MAX} placeholder={t("leaveNotePlaceholder")}
+              className="w-full resize-none rounded-2xl border border-ink/20 bg-ink/[0.04] px-4 py-3 font-display text-base leading-relaxed text-ink placeholder:text-inksoft/60 focus:border-ink/50 focus:outline-none"
+            />
+            <div className="mt-2 flex items-center justify-between gap-3">
+              <p className="text-[11px] leading-snug text-inksoft">{t("kindWordsNotice")}</p>
+              <button type="submit" disabled={sending || text.trim().length < 2} className="min-h-11 shrink-0 rounded-full bg-ink px-6 text-sm font-medium text-[#fbf3de] transition disabled:opacity-30">{sending ? t("sending") : t("send")}</button>
+            </div>
+            {error && <p role="alert" className="mt-2 rounded-xl bg-wax/10 px-3 py-2 text-sm text-wax">{error}</p>}
+          </form>
+        </>
+      )}
 
       <AnimatePresence>
         {report && <ReportSheet target={report} onClose={() => setReport(null)} onReported={() => { if (report.type === "comment") hide(report.id); }} />}

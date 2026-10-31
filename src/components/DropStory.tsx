@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { getDeviceToken } from "@/lib/device";
+import { getDeviceToken, recordMyPost } from "@/lib/device";
 import { POST_COLUMNS } from "@/hooks/usePosts";
 import { ATOLLS, ATOLL_BY_CODE, BODY_MAX, BODY_MIN, CATEGORIES, CATEGORY_BY_ID, type CategoryId } from "@/lib/constants";
 import { norm } from "@/lib/search";
@@ -108,7 +108,9 @@ export default function DropStory({ defaultAtoll, defaultCategory, onPosted, onC
       // The rate-limit trigger raises a friendly message; surface it as-is.
       return setError(error?.message ?? "Something went wrong. Your words are still here — try again.");
     }
-    setSent(data as unknown as Post);
+    const created = data as unknown as Post;
+    recordMyPost(created.id);
+    setSent(created);
   }
 
   // ------------------------------------------------------------ sent state --

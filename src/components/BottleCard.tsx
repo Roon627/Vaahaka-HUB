@@ -30,8 +30,9 @@ interface Props {
  * or tap the letter to open the full reader.
  */
 export default function BottleCard({ post, index, onOpen, onPatch }: Props) {
-  const { opened, previousVisit } = useSea();
+  const { opened, previousVisit, isMyPost } = useSea();
   const { lang, t } = useLanguage();
+  const isMine = isMyPost(post.id);
   const isOpened = opened.has(post.id);
   const isNew = !!(previousVisit && new Date(post.created_at) > new Date(previousVisit) && !isOpened);
   const cat = CATEGORY_BY_ID[post.category] ?? {
@@ -69,6 +70,10 @@ export default function BottleCard({ post, index, onOpen, onPatch }: Props) {
   async function handleHeart(e: React.MouseEvent) {
     e.stopPropagation();
     e.preventDefault();
+    if (isMine) {
+      navigator.vibrate?.([8, 30, 8]);
+      return;
+    }
     if (busy) return;
     setBusy(true);
 
@@ -151,7 +156,9 @@ export default function BottleCard({ post, index, onOpen, onPatch }: Props) {
         }}
         aria-label={`${isOpened ? "Re-read" : "Read"} a ${cat.label.toLowerCase()} letter from ${place}${post.trigger_warning ? " (sealed with a note)" : ""}`}
         className={`group relative flex w-full cursor-pointer flex-col justify-between rounded-2xl border p-4 text-left transition-all sm:p-5 select-none ${
-          isOpened
+          isMine
+            ? "border-sand/55 bg-[#0d2737] shadow-[0_0_24px_rgba(236,217,181,0.12)] hover:border-sand hover:-translate-y-0.5"
+            : isOpened
             ? "border-white/[0.06] bg-[#0c222e]/50 opacity-75 hover:opacity-100"
             : isNew
             ? "border-sand/35 bg-[#0e2736] shadow-sm hover:-translate-y-0.5 hover:border-sand/60"
@@ -174,11 +181,15 @@ export default function BottleCard({ post, index, onOpen, onPatch }: Props) {
             </span>
 
             <div className="flex items-center gap-1.5">
-              {isNew && (
+              {isMine ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-sand/45 bg-sand/20 px-2 py-0.5 text-[10px] font-semibold text-sand">
+                  ✍️ {lang === "dv" ? "ތިބާގެ ސިޓީ" : "Your letter"}
+                </span>
+              ) : isNew ? (
                 <span className="inline-flex items-center gap-1 rounded-full border border-sand/30 bg-sand/15 px-2 py-0.5 text-[10px] font-semibold text-sand">
                   ✦ {t("newArrivalBadge")}
                 </span>
-              )}
+              ) : null}
               <span className="truncate text-[11px] text-mist/80">
                 {place} · {timeAgo(post.created_at)}
               </span>
@@ -212,8 +223,10 @@ export default function BottleCard({ post, index, onOpen, onPatch }: Props) {
 
         {/* Foot: Read prompt & Reactions */}
         <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3 text-[11px] text-mist">
-          <span className={`font-medium text-sand/80 transition-colors group-hover:text-sand ${lang === "dv" ? "font-serif text-xs" : ""}`}>
-            {isOpened ? t("readLetter") : t("openLetter")}
+          <span className={`font-medium transition-colors ${isMine ? "text-sand font-semibold" : "text-sand/80 group-hover:text-sand"} ${lang === "dv" ? "font-serif text-xs" : ""}`}>
+            {isMine
+              ? (lang === "dv" ? "ތިބާގެ ސިޓީ ކިޔާލުމަށް →" : "Your letter on the shore →")
+              : (isOpened ? t("readLetter") : t("openLetter"))}
           </span>
 
           <div className="flex items-center gap-2">
@@ -221,14 +234,16 @@ export default function BottleCard({ post, index, onOpen, onPatch }: Props) {
             <div className="relative">
               <motion.button
                 type="button"
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.88 }}
+                whileHover={isMine ? {} : { scale: 1.08 }}
+                whileTap={isMine ? {} : { scale: 0.88 }}
                 onClick={handleHeart}
-                aria-label={mine ? `Remove heart (${heartCount})` : `Heart this letter (${heartCount})`}
+                aria-label={isMine ? "Your own letter" : mine ? `Remove heart (${heartCount})` : `Heart this letter (${heartCount})`}
                 aria-pressed={mine}
-                title={mine ? "Hearted by you · tap to remove" : "Heart this letter"}
+                title={isMine ? (lang === "dv" ? "މިއީ ތިބާގެ އަމިއްލަ ސިޓީއެވެ" : "This is your own letter") : mine ? "Hearted by you · tap to remove" : "Heart this letter"}
                 className={`relative inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-all ${
-                  mine
+                  isMine
+                    ? "border border-sand/30 bg-sand/10 text-sand/90 cursor-default"
+                    : mine
                     ? "border border-rose-500/40 bg-rose-500/15 text-rose-300 shadow-sm"
                     : "border border-white/10 bg-white/[0.04] text-mist hover:border-sand/40 hover:bg-white/10 hover:text-foam"
                 }`}

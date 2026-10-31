@@ -79,6 +79,9 @@ export default function DumpingGround() {
     setNewArrivalsCount,
     filterNewArrivals,
     setFilterNewArrivals,
+    myPosts,
+    filterMyPosts,
+    setFilterMyPosts,
   } = useSea();
 
   const catParam = params.get("cat");
@@ -100,8 +103,12 @@ export default function DumpingGround() {
     setNewArrivalsCount(newPosts.length);
   }, [newPosts.length, setNewArrivalsCount]);
 
-  // Filtered letters if returning visitor activated "View new arrivals"
-  const visiblePosts = filterNewArrivals && newPosts.length > 0 ? newPosts : posts;
+  // Filtered letters if returning visitor activated "View new arrivals" or "My letters"
+  const visiblePosts = filterMyPosts
+    ? posts.filter((p) => myPosts.has(p.id))
+    : filterNewArrivals && newPosts.length > 0
+    ? newPosts
+    : posts;
 
   // New letters sent from anywhere land at the top of this feed.
   useEffect(() => {
@@ -225,6 +232,54 @@ export default function DumpingGround() {
             onAtoll={(a) => setParam("atoll", a)}
           />
         </div>
+
+        {/* Author My Letters Filter Banner */}
+        <AnimatePresence>
+          {filterMyPosts && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mx-auto mt-6 max-w-7xl px-5 sm:px-8"
+            >
+              <div className="relative overflow-hidden rounded-2xl border border-sand/50 bg-gradient-to-r from-[#0d2737] via-[#123042] to-[#0d2737] p-4 sm:p-5 shadow-lg">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-3.5">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sand/20 text-lg text-sand shadow-inner">
+                      ✍️
+                    </span>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-serif text-base font-medium text-foam">
+                          {lang === "dv"
+                            ? `މި ޑިވައިސްއިން ދޫކޮށްލާފައިވާ ސިޓީތައް (${myPosts.size})`
+                            : `Letters released from this device (${myPosts.size})`}
+                        </h3>
+                        <span className="rounded-full border border-sand/40 bg-sand/20 px-2.5 py-0.5 text-[10px] font-bold text-sand">
+                          {lang === "dv" ? "ޑިވައިސް ހަނދާން" : "Device Memory"}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-xs text-mist">
+                        {lang === "dv"
+                          ? "މިއީ ތިބާ ކަނޑަށް ދޫކޮށްލި އަމިއްލަ ސިޓީތަކެވެ. އެހެން މީހުން ކޮށްފައިވާ ރިއެކްޝަންތަކާއި ދޫކޮށްފައިވާ ހެޔޮ ބަސްތައް ބަލާލެވޭނެއެވެ."
+                          : "These are your own letters resting on the shore. You can read the kind notes left by others."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pl-12 sm:pl-0">
+                    <button
+                      onClick={() => setFilterMyPosts(false)}
+                      className="rounded-full bg-sand px-4 py-2 text-xs font-semibold text-abyss transition hover:bg-[#fae8c8]"
+                    >
+                      {lang === "dv" ? "ހުރިހާ ސިޓީތައް ދައްކާ" : "Show all letters"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Creative Revisit Tide Banner */}
         <AnimatePresence>
