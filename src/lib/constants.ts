@@ -75,6 +75,31 @@ export const ATOLLS: Atoll[] = [
 
 export const ATOLL_BY_CODE = Object.fromEntries(ATOLLS.map((a) => [a.code, a])) as Record<string, Atoll>;
 
+/** Authentic administrative Thaana codes and traditional names for each atoll */
+export const ATOLL_THAANA: Record<string, { dv: string; atollName: string }> = {
+  HA: { dv: "ހއ.", atollName: "ތިލަދުންމަތީ އުތުރުބުރި" },
+  HDh: { dv: "ހދ.", atollName: "ތިލަދުންމަތީ ދެކުނުބުރި" },
+  Sh: { dv: "ށ.", atollName: "މިލަދުންމަޑުލު އުތުރުބުރި" },
+  N: { dv: "ނ.", atollName: "މިލަދުންމަޑުލު ދެކުނުބުރި" },
+  R: { dv: "ރ.", atollName: "މާޅޮސްމަޑުލު އުތުރުބުރި" },
+  B: { dv: "ބ.", atollName: "މާޅޮސްމަޑުލު ދެކުނުބުރި" },
+  Lh: { dv: "ޅ.", atollName: "ފާދިއްޕޮޅު" },
+  K: { dv: "ކ.", atollName: "މާލެ އަތޮޅު" },
+  MLE: { dv: "މާލެ", atollName: "މާލެ ސިޓީ" },
+  AA: { dv: "އއ.", atollName: "އަރިއަތޮޅު އުތުރުބުރި" },
+  ADh: { dv: "އދ.", atollName: "އަރިއަތޮޅު ދެކުނުބުރި" },
+  V: { dv: "ވ.", atollName: "ފެލިދެ އަތޮޅު" },
+  M: { dv: "މ.", atollName: "މުލަކު އަތޮޅު" },
+  F: { dv: "ފ.", atollName: "ނިލަންދެއަތޮޅު އުތުރުބުރި" },
+  Dh: { dv: "ދ.", atollName: "ނިލަންދެއަތޮޅު ދެކުނުބުރި" },
+  Th: { dv: "ތ.", atollName: "ކޮޅުމަޑުލު" },
+  L: { dv: "ލ.", atollName: "ހައްދުންމަތި" },
+  GA: { dv: "ގއ.", atollName: "ހުވަދުއަތޮޅު އުތުރުބުރި" },
+  GDh: { dv: "ގދ.", atollName: "ހުވަދުއަތޮޅު ދެކުނުބުރި" },
+  Gn: { dv: "ޏ.", atollName: "ފުވައްމުލައް" },
+  S: { dv: "ސ.", atollName: "އައްޑޫ ސިޓީ" },
+};
+
 export const ATOLL_GEOJSON_URL =
   process.env.NEXT_PUBLIC_ATOLL_GEOJSON_URL || "/data/maldives-atolls.geojson";
 

@@ -15,7 +15,7 @@ const MAX = 500;
  * numbers; people can report any note; a few reports hide it. Rate limits stop floods.
  */
 export default function Comments({ postId }: { postId: string }) {
-  const { comments, loading, add, hide } = useComments(postId);
+  const { comments, loading, add, hide, hearts, heartCounts, toggleHeart } = useComments(postId);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,18 +37,46 @@ export default function Comments({ postId }: { postId: string }) {
 
       <ul className="mt-3 space-y-2.5">
         <AnimatePresence initial={false}>
-          {comments.map((c) => (
-            <motion.li key={c.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0 }}
-              className="rounded-2xl border border-ink/10 bg-ink/[0.05] px-4 py-3">
-              <p dir="auto" className="whitespace-pre-wrap break-words font-display text-[15px] leading-relaxed text-ink">{c.body}</p>
-              <div className="mt-1.5 flex items-center justify-between text-xs text-inksoft">
-                <span>someone · {timeAgo(c.created_at)}</span>
-                <button onClick={() => setReport({ type: "comment", id: c.id })} aria-label="Report this note" className="-mr-2 flex min-h-9 items-center gap-1 rounded-full px-2.5 transition hover:bg-ink/10 hover:text-wax">
-                  <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 21V4m0 0h11l-2 4 2 4H5" /></svg>report
-                </button>
-              </div>
-            </motion.li>
-          ))}
+          {comments.map((c) => {
+            const isHearted = hearts.has(c.id);
+            const count = heartCounts[c.id] ?? (isHearted ? 1 : 0);
+            return (
+              <motion.li key={c.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0 }}
+                className="rounded-2xl border border-ink/10 bg-ink/[0.05] px-4 py-3">
+                <p dir="auto" className="whitespace-pre-wrap break-words font-display text-[15px] leading-relaxed text-ink">{c.body}</p>
+                <div className="mt-2 flex items-center justify-between border-t border-ink/[0.06] pt-1.5 text-xs text-inksoft">
+                  <div className="flex items-center gap-2.5">
+                    <span>someone · {timeAgo(c.created_at)}</span>
+                    <motion.button
+                      type="button"
+                      whileTap={{ scale: 0.82 }}
+                      onClick={() => toggleHeart(c.id)}
+                      aria-label={isHearted ? "Unheart note" : "Heart note"}
+                      className={`group flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium transition-all ${
+                        isHearted
+                          ? "bg-coral/15 text-[#b83b3b] font-semibold"
+                          : "text-inksoft hover:bg-ink/[0.08] hover:text-[#b83b3b]"
+                      }`}
+                    >
+                      <motion.span
+                        animate={isHearted ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+                        transition={{ duration: 0.25 }}
+                        className="inline-block text-sm"
+                      >
+                        {isHearted ? "❤️" : "🤍"}
+                      </motion.span>
+                      <span className="tabular-nums">
+                        {count > 0 ? count : (isHearted ? 1 : "")}
+                      </span>
+                    </motion.button>
+                  </div>
+                  <button onClick={() => setReport({ type: "comment", id: c.id })} aria-label="Report this note" className="-mr-1 flex min-h-7 items-center gap-1 rounded-full px-2 text-[11px] text-inksoft/70 transition hover:bg-ink/10 hover:text-wax">
+                    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 21V4m0 0h11l-2 4 2 4H5" /></svg>report
+                  </button>
+                </div>
+              </motion.li>
+            );
+          })}
         </AnimatePresence>
         {!loading && comments.length === 0 && <li className="rounded-2xl border border-dashed border-ink/20 px-4 py-4 text-center text-sm text-inksoft">No notes yet. Be the first to say something kind.</li>}
       </ul>

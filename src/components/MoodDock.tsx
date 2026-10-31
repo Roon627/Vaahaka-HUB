@@ -26,9 +26,23 @@ function Inner({ variant }: { variant: "dock" | "pill" | "editorial" }) {
   };
 
   const face = (
-    <motion.img key={value ?? "all"} src={`/brand/stickers/${value ?? "happy"}.svg`} alt="" width={22} height={26}
-      initial={{ scale: 0.5, rotate: -16 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 420, damping: 14 }}
-      className={variant === "dock" ? "h-6 w-auto" : "h-4 w-auto"} />
+    <motion.div
+      className="relative flex items-center justify-center"
+      animate={{ y: [0, -2.5, 0], rotate: [-1.5, 1.5, -1.5] }}
+      transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <motion.img
+        key={value ?? "all"}
+        src={`/brand/stickers/${value ?? "happy"}.svg`}
+        alt=""
+        width={22}
+        height={26}
+        initial={{ scale: 0.6, rotate: -20 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ type: "spring", stiffness: 450, damping: 15 }}
+        className={variant === "dock" ? "h-6 w-auto drop-shadow-sm" : "h-4 w-auto drop-shadow-sm"}
+      />
+    </motion.div>
   );
 
   return (

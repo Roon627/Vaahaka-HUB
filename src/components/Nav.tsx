@@ -27,7 +27,7 @@ const SpeakerOff = I(<><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" /><path d="
 const Close = I(<><path d="M6 6l12 12" /><path d="M18 6L6 18" /></>);
 const Chevron = I(<path d="M9 6l6 6-6 6" />);
 
-function Logo() {
+function Logo({ showDhivehi = true }: { showDhivehi?: boolean }) {
   return (
     <div className="flex items-center gap-2.5">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-sand/20 bg-sand/10 shadow-sm transition-colors group-hover:border-sand/40 group-hover:bg-sand/20">
@@ -43,9 +43,11 @@ function Logo() {
         <span className="font-display text-xl font-medium tracking-tight text-foam transition-colors group-hover:text-sand">
           Ihusaas
         </span>
-        <span className="font-serif text-xs font-normal text-sand/80">
-          އިޙްސާސް
-        </span>
+        {showDhivehi && (
+          <span className="font-serif text-xs font-normal text-sand/80">
+            އިޙްސާސް
+          </span>
+        )}
       </div>
     </div>
   );
@@ -392,7 +394,7 @@ export default function Nav() {
       <header className="fixed inset-x-0 top-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-end border-b border-white/[0.08] bg-[#071720]/90 px-4 pb-2.5 backdrop-blur-xl md:hidden">
         <div className="flex w-full items-center justify-between">
           <Link href="/" aria-label="Ihusaas home" className="group flex items-center">
-            <Logo />
+            <Logo showDhivehi={false} />
           </Link>
 
           <div className="flex items-center gap-2">
@@ -412,13 +414,13 @@ export default function Nav() {
                 <span>{newArrivalsCount} new</span>
               </button>
             )}
-            <button
-              onClick={() => setAbout(true)}
-              aria-label="Sanctuary menu"
-              className="rounded-full border border-white/[0.08] bg-white/[0.03] p-2 text-mist hover:bg-white/10 hover:text-foam"
+            {/* Cute Thaana Translation Pill on Right */}
+            <span
+              className="inline-flex items-center rounded-full border border-sand/25 bg-sand/10 px-3 py-1 font-serif text-xs font-normal tracking-wider text-sand/90 shadow-sm"
+              aria-label="Ihusaas in Dhivehi"
             >
-              <Bars className="h-4 w-4" />
-            </button>
+              އިޙްސާސް
+            </span>
           </div>
         </div>
       </header>

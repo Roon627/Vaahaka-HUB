@@ -94,4 +94,39 @@ export function recordVisit(): void {
   safeSet(LAST_VISIT_KEY, new Date().toISOString());
 }
 
+// ---- hearting comments ----
+const COMMENT_HEARTS_KEY = "ihusaas.comment_hearts";
+const COMMENT_COUNTS_KEY = "ihusaas.comment_heart_counts";
+
+export function getMyCommentHearts(): Set<string> {
+  try {
+    const val = JSON.parse(safeGet(COMMENT_HEARTS_KEY) ?? "[]");
+    return new Set(Array.isArray(val) ? val : []);
+  } catch {
+    return new Set();
+  }
+}
+
+export function setMyCommentHeart(commentId: string, on: boolean): void {
+  const set = getMyCommentHearts();
+  on ? set.add(commentId) : set.delete(commentId);
+  safeSet(COMMENT_HEARTS_KEY, JSON.stringify([...set].slice(-1000)));
+}
+
+export function getCommentHeartCounts(): Record<string, number> {
+  try {
+    const val = JSON.parse(safeGet(COMMENT_COUNTS_KEY) ?? "{}");
+    return val && typeof val === "object" && !Array.isArray(val) ? val : {};
+  } catch {
+    return {};
+  }
+}
+
+export function setCommentHeartCount(commentId: string, count: number): void {
+  const all = getCommentHeartCounts();
+  all[commentId] = Math.max(0, count);
+  safeSet(COMMENT_COUNTS_KEY, JSON.stringify(all));
+}
+
+
 
