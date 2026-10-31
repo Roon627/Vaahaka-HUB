@@ -147,41 +147,6 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
 
       {/* Editorial Actions */}
       <div className="mt-4 space-y-2.5">
-        {/* Language Setting Switcher */}
-        <div className="flex w-full items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.03] p-3.5 text-left transition-all hover:border-white/15">
-          <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-sand text-sm">
-              🌐
-            </span>
-            <div>
-              <span className="block text-sm font-medium text-foam">
-                {t("languageSetting")}
-              </span>
-              <span className="block text-xs text-mist">
-                {lang === "en" ? "English (Active)" : "ދިވެހި (އެކްޓިވް)"}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1">
-            <button
-              onClick={() => setLang("en")}
-              className={`rounded-full px-2.5 py-1 text-xs font-semibold transition ${
-                lang === "en" ? "bg-sand text-abyss shadow-sm" : "text-mist hover:text-foam"
-              }`}
-            >
-              EN
-            </button>
-            <button
-              onClick={() => setLang("dv")}
-              className={`rounded-full px-2.5 py-1 text-xs font-serif transition ${
-                lang === "dv" ? "bg-sand text-abyss shadow-sm font-semibold" : "text-mist hover:text-foam"
-              }`}
-            >
-              ދިވެހި
-            </button>
-          </div>
-        </div>
-
         {/* Device Memory & Fingerprinting Setting */}
         <div className="flex w-full flex-col gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3.5 text-left transition-all hover:border-white/15">
           <div className="flex items-center justify-between">
@@ -479,28 +444,6 @@ export default function Nav() {
               <SoulsOnline />
             </div>
 
-            {/* Language Switcher */}
-            <div className="flex items-center rounded-full border border-sand/30 bg-sand/10 p-0.5 text-xs shadow-sm">
-              <button
-                onClick={() => setLang("en")}
-                className={`rounded-full px-2.5 py-1 font-semibold transition ${
-                  lang === "en" ? "bg-sand text-abyss shadow-sm" : "text-sand/80 hover:text-foam"
-                }`}
-                title="Switch to English"
-              >
-                EN
-              </button>
-              <button
-                onClick={() => setLang("dv")}
-                className={`rounded-full px-2.5 py-1 font-serif transition ${
-                  lang === "dv" ? "bg-sand text-abyss font-semibold shadow-sm" : "text-sand/80 hover:text-foam"
-                }`}
-                title="ދިވެހި ބަހަށް ބަދަލުކުރައްވާ"
-              >
-                ދިވެހި
-              </button>
-            </div>
-
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -533,7 +476,7 @@ export default function Nav() {
       <header className="fixed inset-x-0 top-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-end border-b border-white/[0.08] bg-[#071720]/90 px-4 pb-2.5 backdrop-blur-xl md:hidden">
         <div className="flex w-full items-center justify-between">
           <Link href="/" aria-label="Ihusaas home" className="group flex items-center">
-            <Logo showDhivehi={false} />
+            <Logo showDhivehi={true} />
           </Link>
 
           <div className="flex items-center gap-2">
@@ -553,17 +496,6 @@ export default function Nav() {
                 <span>{newArrivalsCount} {t("newLetter")}</span>
               </button>
             )}
-            {/* Cute Interactive Language Switcher Toggle on Right */}
-            <button
-              onClick={toggleLang}
-              className="inline-flex items-center gap-1 rounded-full border border-sand/30 bg-sand/10 px-2.5 py-1 text-xs transition active:scale-95 shadow-sm hover:bg-sand/20"
-              aria-label="Switch language / ބަސް ބަދަލުކުރައްވާ"
-              title="Switch language / ބަސް ބަދަލުކުރައްވާ"
-            >
-              <span className={lang === "en" ? "font-bold text-foam" : "opacity-60 text-sand"}>EN</span>
-              <span className="opacity-40 text-sand">·</span>
-              <span className={lang === "dv" ? "font-bold text-foam font-serif" : "opacity-60 text-sand font-serif"}>ދިވެހި</span>
-            </button>
           </div>
         </div>
       </header>

@@ -179,13 +179,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Language>("en");
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LANG_KEY) as Language | null;
-      if (saved === "dv" || saved === "en") {
-        setLangState(saved);
-      }
-    } catch {
-      /* ignore */
+    // Default to English while the switch is disabled for further refinement
+    setLangState("en");
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = "en";
+      document.documentElement.dir = "ltr";
     }
   }, []);
 

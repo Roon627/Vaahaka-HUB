@@ -20,13 +20,13 @@ export default function FeedBar({ category, atoll, onCategory, onAtoll }: Props)
   const { myPosts, filterMyPosts, setFilterMyPosts, fingerprintEnabled } = useSea();
 
   const atollLabel = atoll
-    ? (lang === "dv" ? ATOLL_THAANA[atoll]?.atollName ?? ATOLL_BY_CODE[atoll].name : ATOLL_BY_CODE[atoll].name)
-    : t("allIslands");
+    ? ATOLL_BY_CODE[atoll].name
+    : "All islands";
 
   return (
     <div className="mt-5 flex flex-wrap gap-2">
       <button onClick={() => setSheet("mood")} aria-haspopup="dialog" className="shore-filter">
-        {category ? CATEGORY_BY_ID[category].label : t("allFeelings")}<span aria-hidden>⌄</span>
+        {category ? CATEGORY_BY_ID[category].label : "All feelings"}<span aria-hidden>⌄</span>
       </button>
       <button onClick={() => setSheet("place")} aria-haspopup="dialog" className="shore-filter">
         <span className="truncate">{atollLabel}</span><span aria-hidden>⌄</span>

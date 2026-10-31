@@ -12,15 +12,15 @@ interface Props {
   counts?: Record<string, number>;
 }
 
-const MOOD_INFO: Record<string, { dv: string; vibe: string; bgTint: string }> = {
-  all: { dv: "ހުރިހާ", vibe: "The open sea", bgTint: "rgba(159, 227, 208, 0.12)" },
-  nostalgia: { dv: "ހަނދާން", vibe: "Old memories", bgTint: "rgba(241, 213, 138, 0.15)" },
-  sad: { dv: "ހިތާމަ", vibe: "Heavy clouds", bgTint: "rgba(143, 182, 232, 0.15)" },
-  vent: { dv: "ރުޅި", vibe: "Steam it off", bgTint: "rgba(240, 168, 112, 0.15)" },
-  secrets: { dv: "ސިއްރު", vibe: "Whispered", bgTint: "rgba(185, 162, 232, 0.15)" },
-  relationships: { dv: "ލޯބި", vibe: "Heartstrings", bgTint: "rgba(235, 160, 196, 0.15)" },
-  work: { dv: "ވަޒީފާ", vibe: "Long days", bgTint: "rgba(134, 207, 216, 0.15)" },
-  horror: { dv: "ބިރު", vibe: "Dark chills", bgTint: "rgba(232, 139, 139, 0.15)" },
+const MOOD_INFO: Record<string, { vibe: string; bgTint: string }> = {
+  all: { vibe: "The open sea", bgTint: "rgba(159, 227, 208, 0.12)" },
+  nostalgia: { vibe: "Old memories", bgTint: "rgba(241, 213, 138, 0.15)" },
+  sad: { vibe: "Heavy clouds", bgTint: "rgba(143, 182, 232, 0.15)" },
+  vent: { vibe: "Steam it off", bgTint: "rgba(240, 168, 112, 0.15)" },
+  secrets: { vibe: "Whispered", bgTint: "rgba(185, 162, 232, 0.15)" },
+  relationships: { vibe: "Heartstrings", bgTint: "rgba(235, 160, 196, 0.15)" },
+  work: { vibe: "Long days", bgTint: "rgba(134, 207, 216, 0.15)" },
+  horror: { vibe: "Dark chills", bgTint: "rgba(232, 139, 139, 0.15)" },
 };
 
 /**
@@ -63,7 +63,7 @@ export default function MoodSheet({ value, onChange, onClose, counts }: Props) {
         {tiles.map((t, idx) => {
           const on = value === t.id;
           const isPopped = poppedId === t.key;
-          const info = MOOD_INFO[t.key] ?? { dv: "އިޙްސާސް", vibe: "", bgTint: "rgba(255,255,255,0.06)" };
+          const info = MOOD_INFO[t.key] ?? { vibe: "", bgTint: "rgba(255,255,255,0.06)" };
 
           return (
             <motion.button
@@ -126,19 +126,14 @@ export default function MoodSheet({ value, onChange, onClose, counts }: Props) {
                 </AnimatePresence>
               </div>
 
-              {/* Thaana Script & English Mood Lockup */}
+              {/* English Mood Label & Vibe Description */}
               <div className="mt-1 flex flex-col items-center">
-                <div className="flex items-center gap-1.5">
-                  <span
-                    className="font-serif text-xs font-semibold"
-                    style={{ color: on ? t.color : "#e2ded4" }}
-                  >
-                    {t.label}
-                  </span>
-                  <span className="font-serif text-[11px] text-sand/70">
-                    {info.dv}
-                  </span>
-                </div>
+                <span
+                  className="font-serif text-xs font-semibold"
+                  style={{ color: on ? t.color : "#e2ded4" }}
+                >
+                  {t.label}
+                </span>
                 <span className="text-[10px] text-mist/75">
                   {info.vibe}
                 </span>

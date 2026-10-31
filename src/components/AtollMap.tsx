@@ -274,7 +274,7 @@ export default function AtollMap() {
             height={22}
             className="h-4 w-auto"
           />
-          <span className={lang === "dv" ? "font-serif text-xs" : ""}>{category ? CATEGORY_BY_ID[category].label : t("allFeelings")}</span>
+          <span>{category ? CATEGORY_BY_ID[category].label : "All feelings"}</span>
           <span aria-hidden>⌄</span>
         </button>
 
@@ -638,7 +638,7 @@ export default function AtollMap() {
                 {t("archipelagoDirectory")}
               </h2>
               <span className="text-[11px] text-mist">
-                {category ? CATEGORY_BY_ID[category].label : (lang === "dv" ? "ހުރިހާ އިޙްސާސްތައް" : "all feelings")}
+                {category ? CATEGORY_BY_ID[category].label : "all feelings"}
               </span>
             </div>
             <label className="sr-only" htmlFor="region-search">
