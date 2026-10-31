@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSea } from "./SeaProvider";
 import MoodDock from "./MoodDock";
+import SoulsOnline from "./SoulsOnline";
 import { startInstall, useInstall } from "@/lib/pwa";
 import { SUGGEST_EVENT } from "@/lib/suggest";
 import { SOUND_EVENT, setSound, soundOn } from "@/lib/sound";
@@ -28,10 +29,25 @@ const Chevron = I(<path d="M9 6l6 6-6 6" />);
 
 function Logo() {
   return (
-    <span className="flex items-center gap-2 font-display text-xl text-foam">
-      <img src="/brand/mark.svg" alt="" width={20} height={33} className="h-[30px] w-auto" />
-      <span>Ihusaas</span>
-    </span>
+    <div className="flex items-center gap-2.5">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-sand/20 bg-sand/10 shadow-sm transition-colors group-hover:border-sand/40 group-hover:bg-sand/20">
+        <img
+          src="/brand/mark.svg"
+          alt=""
+          width={18}
+          height={30}
+          className="h-5 w-auto drop-shadow-[0_2px_8px_rgba(236,217,181,0.25)]"
+        />
+      </div>
+      <div className="flex items-baseline gap-2">
+        <span className="font-display text-xl font-medium tracking-tight text-foam transition-colors group-hover:text-sand">
+          Ihusaas
+        </span>
+        <span className="font-serif text-xs font-normal text-sand/80">
+          އިޙްސާސް
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -242,50 +258,169 @@ const TABS = [
  */
 export default function Nav() {
   const path = usePathname();
-  const { openWriter, openRandom, finding } = useSea();
+  const {
+    openWriter,
+    openRandom,
+    finding,
+    newArrivalsCount,
+    filterNewArrivals,
+    setFilterNewArrivals,
+  } = useSea();
   const [about, setAbout] = useState(false);
   useEffect(() => setAbout(false), [path]);
   // "Send us a note" can be opened from the About menu or from other pages (see lib/suggest.ts)
   const [suggest, setSuggest] = useState(false);
   useEffect(() => { const open = () => { setAbout(false); setSuggest(true); }; window.addEventListener(SUGGEST_EVENT, open); return () => window.removeEventListener(SUGGEST_EVENT, open); }, []);
 
-  const surprise = (
-    <button onClick={openRandom} disabled={finding} className="flex items-center gap-2 rounded-full px-3.5 py-2 text-sm text-mist transition hover:bg-white/10 hover:text-foam disabled:opacity-60">
-      <Dice className={`h-[18px] w-[18px] ${finding ? "animate-spin" : ""}`} /> <span className="hidden lg:inline">Surprise me</span>
-    </button>
-  );
-
   return (
     <>
-      {/* ---- desktop pill ---- */}
-      <header className="pointer-events-none fixed inset-x-0 top-3 z-40 hidden justify-center px-3 md:flex">
-        <nav aria-label="Main" className="pointer-events-auto flex w-full max-w-5xl items-center justify-between rounded-full border border-white/10 bg-abyss/85 py-2 pl-5 pr-2 shadow-soft backdrop-blur-xl">
-          <Link href="/" aria-label="Ihusaas home"><Logo /></Link>
-          <div className="flex items-center gap-1">
+      {/* ---- Grounded Sanctuary Header (Desktop) ---- */}
+      <header className="fixed inset-x-0 top-0 z-40 hidden border-b border-white/[0.08] bg-[#071720]/85 backdrop-blur-xl transition-all md:block">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+          {/* Left: Brand lockup */}
+          <Link href="/" aria-label="Ihusaas home" className="group flex items-center">
+            <Logo />
+          </Link>
+
+          {/* Center: Editorial navigation + dynamic High Tide Revisit Experience */}
+          <nav aria-label="Main" className="flex items-center gap-1 lg:gap-2">
             {TABS.map(({ href, label, Icon }) => {
               const on = path === href;
               return (
-                <Link key={href} href={href} aria-current={on ? "page" : undefined} className={`relative flex items-center gap-2 rounded-full px-4 py-2 text-sm transition-colors ${on ? "text-foam" : "text-mist hover:text-foam"}`}>
-                  {on && <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-full bg-white/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]" transition={{ type: "spring", stiffness: 380, damping: 32 }} />}
-                  <Icon className="relative h-[18px] w-[18px]" /><span className="relative">{label}</span>
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={on ? "page" : undefined}
+                  className={`group relative flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-medium uppercase tracking-wider transition-colors ${
+                    on ? "text-sand font-semibold" : "text-mist hover:text-foam"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{label}</span>
+                  {on && (
+                    <motion.span
+                      layoutId="nav-active-pip"
+                      className="absolute inset-x-3 -bottom-1 h-0.5 rounded-full bg-sand shadow-[0_0_8px_rgba(236,217,181,0.5)]"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
                 </Link>
               );
             })}
-            <MoodDock variant="pill" />
-            {surprise}
-          </div>
-          <div className="flex items-center gap-1.5">
-            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => openWriter()} className="flex items-center gap-2 rounded-full bg-sand px-5 py-2.5 text-sm font-semibold text-abyss transition hover:bg-[#fae8c8]">
-              <Pen /> Write
+
+            <MoodDock variant="editorial" />
+
+            {/* Surprise me */}
+            <button
+              onClick={openRandom}
+              disabled={finding}
+              className="flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-medium uppercase tracking-wider text-mist transition hover:text-foam disabled:opacity-50"
+              title="Uncork a random letter from the sea"
+            >
+              <Dice className={`h-4 w-4 ${finding ? "animate-spin text-sand" : ""}`} />
+              <span className="hidden xl:inline">Surprise me</span>
+            </button>
+
+            {/* Dynamic Revisit Experience: High Tide Pill */}
+            {newArrivalsCount > 0 && (
+              <div className="ml-2 border-l border-white/[0.1] pl-3">
+                <motion.button
+                  initial={{ scale: 0.92, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => {
+                    setFilterNewArrivals(!filterNewArrivals);
+                    document.getElementById("bottles")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className={`group relative flex items-center gap-2.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
+                    filterNewArrivals
+                      ? "bg-sand text-abyss font-semibold shadow-[0_0_16px_rgba(236,217,181,0.35)]"
+                      : "border border-sand/40 bg-sand/15 text-sand hover:border-sand/70 hover:bg-sand/25"
+                  }`}
+                  title={filterNewArrivals ? "Showing new letters since your last visit. Click to show all." : "Click to view new letters that washed ashore since your last visit"}
+                >
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sand opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-sand" />
+                  </span>
+                  <span className="font-serif italic text-sand/90">High tide:</span>
+                  <span>{newArrivalsCount} new {newArrivalsCount === 1 ? "letter" : "letters"}</span>
+                  <span className="text-[11px] opacity-75 transition-transform group-hover:translate-x-0.5">
+                    {filterNewArrivals ? "✓ showing" : "read →"}
+                  </span>
+                </motion.button>
+              </div>
+            )}
+          </nav>
+
+          {/* Right: Tactile Sanctuary Actions */}
+          <div className="flex items-center gap-3">
+            <div className="hidden xl:block">
+              <SoulsOnline />
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => openWriter()}
+              className="flex items-center gap-2 rounded-full border border-sand/40 bg-sand/15 px-4 py-2 text-xs font-semibold tracking-wide text-sand transition-all hover:bg-sand hover:text-abyss"
+            >
+              <Pen className="h-3.5 w-3.5" />
+              <span>Write a letter</span>
             </motion.button>
-            <button onClick={() => setAbout((v) => !v)} aria-label="Menu: contact, help and how it works" aria-expanded={about} aria-haspopup="dialog" className={`flex items-center gap-2 rounded-full px-3.5 py-2 text-sm transition hover:bg-white/10 hover:text-foam ${about ? "bg-white/10 text-foam" : "text-mist"}`}><Bars /> Menu</button>
+
+            <button
+              onClick={() => setAbout((v) => !v)}
+              aria-label="Sanctuary menu"
+              aria-expanded={about}
+              aria-haspopup="dialog"
+              className={`flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-medium transition-all ${
+                about
+                  ? "border-sand/50 bg-sand/20 text-sand shadow-sm"
+                  : "border-white/[0.08] bg-white/[0.03] text-mist hover:border-white/20 hover:bg-white/[0.07] hover:text-foam"
+              }`}
+            >
+              <Bars className="h-4 w-4" />
+              <span>Menu</span>
+            </button>
           </div>
-        </nav>
+        </div>
       </header>
 
-      {/* ---- mobile top logo ---- */}
-      <header className="fixed inset-x-0 top-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-end border-b border-white/[0.06] bg-[rgba(8,26,38,0.92)] px-5 pb-2 backdrop-blur-xl md:hidden">
-        <Link href="/" aria-label="Ihusaas home"><Logo /></Link>
+      {/* ---- mobile top header ---- */}
+      <header className="fixed inset-x-0 top-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-end border-b border-white/[0.08] bg-[#071720]/90 px-4 pb-2.5 backdrop-blur-xl md:hidden">
+        <div className="flex w-full items-center justify-between">
+          <Link href="/" aria-label="Ihusaas home" className="group flex items-center">
+            <Logo />
+          </Link>
+
+          <div className="flex items-center gap-2">
+            {newArrivalsCount > 0 && (
+              <button
+                onClick={() => {
+                  setFilterNewArrivals(!filterNewArrivals);
+                  document.getElementById("bottles")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
+                  filterNewArrivals
+                    ? "bg-sand text-abyss font-semibold"
+                    : "border border-sand/40 bg-sand/15 text-sand"
+                }`}
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-sand animate-pulse" />
+                <span>{newArrivalsCount} new</span>
+              </button>
+            )}
+            <button
+              onClick={() => setAbout(true)}
+              aria-label="Sanctuary menu"
+              className="rounded-full border border-white/[0.08] bg-white/[0.03] p-2 text-mist hover:bg-white/10 hover:text-foam"
+            >
+              <Bars className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
       </header>
 
       {/* ---- mobile dock ---- */}
