@@ -3,6 +3,7 @@ Allow: /
 Allow: /map
 Allow: /help
 Allow: /privacy
+Allow: /sanctuary
 Disallow: /api/
 Disallow: /.well-known/
 

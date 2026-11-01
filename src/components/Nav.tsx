@@ -27,6 +27,13 @@ const Speaker = I(<><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" /><path d="M15
 const SpeakerOff = I(<><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" /><path d="M16 9.5l5 5" /><path d="M21 9.5l-5 5" /></>);
 const Close = I(<><path d="M6 6l12 12" /><path d="M18 6L6 18" /></>);
 const Chevron = I(<path d="M9 6l6 6-6 6" />);
+const Book = I(
+  <>
+    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z" />
+    <path d="M6 6h10" />
+    <path d="M6 10h10" />
+  </>
+);
 
 function Logo({ showDhivehi = true }: { showDhivehi?: boolean }) {
   return (
@@ -291,6 +298,28 @@ function AboutMenu({ onClose, onSuggest }: { onClose: () => void; onSuggest: () 
           <Chevron className="h-4 w-4 shrink-0 text-coral/70 transition-transform group-hover:translate-x-0.5" />
         </Link>
 
+        {/* The Sanctuary: Mental Health Articles */}
+        <Link
+          href="/sanctuary"
+          onClick={onClose}
+          className="group flex w-full items-center justify-between rounded-xl border border-sand/30 bg-sand/[0.06] p-3.5 text-left transition-all hover:border-sand/50 hover:bg-sand/[0.14]"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sand/20 text-sand transition-transform group-hover:scale-105 text-sm">
+              🌿
+            </span>
+            <div>
+              <span className="block text-sm font-medium text-foam group-hover:text-sand">
+                {lang === "dv" ? "ތަސައްލީ (ނަފްސާނީ ލިޔުންތައް)" : "The Sanctuary"}
+              </span>
+              <span className="block text-xs text-sand/80">
+                {lang === "dv" ? "ހިތުގެ ހަމަޖެހުމަށް ޚާއްޞަ ލިޔުންތައް" : "Calm mental health articles & reflections"}
+              </span>
+            </div>
+          </div>
+          <Chevron className="h-4 w-4 shrink-0 text-sand/70 transition-transform group-hover:translate-x-0.5" />
+        </Link>
+
         {/* Privacy & Safety */}
         <Link
           href="/privacy"
@@ -376,6 +405,7 @@ export default function Nav() {
   const navTabs = [
     { href: "/", label: t("drift"), Icon: Waves },
     { href: "/map", label: t("map"), Icon: MapPin },
+    { href: "/sanctuary", label: lang === "dv" ? "ތަސައްލީ" : "Sanctuary", Icon: Book },
   ];
 
   return (
